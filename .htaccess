@@ -1,0 +1,111 @@
+DirectoryIndex index.php
+RewriteEngine on
+RewriteCond $1 !^(index\.php|resources|robots\.txt)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/?$1 [L,QSA]
+
+RewriteCond %{QUERY_STRING} ^(.*)&?fbclid=[^&]+&?(.*)$ [NC]
+RewriteRule ^(.*)$ /$1?%1%2 [R=301,L]
+
+#RewriteCond %{HTTPS} off
+#RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+
+FileETag MTime Size
+#Turn off Etag
+Header unset Pragma
+Header unset ETag
+<Files ".(js|css|html|htm|php|xml|webp)$">
+SetOutputFilter DEFLATE
+</Files>
+<Files *.js>
+Header add "Cache-Control" "max-age=604800"
+</Files>
+<Files *.ico>
+Header set Cache-Control "max-age=604800, public"
+</Files>
+<Files ".(jpg|jpeg|png|gif|swf|webp)$">
+Header set Cache-Control "max-age=604800, public"
+</Files>
+<Files ".(xml|txt|css|js)$">
+Header set Cache-Control "max-age=172800, proxy-revalidate"
+</Files>
+<Files ".(html|htm|php)$">
+Header set Cache-Control "max-age=60, private, proxy-revalidate"
+</Files>
+<FilesMatch ".(ico|jpg|jpeg|png|gif|js|css|swf|woff|webp|woff2)$">
+Header set Expires "Tue, 16 Jun 2020 20:00:00 GMT"
+</FilesMatch>
+
+<IfModule mod_expires.c>
+Header set cache-control: public
+ExpiresActive on
+
+ExpiresByType font/ttf      "access plus 1 month"
+ExpiresByType font/woff     "access plus 1 month"
+ExpiresByType image/svg+xml "access plus 1 month"
+ExpiresByType font/woff2     "access plus 1 month"
+
+
+</IfModule>
+
+<IfModule mod_deflate.c>
+<FilesMatch "\.(ttf|otf|eot|svg|woff2)$" >
+SetOutputFilter DEFLATE
+</FilesMatch>
+</IfModule>
+
+<ifModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 10 seconds"
+    ExpiresByType text/cache-manifest "access plus 0 seconds"
+
+
+
+
+    # Data
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/xml "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+    ExpiresByType application/json "access plus 0 seconds"
+
+    # Feed
+    ExpiresByType application/rss+xml "access plus 3600 seconds"
+    ExpiresByType application/atom+xml "access plus 3600 seconds"
+
+    # Favicon
+    ExpiresByType image/x-icon "access plus 15552000 seconds"
+
+    # Media: images, video, audio
+    ExpiresByType image/gif "access plus 15552000 seconds"
+    ExpiresByType image/png "access plus 15552000 seconds"
+    ExpiresByType image/jpeg "access plus 15552000 seconds"
+    ExpiresByType image/jpg "access plus 15552000 seconds"
+    ExpiresByType video/ogg "access plus 15552000 seconds"
+    ExpiresByType audio/ogg "access plus 15552000 seconds"
+    ExpiresByType video/mp4 "access plus 15552000 seconds"
+    ExpiresByType video/webm "access plus 15552000 seconds"
+
+    # HTC files  (css3pie)
+    ExpiresByType text/x-component "access plus 15552000 seconds"
+
+    # Webfonts
+    ExpiresByType application/x-font-ttf "access plus 15552000 seconds"
+    ExpiresByType font/opentype "access plus 15552000 seconds"
+    ExpiresByType font/woff2 "access plus 15552000 seconds"
+    ExpiresByType application/x-font-woff "access plus 15552000 seconds"
+    ExpiresByType image/svg+xml "access plus 15552000 seconds"
+    ExpiresByType application/vnd.ms-fontobject "access plus 15552000 seconds"
+
+    # CSS and JavaScript
+    ExpiresByType text/css "access plus 15552000 seconds"
+    ExpiresByType application/javascript "access plus 15552000 seconds"
+    ExpiresByType text/javascript "access plus 15552000 seconds"
+    ExpiresByType application/javascript "access plus 15552000 seconds"
+    ExpiresByType application/x-javascript "access plus 15552000 seconds"
+
+    # Others files
+    ExpiresByType application/x-shockwave-flash "access plus 15552000 seconds"
+    ExpiresByType application/octet-stream "access plus 15552000 seconds"
+</ifModule>

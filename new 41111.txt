@@ -1,0 +1,4 @@
+<add key="vnp_Url" value="https://pay.vnpay.vn/vpcpay.html" />
+    <add key="querydr" value="http://sandbox.vnpayment.vn/merchant_webapi/merchant.html"/>
+    <add key="vnp_TmnCode" value="HUNGHA08"/>
+    <add key="vnp_HashSecret" value="VVNZMQPXNMFOSPAQZVREBTTIABDQEGBX"/>
