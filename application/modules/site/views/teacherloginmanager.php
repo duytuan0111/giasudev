@@ -64,7 +64,7 @@
                         echo "<p class='text-center'>Không tìm thấy bản ghi.</p>";
                     } ?>
                 </div>
-                <div class="box-file-newest">
+               <!--  <div class="box-file-newest">
                     <div class="title"><i class="fa fa-listservices"></i>Danh sách dịch vụ
                     <span><i class="fa fa-services"></i> <span class="btnlistservices"> Đăng ký dịch vụ</span></span>
                     </div>
@@ -80,34 +80,11 @@
                         </tr>
                         </thead>
                         <tbody>
-                            <!-- <tr>
-                                <td>1</td>
-                                <td>Gói điểm xem hồ sơ</td>
-                                <td>01/11/2020</td>
-                                <td>01/11/2020</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Gói điểm xem hồ sơ</td>
-                                <td>01/11/2020</td>
-                                <td>01/11/2020</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Gói điểm xem hồ sơ</td>
-                                <td>01/11/2020</td>
-                                <td>01/11/2020</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Gói điểm xem hồ sơ</td>
-                                <td>01/11/2020</td>
-                                <td>01/11/2020</td>
-                            </tr> -->
+                          
                         </tbody>
                     </table>
                     <p class='text-center'>Không tìm thấy bản ghi.</p>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

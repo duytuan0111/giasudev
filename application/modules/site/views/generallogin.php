@@ -3,12 +3,24 @@ if(!empty($_SESSION['UserInfo'])){
     redirect(site_url());
 }
 ?>
+<style>
+@media (max-width: 479px) {
+    .img-dnchung {
+        margin-left: 27px !important;
+    }
+}
+@media (min-width: 768px) and (max-width: 1024px)  {
+     .img-dnchung {
+        margin-left: -38px;
+    }
+}
+</style>
 <header class="logingenaral">
    <div class="container">
     <a href="<?php echo base_url() ?>" class="backurl"><i class="fa fa-backurl"></i></a>
     <div class="logo-login">
-            <a href="<?php echo base_url() ?>" title="trang chủ">
-               <img src="images/logo-01.png" alt="#" style="background-color:#203043;">
+            <a href="https://timviec365.com.vn/" title="trang chủ">
+               <img src="<?php echo base_url(); ?>upload/images/logo-new2.png" class="img-dnchung" alt="Trang chủ" style="padding: 0px 10px;">
             </a>
          </div>
     <a href="<?php echo base_url() ?>dang-ky-chung" class="btn btndangky">Đăng ký</a>
@@ -29,7 +41,7 @@ if(!empty($_SESSION['UserInfo'])){
                     <li>Hoàn toàn miễn phí</li>
                 </ul>
                 <span class="btnloginuv" onclick="location='phu-huynh-dang-nhap'">Đăng nhập tìm gia sư</span>
-                <a class="supportregister" href="<?php echo base_url() ?>huong-dan-dang-nhap-tk">Hướng dẫn đăng nhập tìm gia sư</a>
+                <!-- <a class="supportregister" href="<?php echo base_url() ?>huong-dan-dang-nhap-tk">Hướng dẫn đăng nhập tìm gia sư</a> -->
             </div>    
         </div>    
         <div class="col-md-6 col-sm-12">
@@ -44,8 +56,8 @@ if(!empty($_SESSION['UserInfo'])){
                 </li>
             </ul>
             <span class="btnloginntd" onclick="location='gia-su-dang-nhap'">Đăng nhập làm gia sư</span>
-            <a class="supportregisterntd" href="<?php echo base_url() ?>huong-dan-dang-nhap-gia-su">Hướng dẫn đăng nhập làm gia sư</a>
-            </div>
+            <!-- <a class="supportregisterntd" href="<?php echo base_url() ?>huong-dan-dang-nhap-gia-su">Hướng dẫn đăng nhập làm gia sư</a>
+            </div> -->
         </div>
         <div class="linkregister">
             <span>Bạn chưa có tài khoản? <a href="<?php echo base_url() ?>dang-ky-chung">đăng ký</a></span>

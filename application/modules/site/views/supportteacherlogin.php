@@ -27,7 +27,7 @@
         		        		<input type="text" name="findkey" id="findkey" placeholder="Nhập từ khóa..." />
         		        	</div>
         		        	<div class="input">
-        		        		<span class="icon-before"><img src="images/s_01.png" alt=""></span>
+        		        		<span class="icon-before"><img src="images/s_01.png" alt="Môn học"></span>
         						<select id="monhoc" name="monhoc">
         							<option value="">Chọn môn học</option>
                                      <?php 
@@ -40,14 +40,14 @@
         						</select>
         					</div>
                             <div class="input">
-                                <span class="icon-before"><img src="images/s_01.png" alt=""></span>
+                                <span class="icon-before"><img src="images/s_01.png" alt="Chủ đề môn học"></span>
                                 <select id="chudehoc" class="city_ab_tag">                        
                                     <option value="" >Chọn chủ đề môn học</option>
                                                            
                                  </select>
                             </div>
         					<div class="input">
-        						<span class="icon-before" style="top:8px"><img src="images/s_02.png" alt=""></span>
+        						<span class="icon-before" style="top:8px"><img src="images/s_02.png" alt="Tỉnh thành"></span>
         						<select id="tinhthanh" class="mucluong_ab_tag">                        
                                 <option data-tokens="0" value="">Tỉnh thành</option>
                                                                         <option data-tokens="1" value="1">Hà Nội</option> 
@@ -116,7 +116,7 @@
                              </select>
         					</div>
         					<div class="input">
-        						<span class="icon-before"><img src="images/icongioitinh.png" alt=""></span>
+        						<span class="icon-before"><img src="images/icongioitinh.png" alt="Giới tính"></span>
         						<select id="gioitinh" class="ngoaingu_ab_tag">                        
                                     <option value="" ></option>
                                     <option value="1">Nam</option>
@@ -124,7 +124,7 @@
                                  </select>
         					</div>
         					<div class="input">
-        						<span class="icon-before" style="top:8px"><img src="images/iconhinhthuchoc.png" alt=""></span>
+        						<span class="icon-before" style="top:8px"><img src="images/iconhinhthuchoc.png" alt="Hình thức"></span>
         						<select id="hinhthuchoc" class="kinhnghiem_ab_tag">                        
                                     <option value="">Chọn hình thức dạy</option>
                                     <option value="1">Offline) Gặp mặt</option>

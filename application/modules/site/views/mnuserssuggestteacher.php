@@ -3,6 +3,13 @@ $CI=&get_instance();
 $CI->load->model('site/site_model');
 
 ?>
+<style>
+  @media (max-width: 479px) {
+    .ncn-mb {
+      display: none;
+    }
+  }
+</style>
 <section class="padd-0">
 <div class="container">
     <div class="row">
@@ -29,10 +36,10 @@ $CI->load->model('site/site_model');
                             
                             <th style="width:20%">Gia sư/Môn học</th>
                             <th style="width:13%">Hình thức dạy</th>
-                            <th style="width:25%">Mức học phí mong muốn</th>
-                            <th style="width:15%">Ngày cập nhật</th>
-                             <th style="width:15">Đề nghị dạy lớp</th>
-                            <th style="width:12%">Trạng thái</th>
+                            <th style="width:13%">Mức học phí mong muốn</th>
+                            <th style="width:15%" class="ncn-mb">Ngày cập nhật</th>
+                            <th style="width:10">Đề nghị dạy lớp</th>
+                            <th style="width:29%">Trạng thái</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -45,7 +52,7 @@ $CI->load->model('site/site_model');
                                 </td>
                                 <td><?php echo GetLearnType($n->WorkID) ?></td>                                
                                 <td><?php echo "Từ: ".number_format($n->Free)." vnđ/h"; ?></td>
-                                <td><?php echo date('d/m/Y',strtotime($n->CreateDate)) ?></td>
+                                <td class="ncn-mb"><?php echo date('d/m/Y',strtotime($n->CreateDate)) ?></td>
                                 <td><?php $az = $CI->site_model->Getclassbyuserid($n->ClassID);?>
                                 <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($az[0]->ClassTitle).'-'.$n->ClassID ?>"><?php echo $az[0]->ClassTitle; ?></a>
                               </td>       

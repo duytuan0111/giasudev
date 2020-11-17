@@ -31,7 +31,7 @@
                             foreach($uservsclass as $n){ ?>
                              <tr>
                                 <td>1</td>
-                                <td><div><a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" target="_blank"><?php echo $n->ClassTitle ?></a><label><?php echo $n->Name ?></label>
+                                <td><div><a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" target="_blank"><?php echo $n->ClassTitle ?></a><label><?php echo $n->Name ?></label>
                                     <span>Mức học phí: <i><?php echo number_format($n->Money) ?> vnđ</i></span>
                                     </div>
                                 </td>
@@ -41,7 +41,7 @@
                                 <td><?php if($n->daday == 1){echo "Đang dạy";}else if($n->daday == 0){echo "Chưa cập nhật";}else if($n->daday == 2){echo "Đã dừng";}else{echo "Tạm nghỉ";} ?></td>
                                 <td class="actionjob">
                                     <!-- <a class="btnntdupdate" data-val="<?php echo $n->ClassID ?>"><i class="fa fa-refresh"></i>Cập nhật trạng thái</a> -->
-                                    <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" target="_blank" class="btnntdviewdetail"><i class="fa fa-view-detail"></i>Xem chi tiết</a>
+                                    <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" target="_blank" class="btnntdviewdetail"><i class="fa fa-view-detail"></i>Xem chi tiết</a>
                                     <a href="javascript:void(0)" data-val="<?php echo $n->ClassID ?>" class="btnntdviewdetail btndel"  id="btndelete">Xóa</a>
                                 </td>
                             </tr>   

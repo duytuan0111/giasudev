@@ -3,7 +3,7 @@
         <a href="<?php echo base_url() ?>" class="backurl"><i class="fa fa-backurl"></i></a>
         <div class="logo-login">
             <a href="<?php echo base_url() ?>" title="trang chủ">
-               <img src="images/logo-2.png" alt="#" style="background-color:#203043;">
+               <img src="images/logo-2.png" alt="Trang chủ" style="background-color:#203043;">
             </a>
          </div>
         <a href="<?php echo base_url() ?>dang-ky-chung" class="btn btndangky">Đăng ký</a>

@@ -1,15 +1,34 @@
 <?php ?>
 <header class="logingenaral">
+  <style>
+    @media (max-width: 479px) {
+        .note {
+          margin-right: 70px !important;
+        }
+        .img-dkychung {
+            margin-left: 27px;
+        }
+        .btnforgotpassword {
+          padding: 0px 20px !important;
+        }
+    }
+    @media (min-width: 768px) and (max-width: 1024px)  {
+       .img-dkychung {
+        margin-left: -38px;
+    }
+}
+</style>
    <div class="container">
-        <a href="<?php echo base_url() ?>" class="backurl"><i class="fa fa-backurl"></i></a>
+        <a href="<?php echo base_url() ?>gia-su-dang-nhap" class="backurl"><i class="fa fa-backurl"></i></a>
         <div class="logo-login">
-            <a href="<?php echo base_url() ?>" title="trang chủ">
-               <img src="images/logo-2.png" alt="#" style="background-color:#203043;">
+            <a href="https://timviec365.com.vn/" title="trang chủ">
+               <img src="<?php echo base_url(); ?>upload/images/logo-new2.png" alt="Trang chủ" style="">
             </a>
          </div>
         <a href="<?php echo base_url() ?>dang-ky-chung" class="btn btndangky">Đăng ký</a>
    </div>
 </header>
+<div id="wait" style="display:none;width:69px;height:89px;position:absolute;top:21%;left:50%;padding:2px; z-index: 1;"><img src='<?php echo base_url(); ?>upload/images/demo_wait.gif' width="64" height="64" /><br>Đang gửi..</div>
 <section class="padd-0">
     <div class="container">
         <div class="formlogin frmfogotpass">
@@ -26,7 +45,7 @@
                 </div>
                 </div>
                  <p>Mời bạn nhập tài khoản Email đã đăng kí. Gia sư 365 sẽ gửi tới bạn hướng dẫn để tạo mật khẩu mới, vui lòng kiểm tra email.</p>
-                <a class="btnforgotpassword" id="btn_teacherforgot">Lấy lại mật khẩu</a>
+                <button class="btnforgotpassword" id="btn_teacherforgot">Lấy lại mật khẩu</button>
                 <div class="linkregister">
                     <span>Bạn đã có tài khoản? <a href="<?php echo base_url() ?>dang-nhap-chung">đăng nhập</a></span>
                 </div>
@@ -76,7 +95,8 @@ $(document).ready(function() {
           dataType: 'json',
           beforeSend: function () 
           {
-            $("#boxLoading").show();
+            $("#wait").css('display', 'block');
+            $(".btnforgotpassword").attr('disabled', true);
           },
           success: function (reponse) 
           {
@@ -96,7 +116,8 @@ $(document).ready(function() {
           },
           complete: function () 
           {
-            $("#boxLoading").hide();
+            $("#wait").css('display', 'none');
+            $(".btnforgotpassword").attr('disabled', false);
           }
         });
       }

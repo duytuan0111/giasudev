@@ -1,4 +1,14 @@
 <?php ?><section class="padd-0">
+<style>
+  @media (max-width: 470px) {
+    .note-none {
+      display: none;
+    }
+    .btnntdedit {
+      margin-bottom: 5px;
+    }
+  }
+</style>
 <div class="container">
     <div class="row">
         <div class="manager-col-left col-md-3 col-sm-12 width-250">
@@ -21,11 +31,11 @@
                         <thead>
                         <tr>
                             <th style="width:5%">STT</th>
-                            <th style="width:50%">Gia sư/Môn học
+                            <th style="width:35%">Gia sư/Môn học
                             </th>
-                            <th style="width:13%">Ghi chú</th>
-                            <th style="width:15%">Ngày lưu</th>
-                            <th style="width:17%">Hành động</th>
+                            <th style="width:13%" class="">Ghi chú</th>
+                            <th style="width:15%" class="note-none">Ngày lưu</th>
+                            <th style="width:32%">Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -39,11 +49,17 @@
                                 <td><?php echo $i ?></td>
                                 <td><a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>"><?php echo $n->Name; ?></a>
                                     <span><?php echo $n->TitleView; ?></span>
-                                </td>                                
-                                <td><?php echo $n->Note; ?></td>
-                                <td><?php echo date('d/m/Y',strtotime($n->ngaymoi)) ?></td>
+                                </td> 
+                                <input type="hidden" name="ghichugiasu" id="ghichugiasu" value="<?php echo $n->Note; ?>">  
+                                <td class="ghichulopdaluu"><?php $gn_text=$n->Note;                                 
+                                if ( strlen( $n->Note ) > 40 ) {
+                                  $gn_text = substr( $n->Note, 0, 40 );
+                                  $gn_text = $gn_text. '...';           
+                                }
+                                echo $gn_text ;  ?></td>
+                                <td class="note-none"><?php echo date('d/m/Y',strtotime($n->ngaymoi)) ?></td>
                                 <td class="actionjob">
-                                    <a data-val="<?php echo $n->UserID ?>" class="btnntdedit" id="sualopdaluu">Sửa</a>
+                                    <a data-val="<?php echo $n->UserID ?>" class="btnntdedit" id="sualopdaluu">Ghi chú</a>
                                     <a data-val="<?php echo $n->UserID ?>" id="xoalopdaluu" class="btnntddelete">Xóa</a>
                                 </td>
                             </tr>
@@ -132,7 +148,8 @@
         });
         
         $('.teachersave').on('click','a.btnntdedit',function(){
-            $('#txtghichu').val('');
+            var ghichu = $('#ghichugiasu').val();
+            $('#txtghichu').val(ghichu);
             $('#txtuserid').val($(this).attr('data-val'));
             $('#myModal').modal('show');
         });
@@ -175,7 +192,8 @@
             }
         });
         $('.teachersave').on('click','a.btnntddelete',function(){            
-                $.ajax({
+              if (confirm('Bạn có chắc muốn xóa bản ghi này không ?')) {
+                  $.ajax({
                           
                           url: configulr+"site/ajaxdeleteusersvaveuser",
                           type: "POST",
@@ -202,6 +220,7 @@
                               window.location.reload();
                           }
                       }); 
+              }
            
         });
         });

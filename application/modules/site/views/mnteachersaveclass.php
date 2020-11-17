@@ -72,7 +72,7 @@
                             <tr>
                                 <td class="stt"><?php echo $i; ?></td>
                                 <td><label><?php echo $n->Name ?></label>
-                                    <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" target="_blank"><?php echo $n->ClassTitle ?></a>
+                                    <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" target="_blank"><?php echo $n->ClassTitle ?></a>
                                 </td>
                                 <td><?php echo $n->ghichu; ?></td>
                                 <td><span><?php echo $n->SubjectName ?></span></td>

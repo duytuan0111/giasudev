@@ -1,28 +1,82 @@
 <?php
-
+$page = $this->uri->segment(2);
+if ($page > 0) {
+  $canonical_new = $canonical.'/'.$page;
+} else {
+  $canonical_new = $canonical;
+}
+$urlweb= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+if($urlweb != $canonical_new)
+{
+   header("HTTP/1.1 301 Moved Permanently"); 
+   header("Location: $canonical_new");
+   exit();
+}
 ?>
 <div class="container">
  <?php $this->load->view('headerfun'); ?>
 </div>
+<style type="text/css">
+  .teacher-name-h3 {
+    display: inline-block;
+    font-size: 15px;
+    color: #00baba;
+    font-weight: 500;
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
+  .h1-teacher {
+    display: inline;
+    float: right !important;
+    padding-top: 10px;
+    padding-left: 12px;
+  }
+  .teacher-h3-sp {
+    height: 46px;
+    background: #00baba;
+    font-size: 18px;
+    color: #fdfdfe;
+    font-weight: 500;
+    line-height: 48px;
+    margin: 0;
+    padding: 0;
+    text-indent: 50px;
+  }
+  .ds-gs-moinhat {
+    font-size: 18px;
+    color: #2c2c2c;
+    font-weight: 500;
+    height: 36px;
+    line-height: 36px;
+    /* float: left; */
+    background: #fff;
+    margin-right: 5px;
+    text-transform: uppercase;
+    margin-left: 14px;
+    margin-bottom: 22px;
+  }
+
+</style>
 <section class="padd-top-30 padd-bot-30">
   <div class="container">
     <div class="row">
       <div class="col-md-12" style="overflow: hidden;">
         <div class="tit_hd resultfindteacher">
-         <div class="ir_h3"><h3><img src="images/icon-gia-su-blue.png" alt="Hồ sơ gia sư dạy <?php echo $keywork; ?>"/><span> <?php if(strtolower($keywork)=='all' || empty($keywork)){echo "Tất cả gia sư";}else{echo "Hồ sơ gia sư dạy ".$keywork;} ?></span></h3>
+         <div class="ir_h3"><img src="images/icon-gia-su-blue.png" alt="Hồ sơ gia sư dạy <?php echo $keywork; ?>"/><h1 class="h1-teacher"> <?php if(strtolower($keywork)=='all' || empty($keywork)){echo "Tìm gia sư";}else{echo "Hồ sơ gia sư dạy ".$keywork;} ?></h1>
          </div>
          <span class="span_hd">Sắp xếp theo: 
            <select  id="slkbox" aria-label="lọc" name="slkbox">
 
-            <option value="<?php echo $selectbox.'last' ?>"  <?php if(strtolower($order)=='last'){echo "selected";} ?>>Mới nhất</option>
+            <option value="<?php echo $canonicals ?>"  <?php if(strtolower($order)=='last'){echo "selected";} ?>>Mới nhất</option>
             <option value="<?php echo $selectbox.'pricelow' ?>" <?php if(strtolower($order)=='pricelow'){echo "selected";} ?>>Lương từ thấp đến cao</option>
             <option value="<?php echo $selectbox.'pricehigh' ?>" <?php if(strtolower($order)=='pricehigh'){echo "selected";} ?>>Lương từ cao xuống thấp</option>                    
           </select>
         </span>
       </div>
     </div>
+    <h2 class="ds-gs-moinhat">Danh sách gia sư mới nhất</h2>
     <div class="col-md-70 col-sm-12">
-      <div class="main_giaovien">
+      <div class="main_giaovien" style="overflow: hidden; margin-bottom: 10px">
        <?php if(!empty($lstitem)){
         foreach($lstitem as $n){    
           ?>
@@ -31,19 +85,20 @@
               <div class="giasu_logo">
                 <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name;?>" target="_blank">
                   <?php if(!empty($n->Image)){?>
-                    <img src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),174,174,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                    <?php $tg3=explode('-',date('d-m-Y',strtotime($n->CreateDate))); ?>
+                    <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg3[2]."/".$tg3[1]."/".$tg3[0]."/".$n->Image  ?>" alt="gia sư <?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                   <?php }else{ ?>
-                   <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                   <img src="images/no-image2.png" alt="gia sư <?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                  <?php } ?>
                  <span class="viewnow">Xem hồ sơ</span>
                </a>
              </div>
            </div>
            <div class="col-md-9 col-sm-12">
-            <div class="giasu_info">
-              <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="giasu_name"><i class="fa fa-online"></i><?php echo $n->Name ?></a> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i>
+            <div class="giasu_info" style="margin-bottom: 15px">
+              <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="giasu_name"><i class="fa fa-online"></i><h3 class="teacher-name-h3"><?php echo $n->Name ?></h3></a> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> -->
               <div title="#" class="giasu_titleview">
-                <span>Gia sư:</span><?php echo str_replace('Gia sư','',$n->TitleView); ?>
+                <span>Gia sư: </span><?php echo str_replace('Gia sư','',$n->TitleView); ?>
               </div>
               <div>
                 <span>Khu vực: <span><?php echo $n->CityName ?></span></span>
@@ -80,22 +135,23 @@
 </div>
 <div class="col-md-30 col-sm-12 col-right-search padd-l-0">
   <div class="box_job_search user">
-    <h3><i class="fa fa-userl"></i> Gia sư tiêu biểu</h3>
+    <div class="teacher-h3-sp"><i class="fa fa-userl"></i> <h2 style="display: inline-block; padding-left: 2px">Gia sư tiêu biểu</h2></div>
     <div class="boxfeature">
       <?php if(!empty($chude)){
         foreach($chude as $n){ ?>
           <div class="itemfeature">
           <div class="feature-icon">
             <?php if(!empty($n->Image)){?>
-              <img src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),60,60,100) ?>" alt="<?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+               <?php $tg4=explode('-',date('d-m-Y',strtotime($n->CreateDate))); ?>
+              <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg4[2]."/".$tg4[1]."/".$tg4[0]."/".$n->Image  ?>" alt="<?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
             <?php }else{ ?>
              <img src="<?php gethumbnail('images/no-image2.png','no-image2.png',strtotime($n->CreateDate),60,60,80) ?>" alt="<?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
            <?php } ?>
           </div>
           <div class="feature-caption">
-            <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i></a>
+            <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><h3 style="display: inline-block;background-color: #FFFFFF; color: #00baba; font-size: 15px; font-weight: 500; padding-left: 0px;text-transform: none; margin: -11px auto;"><?php echo $n->Name ?></h3> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> --></a>
             <div title="#" class="feature_titleview"><span>Gia sư: </span><?php 
-              echo str_replace('Gia sư','',$n->TitleView); ?>
+              echo str_replace('Gia sư','',str_replace(' ,', ', ', $n->TitleView)); ?>
             </div>
             <div>
               <span>Khu vực: <span><?php echo $n->CityName ?></span></span>
@@ -203,8 +259,8 @@
 </div>
 </div> -->
 <div class="box_job_search topkeyword">
-  <h3 class="title2"> <i class="fa fa-key"></i> Top từ khóa
-  </h3>
+  <div class="teacher-h3-sp"> <i class="fa fa-key"></i> <h2 style="display: inline; padding-left: 2px">Top từ khóa</h2>
+  </div>
   <div class="listtag">
     <ul>                                   
       <?php if(!empty($topkey)){

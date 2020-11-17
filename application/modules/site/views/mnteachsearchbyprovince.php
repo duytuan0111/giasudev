@@ -17,7 +17,7 @@
                          <?php 
                                     if(!empty($tinhthanh)){
                                         foreach($tinhthanh as $n){ ?>
-                                            <li class="col-md-4 padd-0"><a target="_blank" href="<?php echo base_url(); ?>viec-lam-gia-su-tai-<?php echo vn_str_filter($n->cit_name); ?>-s0c0p<?php echo $n->cit_id ?>.html"><?php echo $n->cit_name; ?></a></li>
+                                            <li class="col-md-4 padd-0"><a target="_blank" href="<?php echo base_url(); ?>tim-viec-lam-gia-su-tai-<?php echo vn_str_filter($n->cit_name); ?>-s0c0p<?php echo $n->cit_id ?>.html"><?php echo $n->cit_name; ?></a></li>
                                         <?php }
                                     }
                          ?>

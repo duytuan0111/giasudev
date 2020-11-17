@@ -35,7 +35,7 @@
                                 foreach($uclass as $n){
                             ?>
                                 <tr>                                
-                                <td><a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>"><?php echo $n->ClassTitle; ?></a>
+                                <td><a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>"><?php echo $n->ClassTitle; ?></a>
                                     <span><?php echo $n->TitleView; ?></span>
                                 </td>
                                 <td><?php echo GetLearnType($n->LearnType) ?></td>                                
@@ -44,7 +44,7 @@
                                 <td class="actionjob">
                                     <a class="btn btnntdupdate" data-val="<?php echo $n->ClassID ?>" data-id="<?php echo $n->ClassID ?>"><i class="fa fa-refresh"></i> Sửa </a>
                                     <a data-val="<?php echo $n->ClassID ?>" id="xoalopdadang" class="btn btnntddelete"><i class="fa fa-trash"></i> Xóa</a>
-                                    <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" target="_blank" class="btn btnntdviewdetail"><i class="fa fa-view-detail"></i> Chi tiết</a>
+                                    <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" target="_blank" class="btn btnntdviewdetail"><i class="fa fa-view-detail"></i> Chi tiết</a>
                                 </td>                         
                             </tr>
                             <?php } } ?>

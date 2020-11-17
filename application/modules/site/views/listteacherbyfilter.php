@@ -1,11 +1,26 @@
 <?php
-  if(!empty($subjectname))
+
+  $urlweb .= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+  $page = $this->uri->segment(2);
+  if ($page > 0) {
+    $canonical_n = $canonical.'/'.$page;
+  } else {
+    $canonical_n = $canonical;
+  }
+  // 
+  if($urlweb != $canonical_n)
   {
-    $subjectname = $subjectname.' ';
+   header("HTTP/1.1 301 Moved Permanently"); 
+   header("Location: $canonical_n");
+   exit();
+  }
+  if(!empty($NameTopic))
+  {
+    $NameTopic = $NameTopic.' ';
   }
   else
   {
-    $subjectname = '';
+    $NameTopic = '';
   }
 
   if(!empty($cityname))
@@ -44,7 +59,7 @@
             <div class="col-md-12">
                 <div class="tit_hd resultfindteacher">
                  <div class="ir_h3 searchteachertitle">
-                  <h1>
+                  <h3>
                     <span> 
                       <?php
                         if(strtolower($keywork)=='all')
@@ -53,18 +68,21 @@
                         }
                         else
                         {
-                          if(!empty($subjectname) || !empty($cityname) || !empty($classname))
+                          if(!empty($NameTopic)) // || !empty($classname)
                           {
-                            echo 'Hồ sơ gia sư dạy kèm '.$subjectname.$classname.$cityname;
+                            echo $NameTopic; // .$classname.$cityname
                           }
-                          else
+                          else if (empty($NameTopic)  && !empty($cityname))
                           {
+                            echo 'Hồ sơ gia sư dạy kèm '.$cityname;
+                          }
+                          else {
                             echo 'Hồ sơ gia sư dạy kèm';
                           }
                         } 
                       ?>
                       
-                    </span></h1>
+                    </span></h3>
                  </div>
                  <!--  -->
                  <span class="span_hd">Sắp xếp theo:
@@ -88,9 +106,9 @@
                         <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name;?>" target="_blank">
                           <?php if(!empty($n->Image)){?>
                              <?php $tg=explode('-',date('d-m-Y',strtotime($n->CreateDate))); ?>
-                            <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                            <img alt="gia sư <?php echo $n->Name; ?>" src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                           <?php }else{ ?>
-                           <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                           <img src="images/no-image2.png" alt="gia sư <?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                          <?php } ?>
                          <span class="viewnow">Xem hồ sơ</span>
                        </a>
@@ -98,7 +116,7 @@
                    </div>
                    <div class="col-md-9 col-sm-12">
                     <div class="giasu_info">
-                      <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="giasu_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <i class="fa fa-chat"></i></a>
+                      <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="giasu_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <!-- <i class="fa fa-chat"></i> --></a>
                       <div title="#" class="giasu_titleview"><span>Gia sư:</span><?php
                       $search=array('Gia sư',' ,');
                       $replace=array('',', ');
@@ -131,13 +149,13 @@
                       <div class="itemfeature col-md-12 col-md-6 box-mobi">
                         <div class="feature-icon">
                           <?php if(!empty($n->Image)){?>
-                            <img src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),174,174,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                            <img alt="<?php echo $n->Name; ?>" src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),174,174,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                           <?php }else{ ?>
-                           <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                           <img src="images/no-image2.png" alt="<?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                          <?php } ?>
                        </div>
                        <div class="feature-caption">
-                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <i class="fa fa-chat"></i></a>
+                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <!-- <i class="fa fa-chat"></i> --></a>
                         <div title="#" class="feature_titleview"><span>Gia sư:</span><?php
                         echo str_replace('Gia sư','',$n->TitleView);
 
@@ -164,6 +182,9 @@
                         <?php echo $pagination; ?>
                         </div>
                      </div>
+                     <div class="content-seo" style="color: #262626; line-height: 20px;">
+                      <?php echo $content_seo; ?>
+                     </div>
                  </div>
             </div>
             <div class="col-md-30 col-sm-12 col-right-search padd-l-0">
@@ -182,7 +203,7 @@
                                      <?php } ?>
                                 </div>
                                 <div class="feature-caption">
-                                    <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <i class="fa fa-chat"></i></a>
+                                    <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><h3 style="display: inline-block;background-color: #FFFFFF; color: #00baba; font-size: 15px; font-weight: 500; padding-left: 0px;text-transform: none; margin: -11px auto;"><?php echo $n->Name ?></h3> <!-- <i class="fa fa-chat"></i> --></a>
                                     <div title="#" class="feature_titleview"><span>Gia sư:</span><?php
                                     echo str_replace('Gia sư','',$n->TitleView);
 

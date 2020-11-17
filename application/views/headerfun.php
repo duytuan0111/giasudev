@@ -5,7 +5,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
     $usertype=$tg['UserType'];
 }
 ?>
-<?php if($usertype ==0){ ?>
+<?php if($usertype ==0) { ?>
     <div class="uvheaderfun">
         <ul>
             <li class="col-md-2 col-xs-6">
@@ -35,11 +35,11 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                 <a href="<?php echo site_url('giao-vien-manager') ?>"><i class="fa fa-uv-account"></i> Tài khoản</a>
             </li>
             <li class="col-md-2 col-xs-6">
-                <a href="<?php echo site_url('mn-gia-su-cap-nhat-thong-tin') ?>" title="Đăng tin tìm lớp"><i class="fa fa-uv-newspaper"></i> Đăng tin tìm lớp</a>
-            </li>            
-            <li class="col-md-2 col-xs-6">
+                <a href="<?php echo site_url('mn-gia-su-cap-nhat-thong-tin') ?>" title="Đăng tin tìm lớp"><i class="fa fa-uv-newspaper"></i> Cập nhật thông tin</a>
+            </li>           
+            <!--    <li class="col-md-2 col-xs-6">
                 <a href="<?php echo site_url('mn-gia-su-nap-tien') ?>"><i class="fa fa-uv-documentfile"></i> Quản lý tin đăng</a>
-            </li>
+            </li> -->
             <li class="col-md-2 col-xs-6">
                 <a href="<?php echo site_url('mn-danh-sach-lop-da-luu') ?>" title="lớp đã lưu"><i class="fa fa-uv-savefolder"></i> Lớp đã lưu</a>
             </li>
@@ -47,8 +47,14 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                 <a href="<?php echo site_url('mn-danh-sach-lop-de-nghi-day') ?>" title="Lớp đề nghị dạy"><i class="fa fa-uv-uploadfolder"></i> Lớp đã đề nghị dạy</a>
             </li>
             <li class="col-md-2 col-xs-6">
-                <a href="<?php echo site_url('mn-giao-vien-tim-lop-day') ?>" title="Thông báo lớp"><i class="fa fa-uv-pencilouline"></i> Thông báo lớp</a>
+                <a href="<?php echo site_url('mn-danh-sach-lop-da-day') ?>" title="Lớp đã nhận dạy"><i class="fa fa-uv-uploadfolder"></i> Lớp đã nhận dạy</a>
             </li>
+              <li class="col-md-2 col-xs-6">
+                <a href="<?php echo site_url('mn-danh-sach-lop-moi-day') ?>" title="Lớp đã mời dạy"><i class="fa fa-uv-uploadfolder"></i> Lớp đã mời dạy</a>
+            </li>
+           <!--  <li class="col-md-2 col-xs-6">
+                <a href="<?php echo site_url('mn-giao-vien-tim-lop-day') ?>" title="Thông báo lớp"><i class="fa fa-uv-pencilouline"></i> Thông báo lớp</a>
+            </li> -->
         </ul>
     </div>
     <?php } 

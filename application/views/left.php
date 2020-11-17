@@ -66,13 +66,13 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
             <div class="logonuv">
                 <span class="imglogo">
                 <?php if(empty($info->Image)) { ?>
-                <img src="<?php echo base_url(); ?>images/no-image2.png" alt="" class="img-t-01">
+                <img src="<?php echo base_url(); ?>images/no-image2.png" alt="<?php echo $info->Name; ?>" class="img-t-01">
                 <?php } else { $tg=explode('-',date('d-m-Y',strtotime($info->CreateDate))); ?>
-                <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$info->Image  ?>" class="img-t-01" />
+                <img alt="<?php echo $info->Name; ?>" src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$info->Image  ?>" class="img-t-01" />
                 <?php } ?>
                 </span>
                 
-                <a><a href="<?php echo base_url().vn_str_filter($info->Name).'-gv'.$info->UserID ?>"><?php echo $userlogin; ?></a></a>
+                <a><a href="<?php echo base_url().vn_str_filter($info->Name).'-gv'.$info->UserID ?>"><?php echo $info->Name; ?></a></a>
             </div>
             <div class="col-md-12" style="margin: 0 auto 23px auto;">
             <div class="uvhoanthienhoso">
@@ -109,16 +109,16 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                     <li>
                         <i class="fa fa-searchuv"></i><a href="#pageSubmenu" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle <?php if($menu1){echo "";}else{echo "collapsed";} ?>">Tìm kiếm lớp dạy</a>
                         <ul class="list-unstyled collapse <?php if($active1){echo "in";}else{echo "";} ?>" id="pageSubmenu" style="">
-                            <?php if(current_url()==site_url('mn-giao-vien-tim-lop-day')){ ?>
+                        <!--     <?php if(current_url()==site_url('mn-giao-vien-tim-lop-day')){ ?>
                     <li class="active">
                                 <i class="fa fa-timkiemungv"></i><a href="<?php echo base_url() ?>mn-giao-vien-tim-lop-day">Tìm kiếm lớp dạy</a>
                             </li>
                     <?php }else{ ?>
                     <li>
                                 <i class="fa fa-timkiemungv"></i><a href="<?php echo base_url() ?>mn-giao-vien-tim-lop-day">Tìm kiếm lớp dạy</a>
-                            </li>
-                    <?php } ?>
-                            <?php if(current_url()==site_url('mn-giao-vien-tim-lop-day-theo-mon')){ ?>
+                    </li>
+                    <?php } ?> -->
+                     <!--        <?php if(current_url()==site_url('mn-giao-vien-tim-lop-day-theo-mon')){ ?>
                     <li class="active">
                                 <i class="fa fa-timkiemnn"></i><a href="<?php echo base_url()  ?>mn-giao-vien-tim-lop-day-theo-mon">Theo môn học</a>
                             </li>
@@ -126,7 +126,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                         <li>
                                 <i class="fa fa-timkiemnn"></i><a href="<?php echo base_url()  ?>mn-giao-vien-tim-lop-day-theo-mon">Theo môn học</a>
                             </li>
-                    <?php } ?>
+                    <?php } ?> -->
                     <?php if(current_url()==site_url('mn-giao-vien-tim-lop-day-theo-tt')){ ?>
                         <li class="active">
                                 <i class="fa fa-locationp"></i><a href="<?php echo site_url('mn-giao-vien-tim-lop-day-theo-tt'); ?>">Theo tỉnh thành</a>

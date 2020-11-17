@@ -1,4 +1,24 @@
 <?php ?>
+<style>
+    .uvimgrepresent img {
+        border-radius: 50%;
+        margin-top: -3px;
+        margin-left: -3px;
+        cursor: pointer;
+    }
+    @media screen and (max-width: 479px) {
+        .uvinfoheader-r ul {
+            list-style: none;
+            padding-left: 1px !important;
+        }
+        .ul-ns-mb {
+            padding-left: 15px;
+        }
+        .gioitinh-mb-ph {
+            padding-left: 0px;
+        }
+    }
+</style>
 <section class="padd-0">
 <div class="container">
     <div class="row">
@@ -23,9 +43,9 @@
                             <div class="uvinfoheader-l">
                                 <span class="uvimgrepresent">
                                 <?php if(empty($uinfo->Image)) {?>
-                                <img src="<?php echo base_url(); ?>images/no-image2.png" alt="" class="img-t-01">
+                                <img src="<?php echo base_url(); ?>images/no-image2.png" alt="<?php echo $uinfo->Name ?>" class="img-t-01">
                                 <?php } else {?>
-                                <img src="<?php echo base_url(); ?>upload/images/<?php echo $uinfo->Image ?>" class="img-t-01" />
+                                <img alt="<?php echo $uinfo->Name ?>" src="<?php echo base_url(); ?>upload/images/<?php echo $uinfo->Image ?>" class="img-t-01" />
                                 <?php } ?>
                                 
                                 <input type="file" id="file" name="file" title=" "  class="input-t"/>
@@ -53,8 +73,8 @@
                                   </ul>
                                   
                                     
-                                    <ul>
-                                        <li><label class="label-control required-left">Ngày sinh</label>
+                                    <ul class="">
+                                        <li class="ul-ns-mb"><label class="label-control required-left">Ngày sinh</label>
                                             <div class='input-group date' id='datetimepicker1' style="width: 90%">
                                                     <input type='text' name="txtngaysinh" placeholder="Ngày sinh" value="<?php echo date('d-m-Y',strtotime($uinfo->Birth))  ?>" id="txtngaysinh" class="form-control" />
                                                     <span class="input-group-addon">
@@ -80,10 +100,11 @@
                             </div>
                             <div class="tablediv col-md-12">
                                 <div class="tablediv_l col-md-6 padd-l-0">
+                                    
                                     <label class="label-control required-left">Email:</label>
                                             <div class="form-control"><input disabled placeholder="abc@gmail.com" value="<?php echo $uinfo->Email ?>" type="text" id="txtemail" name="txtemail" /></div>
                                 </div>
-                                <div class="tablediv_r col-md-6 padd-r-0">
+                                <div class="tablediv_r col-md-6 padd-r-0 gioitinh-mb-ph">
                                     <label class="label-control required-left">Giới tính:</label>
                                     <select id="txtgioitinh" name="txtgioitinh" class="form-control">
                                                 <option value="">Chọn giới tính</option>

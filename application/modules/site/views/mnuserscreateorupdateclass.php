@@ -68,14 +68,14 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                             </div>
                             <div class="form-inline">
                             <!-- <?php $tgsex=explode($uclass->TeacherSex); ?> -->
-                            <?php $tgsex= $uclass->TeacherSex; ?>
+                            <?php $tgsex= $uclass->TeacherSex; $tgsex1 = explode(',', $tgsex);  ?>
                                 <label style="margin-right:30px;">Giới tính: </label>
                                 <div class="form-group lblcheck">
-                                    <input value="1" <?php if($tgsex == 1){ ?>checked="checked"<?php } ?> name="location1" id="location1" type="radio">
+                                    <input value="1" <?php if($tgsex1[0] == 1 || $tgsex1[1] == 1){ ?>checked="checked"<?php } ?> name="location1" id="location1" type="checkbox">
                                     <label for="location1">Nam</label>                                     
                                 </div>
                                 <div class="form-group lblcheck">
-                                    <input value="2" <?php if($tgsex == 2){ ?>checked="checked"<?php } ?> name="location1" id="location2" type="radio">
+                                    <input value="2" <?php if($tgsex1[0] == 2 || $tgsex1[1] == 2){ ?>checked="checked"<?php } ?> name="location1" id="location2" type="checkbox">
                                     <label for="location2">Nữ</label>                                     
                                 </div>
                             </div>
@@ -101,28 +101,28 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                             <div class="form-group">
                                 <ul class="ultopic">
                                     <?php 
-                                    $lstopic=$CI->site_model->ListTopicBySubject($monchon);
+                                    $lstopic=$CI->site_model->ListTopicBySubject2($monchon);
                                     $usertopic=explode(',',$uclass->TopicArr);
                                     if(count($lstopic) >0){
                                         $data="";
-                                           for($j=0;$j<count($lstopic);$j++){
-                                            if(in_array($lstopic[$j]->ID,$usertopic) ){
+                                        for($j=0;$j<count($lstopic);$j++){
+                                            if(in_array($lstopic[$j],$usertopic) ){
                                                 $data.="<li>";
-            $data.="<input class='radio-calendar' id='toppic-".$lstopic[$j]->ID."' checked='checked' type='checkbox' name='toppicchk' value='".$lstopic[$j]->ID."'>
-                    <label for='toppic-".$lstopic[$j]->ID."'>".$lstopic[$j]->NameTopic."</label>";
-            $data.="</li>";
+                                                $data.="<input class='radio-calendar' id='toppic-".$lstopic[$j]."' checked='checked' type='checkbox' name='toppicchk' value='".$lstopic[$j]."'>
+                                                <label for='toppic-".$lstopic[$j]."'>".$lstopic[$j]->NameTopic."</label>";
+                                                $data.="</li>";
                                             }else{
-                                               $data.="<li>";
-            $data.="<input class='radio-calendar' id='toppic-".$lstopic[$j]->ID."' type='checkbox' name='toppicchk' value='".$lstopic[$j]->ID."'>
-                    <label for='toppic-".$lstopic[$j]->ID."'>".$lstopic[$j]->NameTopic."</label>";
-            $data.="</li>"; 
-                                            }
-                                           }
-                                           echo $data;
-                                        }
-                                    ?>
-                                </ul>
-                            </div>
+                                             $data.="<li>";
+                                             $data.="<input class='radio-calendar' id='toppic-".$lstopic[$j]."' type='checkbox' name='toppicchk' value='".$lstopic[$j]."'>
+                                             <label for='toppic-".$lstopic[$j]."'>".$lstopic[$j]->NameTopic."</label>";
+                                             $data.="</li>"; 
+                                         }
+                                     }
+                                     echo $data;
+                                 }
+                                 ?>
+                             </ul>
+                         </div>
                                 <label>Dạy lớp</label>
                             <div class="form-control">
                                 <select id="lop" class="checklophoc" name="lop" multiple="multiple">
@@ -415,7 +415,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                     <div class="title">Bạn không có quyền với bài viết</div>
                     <?php } ?>
                     <?php }else{ $city="";?>
-                    <div>Thêm mới bài viết</div>
+                    <!-- <div>Thêm mới bài viết</div> -->
                     <div class="col-md-12 col-sm-12 divyeucau phuhuynhyc">
                     <div class="row">
                         <h4><i class="fa fa-plus-circle"></i> Đăng tin tìm gia sư</h4>
@@ -445,11 +445,11 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                             
                                 <label style="margin-right:30px;">Giới tính: </label>
                                 <div class="form-group lblcheck">
-                                    <input value="1" checked="checked"  name="location1" id="location1" type="radio">
+                                    <input value="1" checked="checked"  name="location1" id="location1" type="checkbox">
                                     <label for="location1">Nam</label>                                     
                                 </div>
                                 <div class="form-group lblcheck">
-                                    <input value="2" name="location1" id="location2" type="radio">
+                                    <input value="2" name="location1" id="location2" type="checkbox">
                                     <label for="location2">Nữ</label>                                     
                                 </div>
                             </div>
@@ -787,7 +787,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                     $.ajax(
               {
                   
-                  url: configulr+"/site/AjaxchudeCheckbox",
+                  url: configulr+"/site/AjaxchudeCheckbox2",
                   type: "POST",
                   data: { idmon: monhoc },
                   dataType: 'json',
@@ -817,6 +817,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
             });
          $('#dangkytaikhoan').on('click',function(){
             var tg=[];
+            var tk = [];
             var sexteach=[];
             var lopday = $('#lop').val();
             var quanhuyen = $('#txtquanhuyen').val();
@@ -830,9 +831,12 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
             for(var i=0;i< itemtopic.length;i++){
                 
               var valuethis=  $('input[id='+$(itemtopic[i]).attr('id')+']:checked').val();
+              var Nametopicthis = $('input[id='+$(itemtopic[i]).attr('id')+']:checked').parent().find('label').text();
                if (typeof (valuethis) !== "undefined") {
-                tg.push(valuethis);
+                    tg.push(valuethis);
+                    tk.push(Nametopicthis);
                 }
+              
                 
             };
             var sang2=0;
@@ -935,6 +939,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                         password:$('#txtpass').val(),
                         username:$('#txtusername').val(),
                         topicarr:tg.join(),
+                         tk:  tk.join(),
                         classname:$('#txtclassname').val(),
                         teachertype:$('#txtteachtype').val(),
                         teachersex:sexteach.join(),
@@ -982,6 +987,8 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
                       if (reponse.kq == true) {
                             alert(reponse.data);
                           window.location.href='<?php echo site_url('mn-hv-quan-ly-lop-hoc') ?>'
+                      } else if (reponse.kq == 3) {
+                         alert(reponse.data);
                       }
                       else {
                          alert('Cập nhật thất bại, bạn vui lòng kiểm tra lại');

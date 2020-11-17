@@ -8,6 +8,20 @@
 <div class="container">
 <?php $this->load->view('headerfun'); ?>
 </div>
+<div id="wait" style="display:none;width:69px;height:89px;position:absolute;top:76%;left:50%;padding:2px; z-index: 1;"><img src='<?php echo base_url(); ?>upload/images/demo_wait.gif' width="64" height="64" /><br>Đang gửi..</div>
+<style type="text/css">
+    @media (max-width: 479px) {
+        #wait {
+            position: absolute !important;
+            top: 73% !important;
+            left: 45% !important;
+        }
+        .divyeucau textarea {
+            padding-left: 18px;
+            margin-left: 1px !important;
+        }
+    }
+</style>
 <section class="padd-top-30 padd-bot-30">
     <div class="container">
         <div class="row register padd-bot-40">
@@ -17,7 +31,7 @@
         <div class="row">
             <div class="col-md-10 col-md-offset-1">
                 <div class="registerform">
-                    <h3 class="col-md-12"><i class="fa fa-plus-circle"></i> Thông tin đăng nhập <span>Bạn đã có tài khoản? <a href="<?php echo base_url() ?>gia-su-dang-nhap">Đăng nhập</a></span></h3>
+                    <h3 class="col-md-12"><i class="fa fa-plus-circle"></i> Thông tin đăng nhập <span class="login-u-mobile">Bạn đã có tài khoản? <a href="<?php echo base_url() ?>gia-su-dang-nhap">Đăng nhập</a></span></h3>
                     <div class="col-md-6">
                         <label>Email <span style="font-weight:300;font-size:13">(Email là tài khoản để bạn đăng nhập)</span> *</label>
                         <div class="form-control"><input autocomplete="off" type="text" placeholder="Vui lòng nhập email" id="txtemail"></div>
@@ -45,7 +59,7 @@
                     <div class="row">
                         <div class="col-md-12 batbuoc">
                             <h4><i class="fa fa-plus-circle"></i> Thông tin cá nhân</h4>
-                            <div>(<span>*</span>) Thông tin bắt buộc nhập</div>
+                            <div class="tt-batbuoc-mobile">(<span>*</span>) Thông tin bắt buộc nhập</div>
                         </div>
                     </div>
                     <form onsubmit="return false" enctype="multipart/form-data">
@@ -59,7 +73,7 @@
                                 <input accept="image/x-png,image/gif,image/jpeg" type="file" name="danhdaidien" id="danhdaidien" class="inputfile inputfile-6" data-multiple-caption="{count} files selected" multiple />
                                 <label for="danhdaidien"><strong> Chọn tệp</strong> <span>không có file nào được chọn</span></label>
                             </div>
-                            <label class="required">Ảnh CMND, thẻ sinh viên hoặc bằng cấp chuyên môn cao nhất <span>(để tăng sự tin tưởng của học viên với bạn)</span></label>
+                            <label class="">Ảnh CMND, thẻ sinh viên hoặc bằng cấp chuyên môn cao nhất <span>(để tăng sự tin tưởng của học viên với bạn)</span></label>
                             <div class="form-control">
                                 <input accept="image/x-png,image/gif,image/jpeg" type="file" name="anhcmnd" id="anhcmnd" class="inputfile inputfile-6" data-multiple-caption="{count} files selected" multiple />
                                 <label for="anhcmnd"><strong> Chọn tệp</strong> <span>không có file nào được chọn</span></label>
@@ -72,7 +86,7 @@
                                 </span>
                             </div>
                             <div class="form-inline">
-                                <label style="margin-right:30px;">Giới tính: </label>
+                                <label class="gt-mobile" style="margin-right:30px;">Giới tính: </label>
                                 <div class="form-group lblcheck">
                                     <input value="1" checked="checked" name="location1" id="location1" type="radio">
                                     <label for="location1">Nam</label>                                     
@@ -138,7 +152,7 @@
                         </div>
                         <div class="col-md-10 col-md-offset-1">
                             <label class="required">Môn học sẽ dạy</label>
-                            <div class="form-control">
+                            <div class="form-control quanhuyenmobile">
                                 <select id="monhoc" class="checkmonhoc" name="monhoc" multiple="multiple">
                                    <option value="">Chọn môn học</option>
                                    <?php 
@@ -170,7 +184,7 @@
                                 <label>Chủ đề môn học <span>(Chọn chủ đề giúp phụ huynh tìm kiếm bạn dễ hơn)</span></label>
                                 <div class="form-group">
                                     <ul class="ultopic">
-                                        <li>
+                                      <!--   <li>
                                             <input class="radio-calendar" id="morning-calendar-2" type="checkbox" name="sang_2" value="sang_2">
                                             <label for="morning-calendar-2" class="lbl-active">Sáng</label>
                                             
@@ -184,7 +198,7 @@
                                             <input class="radio-calendar" id="evening-calendar-2" type="checkbox" name="toi_2" value="toi_2">
                                             <label for="evening-calendar-2">Tối</label>
                                             
-                                        </li>
+                                        </li> -->
                                     </ul>
                                 </div>
                             </div>
@@ -258,7 +272,7 @@
                                 <option data-tokens="54" value="54">Đồng Tháp</option>
                             </select>
                         </div>
-                        <div class="form-control">
+                        <div class="form-control quanhuyenmobile" >
                                 <select id="txtquanhuyen" class="checkquanhuyen" name="txtquanhuyen" multiple="multiple">
                                    <option value="">Quận(huyện)</option>
                                 </select>
@@ -435,8 +449,8 @@
 </div>
 <div class="col-md-12">
     <div class="fun">
-        <span class="btn btn-primary btn-success" id="dangkygiaovien">Hoàn tất</span>
-        <span class="btn btn-primary btn-warning">Làm lại</span>
+        <button class="btn btn-primary btn-success" id="dangkygiaovien">Hoàn tất</button>
+        <button class="btn btn-primary btn-warning" id="btnlamlai">Làm lại</button>
     </div>
 </div>
 
@@ -483,10 +497,11 @@
         $('#txtquanhuyen').select2({ width: '100%',placeholder: 'Khu vực bạn có thể dạy (Tối đa 3 Quận/Huyện) ' ,multiple: true, maximumSelectionLength: 3,minimumInputLength: 0 });
         var configulr='<?php echo site_url(); ?>';
         $('#dangkygiaovien').on('click',function()
-        {
+        {   
             if(validategiasu() && typeof($('input[id=dongydieukhoan]:checked').val())!=='undefined')
             {
                 var tg=[];
+                var tgName = [];
                 var sexteach=[];
                 if(typeof($('input[id=location1]:checked').val())!=='undefined')
                 {
@@ -500,9 +515,14 @@
                 for(var i=0;i< itemtopic.length;i++)
                 {
                     var valuethis=  $('input[id='+$(itemtopic[i]).attr('id')+']:checked').val();
+                    var valuethat=  $('input[id='+$(itemtopic[i]).attr('id')+']:checked').parent().find('label').text();
                     if (typeof (valuethis) !== "undefined") 
                     {
                         tg.push(valuethis);
+                    }
+                    if (typeof (valuethat) !== "undefined") 
+                    {
+                        tgName.push(valuethat);
                     }
                 };
                 var sang2=0;
@@ -668,6 +688,14 @@
                 {
                    data.append('chudemonhoc', ""); 
                 }
+                 if(tgName != null)
+                {
+                    data.append('tentopic', tgName.join());
+                }
+                else
+                {
+                   data.append('tentopic', ""); 
+                }
                 // data.append('lop', $("#lop").val());
                 data.append('khuvucday', $('#txtcityclass').val());
                 data.append('tenkhuvucday', $('#txtcityclass option:selected').text());
@@ -718,7 +746,9 @@
                     enctype: 'multipart/form-data',
                     beforeSend: function () 
                     {
-                        $("#boxLoading").show();
+                       $("#wait").css('display', 'block');
+                       $("#dangkytaikhoan").attr('disabled', true);
+                       $("#btnlamlai").attr('disabled', true);
                     },
                     success: function (reponse) 
                     {
@@ -726,7 +756,9 @@
                         {
                             alert('Bạn đã đăng ký tài khoản thành công. Vui lòng kiểm tra tin email để nhận mã xác thực kích hoạt tài khoản');
                             var urlredirect=configulr;
-                            window.location.href=urlredirect;
+                            // window.location.href=urlredirect;
+                            window.location.href = configulr+'xac-thuc-tai-khoan';
+
                         }
                         else 
                         {
@@ -739,27 +771,39 @@
                     },
                     complete: function () 
                     {
-                        $("#boxLoading").hide();
+                        $("#wait").css('display', 'none');
+                        $("#dangkytaikhoan").attr('disabled', false);
+                        $("#btnlamlai").attr('disabled', false);
                     }
                 }); 
+            }  else if (typeof($('input[id=dongydieukhoan]:checked').val()) =='undefined') {
+                    alert('Bạn phải cam kết các quy định của Giasu365');
             }
         });
-
+        $('#monhoc').on('change.select2', function(){
+            var monhoc1 = $('#monhoc').val();
+            if (monhoc1 == null) {
+                $('#grouptopic').empty();
+            }
+        });
         $('#monhoc').change(function () 
         {
             var monhoc=$(this).val();
             /*monhoc=monhoc1.split(',');*/
             if(monhoc.length > 0){
                 $('#grouptopic div#group-topic0').remove();
-                for(var i=0; i<monhoc.length; i++) {
-                    if(typeof($('#group-topic'+monhoc[i]).attr('data-val'))==='undefined'){
-                        var strhtml="<div id='group-topic"+monhoc[i]+"' data-val='"+monhoc[i]+"'>";
 
-                        strhtml+="<label>Lớp hoặc chủ đề môn học <span>("+$(this).find('option[value="' + monhoc[i] + '"]').text()+")</span></label>";
+                // for(var i=0; i<monhoc.length; i++) {
+                    // if(typeof($('#group-topic'+monhoc).attr('data-val'))==='undefined'){
+                        var strhtml="<div id='group-topic"+monhoc+"' data-val='"+monhoc+"'>";
+
+                        strhtml+="<label>Lớp hoặc chủ đề môn học</label>";
+                        // strhtml+="<label>Lớp hoặc chủ đề môn học <span>("+$(this).find('option[value="' + monhoc + '"]').text()+")</span></label>";
                         $.ajax({
-                            url: configulr+"site/AjaxchudeCheckbox",
+                            url: configulr+"site/AjaxchudeCheckbox", // AjaxchudeCheckbox AjaxtopicCheckbox
                             type: "POST",
-                            data: { idmon: monhoc[i] },
+                            data: { idmon: monhoc},
+                            async: false,
                             dataType: 'json',
                             beforeSend: function () 
                             {
@@ -769,14 +813,14 @@
                             {
                                 if(obj.kq != '')
                                 {
-                                    if(obj.id == monhoc)
+                                    if(obj.kq == true)
                                     {
                                         var reponse=obj.kq;
                                         strhtml+="<div class='form-group'><ul class='ultopic'>";
                                         strhtml+=obj.data;
                                         strhtml+="</ul></div>";
                                         strhtml+="</div>";
-                                        $('#grouptopic').append(strhtml);
+                                        $('#grouptopic').html(strhtml);
                                     }
                                     for(var j=1; j<29; j++){
                                          if('#group-topic'+obj.id != '#group-topic'+j)
@@ -797,9 +841,9 @@
                             $("#boxLoading").hide();
                             }
                         }); 
-                    }
-                } 
-            }
+                    // }
+                // } 
+            } 
             
         });
 
@@ -816,7 +860,7 @@
             if ($.trim($('#txtemail').val()) == '') 
             {
                $('#txtemail').parent().addClass('errorClass');
-               $('#txtemail').focus();
+               // $('#txtemail').focus();
                return false;
             } 
             else 
@@ -836,7 +880,7 @@
                         {
                             $('#txtemail').tooltip('hide').attr('title', 'Email đã được đăng ký vui lòng chọn email khác').tooltip('show');
                             $('#txtemail').parent().addClass('errorClass');
-                            $('#txtemail').focus();
+                            // $('#txtemail').focus();
                             return false;
                         }
                         else
@@ -859,7 +903,7 @@
             if ($.trim(hoten) == '') 
             {
                 $('#txthoten').parent().addClass('errorClass');
-                $('#txthoten').focus();
+                // $('#txthoten').focus();
                 return false;
             } 
             else 
@@ -870,7 +914,7 @@
             if ($.trim($('#txtmatkhau').val()) == '') 
             {
                 $('#txtmatkhau').parent().addClass('errorClass');
-                $('#txtmatkhau').focus();
+                // $('#txtmatkhau').focus();
                 return false;
             } 
             else 
@@ -887,7 +931,7 @@
             if ($.trim($('#txtrepass').val()) == '') 
             {
                 $('#txtrepass').parent().addClass('errorClass');
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
                 return false;
             } 
             else 
@@ -905,14 +949,14 @@
             {
                 $('#txtrepass').tooltip('hide').attr('title', 'Nhập lại mật khẩu không phù hợp').tooltip('show');
                 $('#txtrepass').parent().addClass("errorClass");
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
                 return false;
             };
 
             if ($.trim($('#txtphone').val()) == '') 
             {
                 $('#txtphone').parent().addClass('errorClass');
-                $('#txtphone').focus();
+                // $('#txtphone').focus();
                 return false;
             } 
             else 
@@ -920,7 +964,7 @@
                 if (regex_sdt.test($('#txtphone').val()) == false) 
                 {
                     $('#sdt').attr('title', 'Số điện thoại không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtsdt').focus();
+                    // $('#txtsdt').focus();
                     return false;
                 }
                 else
@@ -939,7 +983,7 @@
                             if(obj == 1){
                                 $($('#txtphone')).tooltip('hide').attr('title', 'Số điện thoại đã đăng ký vui lòng chọn số khác').tooltip('show');
                                 $('#txtphone').parent().addClass('errorClass');
-                                $('#txtphone').focus();
+                                // $('#txtphone').focus();
                                 return false;
                             }
                             else
@@ -962,7 +1006,7 @@
 
             if ($.trim($('#danhdaidien').val()) == '') {
                 $('#danhdaidien + label').parent().addClass('errorClass');
-                $('#danhdaidien').focus();
+                // $('#danhdaidien').focus();
                 return false;
             } 
             else 
@@ -970,19 +1014,19 @@
                 $('#danhdaidien + label').parent().removeClass('errorClass');
             };
 
-            if ($.trim($('#anhcmnd').val()) == '') {
-                 $('#anhcmnd + label').parent().addClass('errorClass');
-                 $('#anhcmnd').focus();
-                 return false;
-            } 
-            else 
-            {
-                $('#anhcmnd + label').parent().removeClass('errorClass');
-            };
+            // if ($.trim($('#anhcmnd').val()) == '') {
+            //      $('#anhcmnd + label').parent().addClass('errorClass');
+                 // $('#anhcmnd').focus();
+            //      return false;
+            // } 
+            // else 
+            // {
+            //     $('#anhcmnd + label').parent().removeClass('errorClass');
+            // };
 
             if ($.trim($('#txtngaysinh').val()) == '') {
                $('#txtngaysinh').parent().addClass('errorClass');
-               $('#txtngaysinh').focus();
+               // $('#txtngaysinh').focus();
                 return false;
             } 
             else 
@@ -993,7 +1037,7 @@
             if ($.trim($('#txtnoiohientai').val()) == '')
             {
                $('#txtnoiohientai').parent().addClass('errorClass');
-               $('#txtnoiohientai').focus();
+               // $('#txtnoiohientai').focus();
                 return false;
             } 
             else 
@@ -1004,7 +1048,7 @@
             if ($.trim($('#txtteachtype').val()) == '') 
             {
                $('#txtteachtype').parent().addClass('errorClass');
-               $('#txtteachtype').first().focus();
+               // $('#txtteachtype').first().focus();
                 return false;
             } 
             else 
@@ -1014,7 +1058,7 @@
 
             if ($.trim($('#txtschool').val()) == '') {
                $('#txtschool').parent().addClass('errorClass');
-               $('#txtschool').focus();
+               // $('#txtschool').focus();
                 return false;
             } 
             else 
@@ -1025,7 +1069,7 @@
             if ($.trim($('#txtmajor').val()) == '') 
             {
                $('#txtmajor').parent().addClass('errorClass');
-               $('#txtmajor').focus();
+               // $('#txtmajor').focus();
                 return false;
             } 
             else 
@@ -1035,7 +1079,7 @@
 
             if ($.trim($('#txtGraduationyear').val()) == '') {
                $('#txtGraduationyear').parent().addClass('errorClass');
-               $('#txtGraduationyear').focus();
+               // $('#txtGraduationyear').focus();
                 return false;
             } 
             else 
@@ -1055,7 +1099,7 @@
             if ($.trim($('#kinhnghiem').val()) == '') 
             {
                $('#kinhnghiem').addClass('errorClass');
-               $('#kinhnghiem').focus();
+               // $('#kinhnghiem').focus();
                 return false;
             } 
             else 
@@ -1086,7 +1130,7 @@
             if ($.trim($('#monhoc').val()) == '') 
             {
                $('#monhoc').parent().addClass('errorClass');
-               $('#monhoc').focus();
+               // $('#monhoc').focus();
                 return false;
             } 
             else 
@@ -1097,7 +1141,7 @@
             if ($.trim($('#lop').val()) == '') 
             {
                $('#lop').parent().addClass('errorClass');
-               $('#lop').focus();
+               // $('#lop').focus();
                 return false;
             } 
             else 
@@ -1107,7 +1151,7 @@
 
             if ($.trim($('#txtcityclass').val()) == '' || $('#txtcityclass').val() ==0) {
                $('#txtcityclass').parent().addClass('errorClass');
-                $('#txtcityclass').focus();
+                // $('#txtcityclass').focus();
                 return false;
             } 
             else 
@@ -1117,7 +1161,7 @@
 
             if ($.trim($('#txtquanhuyen').val()) == '' || $('#txtquanhuyen').val() ==0) {
                $('#txtquanhuyen').parent().addClass('errorClass');
-                $('#txtquanhuyen').focus();
+                // $('#txtquanhuyen').focus();
 
                 return false;
             } 
@@ -1128,7 +1172,7 @@
 
             if ($.trim($('#txthocphi').val()) == '') {
                $('#txthocphi').parent().addClass('errorClass');
-               $('#txthocphi').focus();
+               // $('#txthocphi').focus();
                 return false;
             } 
             else 
@@ -1145,7 +1189,7 @@
 
             //  if ($.trim($('#lichday').val()) == '') {
             //    $('#lichday').addClass('errorClass');
-            //     $('#lichday').first().focus();
+                // $('#lichday').first().focus();
             //     return false;
             // } 
             // else 
@@ -1162,7 +1206,7 @@
             if (pwd.length < 6) {
                 $(element).tooltip('hide').attr('title', 'Mật khẩu phải nhiều hơn hoặc có 6 ký tự').tooltip('show');
                 $(element).parent().addClass('errorClass');
-                $(element).focus();
+                // $(element).focus();
                 return 1;
             }
             $(element).data("title", "").tooltip("hide");
@@ -1179,7 +1223,7 @@
                 {
                     $('#txtemail').parent().attr('title', 'Vui lòng nhập email.').tooltip('show').addClass('errorClass');
                 }
-                $('#txtemail').focus();
+                // $('#txtemail').focus();
 
             }
             else
@@ -1193,14 +1237,14 @@
                 if($('#txtemail').parent().hasClass('errorClass') == false){
                     $('#txtemail').parent().attr('title', 'Vui lòng nhập email.').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtemail').focus();
+                // $('#txtemail').focus();
             }
             else
             {
                 if (regex_email.test($('#txtemail').val()) == false)
                 {
                     $('#txtemail').parent().attr('title', 'Email không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtemail').focus();
+                    // $('#txtemail').focus();
                 }
                 else if(regex_email.test($('#txtemail').val()) == true)
                 {
@@ -1219,7 +1263,7 @@
                         {
                             $('#txtemail').tooltip('hide').attr('title', 'Email đã được đăng ký vui lòng chọn email khác').tooltip('show');
                             $('#txtemail').parent().addClass('errorClass');
-                            $('#txtemail').focus();
+                            // $('#txtemail').focus();
                             return false;
                         }
                         else
@@ -1254,7 +1298,7 @@
                 {
                     $('#txthoten').parent().attr('title', 'Vui lòng nhập họ tên.').tooltip('show').addClass('errorClass');
                 }
-                $('#txthoten').focus();
+                // $('#txthoten').focus();
 
             }
             else
@@ -1267,7 +1311,7 @@
                 if($('#txthoten').parent().hasClass('errorClass') == false){
                     $('#txthoten').parent().attr('title', 'Vui lòng nhập họ tên.').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txthoten').focus();
+                // $('#txthoten').focus();
             }
             else
             {
@@ -1283,7 +1327,7 @@
                 {
                     $('#txtmatkhau').parent().attr('title', 'Vui lòng nhập mật khẩu.').tooltip('show').addClass('errorClass');
                 }
-                $('#txtmatkhau').focus();
+                // $('#txtmatkhau').focus();
 
             }
             else
@@ -1296,14 +1340,14 @@
                 if($('#txtmatkhau').parent().hasClass('errorClass') == false){
                     $('#txtmatkhau').parent().attr('title', 'Vui lòng nhập mật khẩu.').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtmatkhau').focus();
+                // $('#txtmatkhau').focus();
             }
             else
             {
                 if ($('#txtmatkhau').val().length <6) 
                 {
                     $('#txtmatkhau').parent().attr('title', 'Mật khẩu phải nhiều hơn hoặc có 6 ký tự').tooltip('show').addClass('errorClass');
-                    $('#txtmatkhau').focus();
+                    // $('#txtmatkhau').focus();
                 }
                 else
                 {
@@ -1320,7 +1364,7 @@
                 {
                     $('#txtrepass').parent().attr('title', 'Vui lòng nhập mật khẩu.').tooltip('show').addClass('errorClass');
                 }
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
 
             }
             else
@@ -1333,7 +1377,7 @@
                 if($('#txtrepass').parent().hasClass('errorClass') == false){
                     $('#txtrepass').parent().attr('title', 'Vui lòng nhập mật khẩu.').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
             }
             else
             {
@@ -1356,7 +1400,7 @@
                 {
                     $('#txtphone').parent().attr('title', 'Vui lòng nhập số điện thoại').tooltip('show').addClass('errorClass');
                 }
-                $('#txtphone').focus();
+                // $('#txtphone').focus();
             }
             else
             {
@@ -1368,7 +1412,7 @@
                 if($('#txtphone').parent().hasClass('errorClass') == false){
                     $('#txtphone').parent().attr('title', 'Vui lòng nhập số điện thoại').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtphone').focus();
+                // $('#txtphone').focus();
             }
             else
             {
@@ -1376,7 +1420,7 @@
                 if (regex_sdt.test($('#txtphone').val()) == false) 
                 {
                     $('#txtphone').parent().attr('title', 'Số điện thoại không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtphone').focus();
+                    // $('#txtphone').focus();
                 }
                 else if(regex_sdt.test($('#txtphone').val()) == true)
                 {
@@ -1394,7 +1438,7 @@
                             if(obj == 1){
                                 $($('#txtphone')).tooltip('hide').attr('title', 'Số điện thoại đã đăng ký vui lòng chọn số khác').tooltip('show');
                                 $('#txtphone').parent().addClass('errorClass');
-                                $('#txtphone').focus();
+                                // $('#txtphone').focus();
                                 return false;
                             }
                             else
@@ -1428,7 +1472,7 @@
                 {
                     $('#txtngaysinh').parent().attr('title', 'Vui lòng nhập ngày sinh').tooltip('show').addClass('errorClass');
                 }
-                $('#txtngaysinh').focus();
+                // $('#txtngaysinh').focus();
             }
             else
             {
@@ -1441,7 +1485,7 @@
                 if($('#txtngaysinh').parent().hasClass('errorClass') == false){
                     $('#txtngaysinh').parent().attr('title', 'Vui lòng nhập ngày sinh').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtngaysinh').focus();
+                // $('#txtngaysinh').focus();
             }
             else
             {
@@ -1457,7 +1501,7 @@
                 {
                     $('#txtnoiohientai').parent().attr('title', 'Vui lòng nhập địa chỉ hiện tại bạn đang sinh sống').tooltip('show').addClass('errorClass');
                 }
-                $('#txtnoiohientai').focus();
+                // $('#txtnoiohientai').focus();
             }
             else
             {
@@ -1470,7 +1514,7 @@
                 if($('#txtnoiohientai').parent().hasClass('errorClass') == false){
                     $('#txtnoiohientai').parent().attr('title', 'Vui lòng nhập địa chỉ hiện tại bạn đang sinh sống').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtnoiohientai').focus();
+                // $('#txtnoiohientai').focus();
             }
             else
             {
@@ -1486,7 +1530,7 @@
                 {
                     $('#txtschool').parent().attr('title', 'Vui lòng nhập trường học của bạn ').tooltip('show').addClass('errorClass');
                 }
-                $('#txtschool').focus();
+                // $('#txtschool').focus();
             }
             else
             {
@@ -1499,7 +1543,7 @@
                 if($('#txtschool').parent().hasClass('errorClass') == false){
                     $('#txtschool').parent().attr('title', 'Vui lòng nhập trường học của bạn').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtschool').focus();
+                // $('#txtschool').focus();
             }
             else
             {
@@ -1515,7 +1559,7 @@
                 {
                     $('#txtmajor').parent().attr('title', 'Vui lòng nhập chuyên ngành của bạn').tooltip('show').addClass('errorClass');
                 }
-                $('#txtmajor').focus();
+                // $('#txtmajor').focus();
             }
             else
             {
@@ -1528,7 +1572,7 @@
                 if($('#txtmajor').parent().hasClass('errorClass') == false){
                     $('#txtmajor').parent().attr('title', 'Vui lòng nhập chuyên ngành của bạn').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtmajor').focus();
+                // $('#txtmajor').focus();
             }
             else
             {
@@ -1544,7 +1588,7 @@
                 {
                     $('#txtGraduationyear').parent().attr('title', 'Vui lòng nhập năm tốt nghiệp của bạn').tooltip('show').addClass('errorClass'); 
                 }
-                $('#txtGraduationyear').focus();
+                // $('#txtGraduationyear').focus();
             }
             else if (reg_year.test($('#txtGraduationyear').val()) == false) {
                  if($('#txtGraduationyear').hasClass('errorClass') == false)
@@ -1567,7 +1611,7 @@
                 if($('#txtGraduationyear').parent().hasClass('errorClass') == false){
                     $('#txtGraduationyear').parent().attr('title', 'Vui lòng nhập năm tốt nghiệp của bạn').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtGraduationyear').focus();
+                // $('#txtGraduationyear').focus();
             }
             else
             {
@@ -1583,7 +1627,7 @@
                 {
                     $('#infouser').parent().attr('title', 'Vui lòng giới thiệu về bản thân của bạn').tooltip('show').addClass('errorClass');
                 }
-                $('#infouser').focus();
+                // $('#infouser').focus();
             }
             else
             {
@@ -1596,7 +1640,7 @@
                 if($('#infouser').parent().hasClass('errorClass') == false){
                     $('#infouser').parent().attr('title', 'Vui lòng giới thiệu về bản thân của bạn').tooltip('show').addClass('errorClass');                
                 } 
-                $('#infouser').focus();
+                // $('#infouser').focus();
             }
             else
             {
@@ -1612,7 +1656,7 @@
                 {
                     $('#kinhnghiem').parent().attr('title', 'Vui lòng nhập kinh nghiệm đi dạy của bạn').tooltip('show').addClass('errorClass');
                 }
-                $('#kinhnghiem').focus();
+                // $('#kinhnghiem').focus();
             }
             else
             {
@@ -1625,7 +1669,7 @@
                 if($('#kinhnghiem').parent().hasClass('errorClass') == false){
                     $('#kinhnghiem').parent().attr('title', 'Vui lòng nhập kinh nghiệm đi dạy của bạn').tooltip('show').addClass('errorClass');                
                 } 
-                $('#kinhnghiem').focus();
+                // $('#kinhnghiem').focus();
             }
             else
             {
@@ -1641,7 +1685,7 @@
                 {
                     $('#txthocphi').parent().attr('title', 'Vui lòng nhập mức học phí dự kiến').tooltip('show').addClass('errorClass');
                 }
-                $('#txthocphi').focus();
+                // $('#txthocphi').focus();
             }
             else
             {
@@ -1654,7 +1698,7 @@
                 if($('#txthocphi').parent().hasClass('errorClass') == false){
                     $('#txthocphi').parent().attr('title', 'Vui lòng nhập mức học phí dự kiến').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txthocphi').focus();
+                // $('#txthocphi').focus();
             }
             else
             {

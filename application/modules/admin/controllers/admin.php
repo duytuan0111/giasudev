@@ -8,6 +8,7 @@ class admin extends Controller
 		$this->load->helper('locdau');			
 		$this->load->helper('images');
 		$this->load->library('pagination');	
+		$this->load->model('site/site_model');
 		$this->load->model('admin/admin_model');
 		$this->load->model('admin/Classes/PHPExcel');
  	}   
@@ -49,6 +50,82 @@ class admin extends Controller
     		$data['pagination']= $this->pagination->create_links();	
     		$data['content']='banner';			
     		$this->load->view('template',$data);    	   
+    }
+    function ajaxadminupdateclass() {
+    	$result=['kq'=>false,'data'=>''];
+    	$classid  =  $_POST['uc'];
+    	$topicarr=$_POST['topicarr'];
+    	$classname=$_POST['classname'];
+    	$teachertype=$_POST['teachertype'];
+    	$teachersex=$_POST['teachersex'];
+    	$monhoc=$_POST['monhoc'];
+    	$tenmonhoc=$_POST['tenmonhoc'];
+    	$studens=$_POST['studens'];
+    	$hours=$_POST['hours'];
+    	$workid=$_POST['workid'];
+    	$money=$_POST['money'];        
+    	$phone=$_POST['phone'];
+    	$cityid=$_POST['cityid'];
+    	$address=$_POST['address'];
+    	$descclass=$_POST['descclass'];
+    	$sang2=$_POST['sang2'];
+    	$chieu2=$_POST['chieu2'];
+    	$toi2=$_POST['toi2'];
+    	$sang3=$_POST['sang3'];
+    	$chieu3=$_POST['chieu3'];
+    	$toi3=$_POST['toi3'];
+    	$sang4=$_POST['sang4'];
+    	$chieu4=$_POST['chieu4'];
+    	$toi4=$_POST['toi4'];
+    	$sang5=$_POST['sang5'];
+    	$chieu5=$_POST['chieu5'];
+    	$toi5=$_POST['toi5'];
+    	$sang6=$_POST['sang6'];
+    	$chieu6=$_POST['chieu6'];
+    	$toi6=$_POST['toi6'];
+    	$sang7=$_POST['sang7'];
+    	$chieu7=$_POST['chieu7'];
+    	$toi7=$_POST['toi7'];
+    	$sang8=$_POST['sang8'];
+    	$chieu8=$_POST['chieu8'];
+    	$toi8=$_POST['toi8'];
+    	$cityname=$_POST['cityname'];
+    	$metatitle=$classname." ,".$cityname;
+    	$metadesc=$descclass;
+    	$lopday = $_POST['lopday'];
+    	$quanhuyen = $_POST['districtid'];
+    	$NameTopic1 = $_POST['tk'];
+    	$alias_classname = vn_str_filter($classname);
+
+
+
+    	$metakey=$classname.", gia sư 365, gia sư ".$tenmonhoc.", gia sư tại ".$cityname;
+    	$num = array_count_values(array($sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8));
+    	if(!empty($classname)){
+    		$userid= 195;
+    		$resultclass=['kq'=>false,'data'=>0];
+    		if(intval($classid)>0){
+    			$resultclass=$this->site_model->UpdateClass($classid,$classname,$monhoc,$tenmonhoc,$topicarr,$money,$hours,$workid,$phone,$cityid,$address,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$descclass,$num[1],$studens,$teachersex,$ExpectedDate,$teachertype,$lopday,$quanhuyen, $NameTopic1);
+    			if($resultclass['kq']==true){
+    				$result =['kq'=>true,'data'=>'Cập nhật thành công'];
+    			}
+    		}else{
+    			$check_alias_class = $this->site_model->check_alias_class($userid, $alias_classname);
+    			if ($check_alias_class == 0) {
+    				$resultclass=$this->site_model->InsertClass($classname,$monhoc,$tenmonhoc,$topicarr,$money,$hours,$workid,$phone,$cityid,$address,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$userid,$descclass,$num[1],$studens,$teachersex,$ExpectedDate,$userid,$teachertype,$lopday,$quanhuyen,$NameTopic1,$alias_classname);
+    				$classid=$resultclass['data'];
+    				if($classid > 0){
+    					$resultmeta=$this->site_model->InsertClassMeta($classid,$metadesc,$metatitle,$metakey,'','');
+    					if($resultmeta['data']>0){
+    						$result=['kq'=>true,'data'=>'Thêm mới thành công'];
+    					}
+    				}
+    			} else {
+    				$result = ['kq' => 3, 'data' => 'Bạn đã đăng tin với yêu cầu tìm kiếm gia sư này, vui lòng thay đổi yêu cầu tìm gia sư'];
+    			}
+    		}
+    	}
+    	echo json_encode($result,JSON_UNESCAPED_UNICODE);
     }
 	function frmbanner()
     {		
@@ -101,6 +178,7 @@ class admin extends Controller
 		$this->admin_model->add_tbl('tbl_banner',$data,$id);    
 		redirect('admin/banner');	
     }
+
 	
 	function edit_banner($id)
     {
@@ -438,23 +516,7 @@ class admin extends Controller
 		$this->admin_model->add_seosubject('seobysubject',$data,$id);		
 		redirect('admin/urlgiasutheomon');	
     }
-      function add_viectheomon()
-    {
-		$this->checklogin();		
-		$this->checkrole();	
-		$id = $this->input->post('id');	
-		$subject_id = $this->input->post('subject_id');
-		$data=array(
-				'h1'					=> 	$this->input->post('h1'),
-				'content'				=> 	$this->input->post('editor'),
-				'subject_id'			=> 	$subject_id,						
-				'keywork'  				=>  $this->input->post('keywork'),
-				'description'			=>	$this->input->post('description'),
-				'title'  				=>  $this->input->post('title')
-			); 
-		$this->admin_model->add_seosubject('viecbysubject',$data,$id);		
-		redirect('admin/urlviectheomon');	
-    }
+    
      function add_urltheomontinhthanh()
     {
 		$this->checklogin();		
@@ -509,8 +571,44 @@ class admin extends Controller
         $data['id']=$id;
         $data['content']='exit_urlgiasu';
         $query = $this->admin_model->Getallby($table='city');
+        $query1 = $this->admin_model->Getallby($table='subject');
+        $data['listsubject'] = $query1['data'];
         $data['listcity'] = $query['data'];
         $this->load->view('template',$data);    
+    }
+    function addlistaddress() {
+    	 $query = $this->admin_model->Getallby($table='city');
+    	 $listcity = $query['data'];
+
+    	 // $this->admin_model->insert($tbl, $data);
+    	 foreach ($listcity as $key) {
+    	 	$data = [
+    	 		'h1'			=> 'Hồ sơ gia sư dạy kèm tại '.$key->cit_name,
+    	 		'place_id' 		=> $key->cit_id,
+    	 		'place_name'	=> $key->cit_name,
+    	 		'option'		=> 1 
+    	 	];
+    	 	$this->admin_model->insert($tbl='url_timviec', $data);
+    	 }
+    }
+  
+    function addlistsubject() {
+    	 $query = $this->admin_model->Getallby($table='subject');
+    	 $listsub = $query['data'];
+
+    	 // $this->admin_model->insert($tbl, $data);
+    	 foreach ($listsub as $key) {
+    	 	$data = [
+    	 		'NameTopic'			=> $key->SubjectName,
+    	 		'key_tag'			=> $key->SubjectName,
+    	 		'alias'			    => vn_str_filter($key->SubjectName),
+    	 		'SubjectID'			=> $key->ID,
+    	 		'sub_id'			=> $key->ID,
+    	 		'option'			=> 0,
+    	 		'type' 				=> 2 
+    	 	];
+    	 	$this->admin_model->insert($tbl='topic', $data);
+    	 }
     }
     function exit_urlphuhuynh($id)
     {
@@ -518,6 +616,10 @@ class admin extends Controller
 		$this->checkrole();	
         $data['id']=$id;
         $data['content']='exit_urlphuhuynh';
+        $query = $this->admin_model->Getallby($table='city');
+        $query1 = $this->admin_model->Getallby($table='subject');
+        $data['listsubject'] = $query1['data'];
+        $data['listcity'] = $query['data'];
         $this->load->view('template',$data);    
     }
      function edit_urltheotinh($id)
@@ -693,6 +795,43 @@ class admin extends Controller
 			redirect('admin/ungvien/'.$_SESSION['start_row']);
 		}		
     }
+    function update_is_top($id) {
+    	$this->checklogin();
+    	$check = $_POST['is_top'];
+    	$data = ['is_top' => $check];
+    	$update = $this->admin_model->update_tbl($tbl='topic', $data, $id);
+    	if ($update) {
+    		$result['kq'] = true;
+    	} else {
+    		$result['kq'] = false;
+    	}
+    	echo json_encode($result);
+    }
+     function update_index($id) {
+    	$this->checklogin();
+    	$index = $_POST['index'];
+    	$tbl = $_POST['tbl'];
+    	$data = ['index' => $index];
+    	$update = $this->admin_model->update_tbl($tbl, $data, $id);
+    	if ($update) {
+    		$result['kq'] = true;
+    	} else {
+    		$result['kq'] = false;
+    	}
+    	echo json_encode($result);
+    }
+    function update_is_top1($id) {
+    	$this->checklogin();
+    	$check = $_POST['is_top'];
+    	$data = ['is_top' => $check];
+    	$update = $this->admin_model->update_tbl($tbl='url_timviec', $data, $id);
+    	if ($update) {
+    		$result['kq'] = true;
+    	} else {
+    		$result['kq'] = false;
+    	}
+    	echo json_encode($result);
+    }
     function del_ungvien()
 	{     
 		$this->checklogin();
@@ -857,11 +996,17 @@ class admin extends Controller
         // url gia sư
     function urlgiasu()
     {
+
         $this->checkrole();	
 		$this->load->helper('status');
         $start_row=$this->uri->segment(3);
+        $query = $this->admin_model->Getallby($table='city');
+        $data['listcity'] = $query['data'];
+        if ($start_row == '') {
+        	$start_row = 0;
+        }
 		$per_page=15;
-		$query=$this->admin_model->Getallby($table='url_phuhuynh');
+		$query=$this->admin_model->Getallbylm($table='topic', $start_row, $per_page); //url_phuhuynh
 		if(is_numeric($start_row))
 		{
 			$start_row=$start_row;
@@ -870,18 +1015,24 @@ class admin extends Controller
 		{
 			$start_row=0;
 		}
-        if(isset($_POST['txt_search']) OR isset($_POST['search_status'])){	
+        if(isset($_POST['txt_search']) OR isset($_POST['search_status']) OR isset($_POST['search_address'])){	
 			unset($_SESSION['txt_search']);
 			unset($_SESSION['search_status']);			
+			unset($_SESSION['search_address']);			
             		
 			$_SESSION['txt_search'] = $_POST['txt_search'];
 			$_SESSION['search_status']= $_POST['search_status'];
-			$query = $this->admin_model->Getallfilterby($table='url_phuhuynh', $_SESSION['txt_search'], $_SESSION['search_status']);
+			$_SESSION['search_address']= $_POST['search_address'];
+			// var_dump($_SESSION['search_address']);
+			// die();
+			// 
+			$query = $this->admin_model->Getallfilterby($table='topic', $_SESSION['txt_search'], $_SESSION['search_status'], $_SESSION['search_address'], $start_row, $per_page);
             	
 		}
 		else{
 			$_SESSION['txt_search'] = '';
 			$_SESSION['search_status']= '';
+			$_SESSION['search_address']= '';
 			
             				
 		}	
@@ -910,6 +1061,8 @@ class admin extends Controller
     }
         function url_phuhuynh()
     {
+    	 $query = $this->admin_model->Getallby($table='city');
+        $data['listcity'] = $query['data'];
         $this->checkrole();	
 		$this->load->helper('status');
         $start_row=$this->uri->segment(3);
@@ -923,17 +1076,20 @@ class admin extends Controller
 		{
 			$start_row=0;
 		}
-        if(isset($_POST['txt_search']) OR isset($_POST['search_status']) ){	
+        if(isset($_POST['txt_search']) OR isset($_POST['search_status'])  OR isset($_POST['search_address'])){	
 			unset($_SESSION['txt_search']);
 			unset($_SESSION['search_status']);			
+			unset($_SESSION['search_address']);			
             		
 			$_SESSION['txt_search'] = $_POST['txt_search'];
 			$_SESSION['search_status']= $_POST['search_status'];
-			$query = $this->admin_model->Getallfilterby($table='url_timviec', $_SESSION['txt_search'], $_SESSION['search_status']);         	
+			$_SESSION['search_address']= $_POST['search_address'];
+			$query = $this->admin_model->Getallfilterby($table='url_timviec', $_SESSION['txt_search'], $_SESSION['search_status'],$_SESSION['search_address'], $start_row, $per_page);       	
 		}
 		else{
 			$_SESSION['txt_search'] = '';
 			$_SESSION['search_status']= ''; //0
+			$_SESSION['search_address']= ''; //0
 		
             				
 		}	
@@ -1341,21 +1497,22 @@ class admin extends Controller
 	{     
 		$this->checklogin();
         $checkbox=$_POST['checkbox'];                             
-        $countcheck=count($checkbox);           
+        $countcheck=count($checkbox); 
         if($countcheck!=0)
         {            
             for($i=0;$i<$countcheck;$i++)
             {
-                $del_id = $checkbox[$i];								
-				$result = $this->admin_model->checkstatusjob('users','`Delete`',1,'UserID',$del_id);
-                $result = $this->admin_model->checkstatusjob('users','`Active`',0,'UserID',$del_id);
+                $del_id = $checkbox[$i];
+                $result = $this->admin_model->del_vieclam($del_id);								
+				// $result = $this->admin_model->checkstatusjob('users','`Delete`',1,'UserID',$del_id);
+    //             $result = $this->admin_model->checkstatusjob('users','`Active`',0,'UserID',$del_id);
 			}
-			redirect('admin/vieclam/'.$_SESSION['start_row']);			           
+			redirect('admin/doanhnghiep/'.$_SESSION['start_row']);			           
         }
         else
         { 
             echo 'Bạn phải chọn';
-			redirect('admin/vieclam');  
+			redirect('admin/doanhnghiep');  
         }
 	}
 	 function del_urlgiasu()
@@ -1368,7 +1525,7 @@ class admin extends Controller
             for($i=0;$i<$countcheck;$i++)
             {
                 $del_id = $checkbox[$i];								
-				$result = $this->admin_model->del_urlgiasu('url_phuhuynh','id',$del_id);
+				$result = $this->admin_model->del_urlgiasu('topic','ID',$del_id);
 			}
 			redirect('admin/urlgiasu/');			           
         }
@@ -1388,7 +1545,7 @@ class admin extends Controller
             for($i=0;$i<$countcheck;$i++)
             {
                 $del_id = $checkbox[$i];								
-				$result = $this->admin_model->del_urlgiasu('url_timviec','id',$del_id);
+				$result = $this->admin_model->del_urlgiasu('url_timviec','ID',$del_id);
 			}
 			redirect('admin/url_phuhuynh/');			           
         }
@@ -1661,7 +1818,9 @@ class admin extends Controller
 		$this->checklogin();
         $data['listdefault']=$this->admin_model->Getlistcontentgiasu('');
         $query = $this->admin_model->Getallby($table='city');
+        $query1 = $this->admin_model->Getallby($table='subject');
         $data['listcity'] = $query['data'];
+        $data['listsubject'] = $query1['data'];
         $data['content']='frmaddurl_giasu'; 
         $this->load->view('template',$data);  
     }
@@ -1669,6 +1828,10 @@ class admin extends Controller
     {
 		$this->checklogin();
         $data['listdefault']=$this->admin_model->Getlistcontentgiasu('');
+        $query = $this->admin_model->Getallby($table='city');
+        $query1 = $this->admin_model->Getallby($table='subject');
+        $data['listcity'] = $query['data'];
+        $data['listsubject'] = $query1['data'];
         $data['content']='frmaddurl_phuhuynh'; 
         $this->load->view('template',$data);  
     }
@@ -1679,6 +1842,7 @@ class admin extends Controller
 
 			'h1' 				=> $_POST['h1'],
 			'key_tag'			=> $_POST['key_tag'],
+			'NameTopic'			=> $_POST['key_tag'],
 			'alias'				=> $_POST['alias'],
 			'content'			=> $_POST['content'],
 			'seo_keyword' 		=> $_POST['keyword'],
@@ -1686,21 +1850,40 @@ class admin extends Controller
 			'seo_title' 		=> $_POST['title'],
 			'place_id'			=> $_POST['place'],
 			'place_name'		=> $_POST['cit_name'],
+			'type'				=> $_POST['type'],
 			'index'				=> 0
 		];
+
 		if ($data['key_tag'] != '' && $data['place_id'] == '') {
 			$data['option'] = 0;
+
+			$data['sub_id'] = $_POST['sub_id'];
+			$data['SubjectID'] = $_POST['sub_id'];
 		} else if ($data['key_tag'] == '' && $data['place_id'] != '') {
 			$data['option'] = 1;
 		} else if ($data['key_tag'] != '' && $data['place_id'] != '') {
 			$data['option'] = 2;
+			$data['sub_id'] = $_POST['sub_id'];
+			$data['SubjectID'] = $_POST['sub_id'];
+
 		}
-		// $checkalias = $this->admin_model->checkalias($data['alias']);
-		$checkalias =  false;
+		if ($data['option'] == 0) {
+			$checkalias = $this->admin_model->checkalias($data['alias']);
+		} else if ($data['option'] == 1) {
+			$checkalias = $this->admin_model->checkplace($data['place_id']);
+		} else if ($data['option'] == 2) {
+			/*alias new*/
+			$place_name = vn_str_filter($data['place_name']);
+			$data['alias'] = $_POST['alias'].'-tai-'.$place_name;
+			/*new*/
+			$checkalias = $this->admin_model->checkap($data['alias'], $data['place_id']);
+		}
+		
+		// $checkalias =  true;
 		if ($checkalias == true) {
 			$result['kq'] = 0;
 		} else {
-			$insert = $this->admin_model->insert('url_phuhuynh', $data);
+			$insert = $this->admin_model->insert('topic', $data);
 			if ($insert) {
 				$result['kq'] = 1;
 			} else {
@@ -1711,20 +1894,45 @@ class admin extends Controller
     }
     function add_url_phuhuynh() {
     	$this->checklogin();		
-		$this->checkrole();
+    	$this->checkrole();
 		$data = [
+
 			'h1' 				=> $_POST['h1'],
 			'key_tag'			=> $_POST['key_tag'],
+			'NameTopic'			=> $_POST['key_tag'],
 			'alias'				=> $_POST['alias'],
 			'content'			=> $_POST['content'],
 			'seo_keyword' 		=> $_POST['keyword'],
 			'seo_description'	=> $_POST['description'],
 			'seo_title' 		=> $_POST['title'],
-			'option'			=> $_POST['option'],
+			'place_id'			=> $_POST['place'],
+			'place_name'		=> $_POST['cit_name'],
+			'type'				=> $_POST['type'],
 			'index'				=> 0
 		];
-	
-		$checkalias = $this->admin_model->checkalias_phuhuynh($data['alias']);
+		if ($data['key_tag'] != '' && $data['place_id'] == '') {
+			$data['option'] = 0;
+			$data['sub_id'] = $_POST['sub_id'];
+			$data['SubjectID'] = $_POST['sub_id'];
+		} else if ($data['key_tag'] == '' && $data['place_id'] != '') {
+			$data['option'] = 1;
+		} else if ($data['key_tag'] != '' && $data['place_id'] != '') {
+			$data['option'] = 2;
+			$data['sub_id'] = $_POST['sub_id'];
+			$data['SubjectID'] = $_POST['sub_id'];
+		}
+		if ($data['option']  == 0) {
+			$checkalias = $this->admin_model->checkalias_phuhuynh($data['alias']);
+		} else if ($data['option'] == 1) {
+			$checkalias = $this->admin_model->checkplace_phuhuynh($data['place_id']);
+		} else if ($data['option'] == 2) {
+			/*alias new*/
+			$place_name = vn_str_filter($data['place_name']);
+			$data['alias'] = $_POST['alias'].'-tai-'.$place_name;
+			/*new*/
+			$checkalias = $this->admin_model->checkap_phuhuynh($data['alias'], $data['place_id']);
+		}
+		// $checkalias =  true;
 		if ($checkalias == true) {
 			$result['kq'] = 0;
 		} else {
@@ -1741,48 +1949,208 @@ class admin extends Controller
     	$this->checklogin();		
     	$this->checkrole();
     	$id = $_POST['id'];
-
     	$data = [
     		'h1' 				=> $_POST['h1'],
     		'key_tag'			=> $_POST['key_tag'],
+    		'NameTopic'			=> $_POST['key_tag'],
     		'content'			=> $_POST['content'],
     		'seo_keyword' 		=> $_POST['keyword'],
     		'seo_description'	=> $_POST['description'],
     		'seo_title' 		=> $_POST['title'],
-    		'option'			=> $_POST['option'],
+    		'type'				=> $_POST['type'],
     		'index'				=> 0
     	];
+    	$option = $_POST['option'];
+    	$sub_id = $_POST['sub_id'];
+    	$place = $_POST['place'];
+    	$place_name = $_POST['cit_name'];
+    	$alias = $_POST['alias'];
+    	$place_id_old = $_POST['place_id_old'];
+    	
+    	if ($option == 2) {
+    		$data['sub_id'] = $sub_id;
+    		// $data['SubjectID'] = $sub_id;
+    		$data['place_id'] = $place;
+    		$data['place_name'] = $place_name;
+    		$data['alias'] = $alias;
+    		if ($place == $place_id_old) {
+    			$update = $this->admin_model->add_tbl('topic', $data, $id);
+    			$result['kq'] = 1;
+    		} else {
+    			$checkalias = $this->admin_model->checkap($data['alias'], $data['place_id']);
+    			if ($checkalias == true) {
+    				$result['kq'] = 0;
+    			} else {
+    				$update = $this->admin_model->add_tbl('topic', $data, $id);
+    				$result['kq'] = 1;
+    			}
 
-    	if ($id != '') {
-    		$update = $this->admin_model->add_tbl('url_phuhuynh', $data, $id);
-    		$result['kq'] = 1;
-    	} else {
-    		$result['kq'] = 0;
+    		}
+    		
     	}
+    	else if ($option == 1) { 
+    		$update = $this->admin_model->add_tbl('topic', $data, $id);
+    		$result['kq'] = 1;
+
+    	}
+    	else if ($option == 0) {
+    		$data['sub_id'] = $sub_id;
+    		// $data['SubjectID'] = $sub_id;
+    		if ($id != '') {
+    			$update = $this->admin_model->add_tbl('topic', $data, $id);
+    			$result['kq'] = 1;
+    		} else {
+    			$result['kq'] = 0;
+    		}
+    	}
+  //   	else if (($option == 0 && $place != '') || ($option == 1 && $sub_id !='')) {
+  //   		$data['alias'] = $alias;
+  //   		$data['option'] = 2;
+  //   		// $data['sub_id'] = $sub_id;
+  //   		$data['place_id'] = $place;
+  //   		$data['place_name'] = $place_name;
+  //   		// them moi
+  //   		if ($data['key_tag'] != '' && $data['place_id'] == '') {
+  //   			$data['option'] = 0;
+  //   			$data['sub_id'] = $_POST['sub_id'];
+  //   			$data['SubjectID'] = $_POST['sub_id'];
+  //   		} else if ($data['key_tag'] == '' && $data['place_id'] != '') {
+  //   			$data['option'] = 1;
+  //   		} else if ($data['key_tag'] != '' && $data['place_id'] != '') {
+  //   			$data['option'] = 2;
+  //   			$data['sub_id'] = $_POST['sub_id'];
+  //   			$data['SubjectID'] = $_POST['sub_id'];
+  //   		}
+  //   		if ($data['option']  == 0) {
+  //   			$checkalias = $this->admin_model->checkalias($data['alias']);
+  //   		} else if ($data['option'] == 1) {
+  //   			$checkalias = $this->admin_model->checkplace($data['place_id']);
+  //   		} else if ($data['option'] == 2) {
+  //   			$checkalias = $this->admin_model->checkap($data['alias'], $data['place_id']);
+  //   		}
+		// // $checkalias =  true;
+  //   		if ($checkalias == true) {
+  //   			$result['kq'] = 0;
+  //   		} else {
+  //   			$insert = $this->admin_model->insert('topic', $data);
+  //   			if ($insert) {
+  //   				$result['kq'] = 1;
+  //   			} else {
+  //   				$result['kq'] = 2;
+  //   			}
+  //   		}
+  //   	}
+    	// 
+    	// if ($id != '') {
+    	// 	$update = $this->admin_model->add_tbl('url_phuhuynh', $data, $id);
+    	// 	$result['kq'] = 1;
+    	// } else {
+    	// 	$result['kq'] = 0;
+    	// }
     	echo json_encode($result);
     }
         function edit_url_phuhuynh() {
     	$this->checklogin();		
     	$this->checkrole();
     	$id = $_POST['id'];
-
     	$data = [
     		'h1' 				=> $_POST['h1'],
     		'key_tag'			=> $_POST['key_tag'],
+    		'NameTopic'			=> $_POST['key_tag'],
     		'content'			=> $_POST['content'],
     		'seo_keyword' 		=> $_POST['keyword'],
     		'seo_description'	=> $_POST['description'],
     		'seo_title' 		=> $_POST['title'],
-    		'option'			=> $_POST['option'],
+    		'type'				=> $_POST['type'],
     		'index'				=> 0
     	];
+    	$option = $_POST['option'];
+    	$sub_id = $_POST['sub_id'];
+    	$place = $_POST['place'];
+    	$place_name = $_POST['cit_name'];
+    	$alias = $_POST['alias'];
+    	$place_id_old = $_POST['place_id_old'];
+    	
+    	if ($option == 2) {
+    		$data['sub_id'] = $sub_id;
+    		// $data['SubjectID'] = $sub_id;
+    		$data['place_id'] = $place;
+    		$data['place_name'] = $place_name;
+    		$data['alias'] = $alias;
+    		if ($place == $place_id_old) {
+    			$update = $this->admin_model->add_tbl('url_timviec', $data, $id);
+    			$result['kq'] = 1;
+    		} else {
+    			$checkalias = $this->admin_model->checkap_phuhuynh($data['alias'], $data['place_id']);
+    			if ($checkalias == true) {
+    				$result['kq'] = 0;
+    			} else {
+    				$update = $this->admin_model->add_tbl('url_timviec', $data, $id);
+    				$result['kq'] = 1;
+    			}
 
-    	if ($id != '') {
+    		}
+    		
+    	}
+    	else if ($option == 1) { 
     		$update = $this->admin_model->add_tbl('url_timviec', $data, $id);
     		$result['kq'] = 1;
-    	} else {
-    		$result['kq'] = 0;
+
     	}
+    	else if ($option == 0) {
+    		$data['sub_id'] = $sub_id;
+    		// $data['SubjectID'] = $sub_id;
+    		if ($id != '') {
+    			$update = $this->admin_model->add_tbl('url_timviec', $data, $id);
+    			$result['kq'] = 1;
+    		} else {
+    			$result['kq'] = 0;
+    		}
+    	}
+  //   	else if (($option == 0 && $place != '') || ($option == 1 && $sub_id !='')) {
+  //   		$data['alias'] = $alias;
+  //   		$data['option'] = 2;
+  //   		// $data['sub_id'] = $sub_id;
+  //   		$data['place_id'] = $place;
+  //   		$data['place_name'] = $place_name;
+  //   		// them moi
+  //   		if ($data['key_tag'] != '' && $data['place_id'] == '') {
+  //   			$data['option'] = 0;
+  //   			$data['sub_id'] = $_POST['sub_id'];
+  //   			$data['SubjectID'] = $_POST['sub_id'];
+  //   		} else if ($data['key_tag'] == '' && $data['place_id'] != '') {
+  //   			$data['option'] = 1;
+  //   		} else if ($data['key_tag'] != '' && $data['place_id'] != '') {
+  //   			$data['option'] = 2;
+  //   			$data['sub_id'] = $_POST['sub_id'];
+  //   			$data['SubjectID'] = $_POST['sub_id'];
+  //   		}
+  //   		if ($data['option'] == 0) {
+  //   			$checkalias = $this->admin_model->checkalias_phuhuynh($data['alias']);
+  //   		} else if ($data['option'] == 1) {
+  //   			$checkalias = $this->admin_model->checkplace_phuhuynh($data['place_id']);
+  //   		} else if ($data['option']  == 2) {
+  //   			$checkalias = $this->admin_model->checkap_phuhuynh($data['alias'], $data['place_id']);
+  //   		}
+		// // $checkalias =  true;
+  //   		if ($checkalias == true) {
+  //   			$result['kq'] = 0;
+  //   		} else {
+  //   			$insert = $this->admin_model->insert('url_timviec', $data);
+  //   			if ($insert) {
+  //   				$result['kq'] = 1;
+  //   			} else {
+  //   				$result['kq'] = 2;
+  //   			}
+  //   		}
+  //   	}
+    	// 
+    	// if ($id != '') {
+    	// 	$update = $this->admin_model->add_tbl('url_phuhuynh', $data, $id);
+    	// 	$result['kq'] = 1;
+    	// } else {
+    	// 	$result['kq'] = 0;
+    	// }
     	echo json_encode($result);
     }	
 	function frmbaiviettimgiasu()
@@ -2438,6 +2806,8 @@ class admin extends Controller
 			$this->admin_model->checkstatusjob($tblname,$field,$fieldvl,$fieldid,$id);
 	   	 	  
 	}
+	
+
 	function add_footer()
     {
 		$this->checklogin();

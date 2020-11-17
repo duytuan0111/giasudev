@@ -1,4 +1,11 @@
 <?php
+    $urlweb= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    if($canonical != '' && $urlweb != $canonical)
+    {
+     header("HTTP/1.1 301 Moved Permanently"); 
+     header("Location: $canonical");
+     exit();
+    }
     if(!empty($subjectname))
     {
         $subjectname = $subjectname.' ';
@@ -7,7 +14,14 @@
     {
         $subjectname = '';
     }
-
+    if(!empty($TopicName))
+    {
+        $TopicName = $TopicName.' ';
+    }
+    else
+    {
+        $TopicName = '';
+    }
     if(!empty($cityname))
     {
         $cityname = 'tại '.$cityname;
@@ -26,7 +40,13 @@
         $classname = '';
     }
 
+
 ?>
+<style>
+    .itemnews_r p {
+        display: blok;
+    }
+</style>
 <div class="container">
     <?php $this->load->view('headerfun'); ?>
 </div>
@@ -45,12 +65,14 @@
                             }
                             else
                             {
-                                if(!empty($subjectname) || !empty($cityname) || !empty($classname))
+                                if(!empty($TopicName))
                                 {
-                                    echo 'Tổng hợp tin tuyển gia sư '.$subjectname.$classname.$cityname;
+                                    echo $TopicName; // .$classname.$cityname
                                 }
-                                else
+                                else if (empty($TopicName) && !empty($cityname))
                                 {
+                                    echo 'Tổng hợp tin tuyển gia sư '.$cityname;
+                                } else {
                                     echo 'Tổng hợp tin tuyển gia sư';
                                 }
                             }
@@ -62,23 +84,23 @@
                     <?php
                     if(!empty($lstitem)){
                         foreach($lstitem as $n){ if($n->dongyday ==0){ ?>
-                            <div class="itemnews">
+                            <div class="itemnews" style="height: 169px !important">
                                 <div class="itemnews_l">
                                     <a class="logouser">
                                         <?php if(!empty($n->Image)){?>
-                                            <img src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                            <img alt="<?php echo $n->ClassTitle; ?>" src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                         <?php }else{ ?>
-                                            <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                            <img alt="<?php echo $n->ClassTitle; ?>" src="images/no-image2.png"  onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                         <?php } ?>
                                     </a>
-                                    <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
+                                    <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
                                     <span><?php echo date("d/m/Y",strtotime($n->CreateDate)); ?></span>
                                 </div>
                                 <div class="itemnews_r">
-                                    <a target="_blank" href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
-                                    <p><?php $gn_text=$n->DescClass;
-                                    if ( strlen( $n->DescClass ) > 150 ) {
-                                        $gn_text = substr( $n->DescClass, 0, 150 );
+                                    <a target="_blank" href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
+                                    <p class="chitietmobile"><?php $gn_text=$n->DescClass;
+                                    if ( strlen( $n->DescClass ) > 100 ) {
+                                        $gn_text = substr( $n->DescClass, 0, 100 );
                                         $space   = strrpos( $gn_text, ' ' );
                                         $gn_text = substr( $gn_text, 0, $space ). '...';                
                                     }
@@ -88,8 +110,8 @@
                                     echo GetLearnType($tg[0]);
                                     ?></span>
                                     <span class="btn"><?php echo Getcitybyindex($n->City) ?></span>
-                                    <span class="xacthuc"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="Phụ huynh đã xác thực"></i><i class="fa fa-uv-chat-cam"></i></span>
-                                    <span class="dadenghiday">Đã đề nghị dạy:&nbsp;&nbsp;<?php echo $n->denghiday  ?><i class="fa fa-user-dnd"></i></span>                    
+                                    <span class="xacthuc"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="Phụ huynh đã xác thực"></i><!-- <i class="fa fa-uv-chat-cam"></i> --></span>
+                                    <span class="dadenghiday">Đã đề nghị dạy:&nbsp;&nbsp;<?php if ($n->denghiday != '') {echo $n->denghiday;} else {echo 0;}  ?><i class="fa fa-user-dnd"></i></span>                    
                                 </div>
                             </div>
                         <?php } }
@@ -104,7 +126,7 @@
                             <?php 
                                 foreach($lienquan as $n){ ?>
                                     <div class="item-uv-online">
-                                        <div class="item-uv-onlien-job"><a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?></a></div>
+                                        <div class="item-uv-onlien-job"><a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?></a></div>
                                         <div class="item-uv-name"><a href="">Học phí: <?php echo number_format($n->Money)." vnđ/buổi" ?> </a><span><span>Địa điểm:</span> <?php echo Getcitybyindex($n->City); ?></span></div>
                                         <div class="item-uv-online-chat">
                                             <span class="uvonline-chat"><i class="fa fa-chat" ></i> Chat với phụ huynh</span>
@@ -119,8 +141,8 @@
                     </div>
                     <?php } ?>
                 </div>
-                <div class="clearfix" style="height:20px"></div>
-
+                <div class="clearfix" style="height:20px">
+                </div>
                 <div class="row timkiemungvien">
                     <div class="col-md-6 padd-r-5">
                         <div class="box-f box-document">
@@ -143,9 +165,12 @@
                         </div>
                     </div>
                 </div>
+                <div class="content-seo" style="color: #262626; line-height: 20px;">
+                  <?php echo $content_seo; ?>
+              </div>
             </div>
             <div class="col-md-30 col-sm-12 col-right-search padd-l-0">
-                <div class="box_job_search user">
+                <!-- <div class="box_job_search user">
                     <h2><i class="fa fa-userl"></i> Tìm kiếm lớp dạy</h2>
                     <div class="main_sc">
                         <form action="" method="post">
@@ -257,7 +282,7 @@
                             <center><input class="btn btnsearchuv" type="button" name="submit" value="Tìm kiếm"></center>
                         </form>
                     </div>
-                </div>
+                </div> -->
                 <!-- <div class="box_job_search tagwork uvonline">
                     <h2>Phụ huynh đang online
                     </h2>
@@ -353,6 +378,7 @@
 
                     </div>
                 </div> -->
+
                 <div class="box_job_search topkeyword">
                     <h3 class="title2"> <i class="fa fa-key"></i> Top từ khóa
                     </h3>
@@ -376,7 +402,7 @@
             <div class="row">
                 <div class="col-md-12 linkseo">
                     <div>
-                        <?php echo $linkseo->htmltext; ?>
+                        <!-- <?php echo $linkseo->htmltext; ?> -->
                     </div>
                 </div>
             </div>

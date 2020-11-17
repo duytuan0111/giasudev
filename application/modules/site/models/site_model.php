@@ -68,6 +68,22 @@ function add_tbl($tbl,$data,$id)
         $this->db->where('id',$id);
         $this->db->update($tbl,$data);    
     }
+}
+function check_alias_search($tbl,$alias, $city) {
+    if ($alias != '' && $city == '') {
+        $query = "SELECT * FROM ".$tbl." WHERE alias = '".$alias."' ";
+    } else if ($alias == '' && $city != '') {
+        $query = "SELECT * FROM ".$tbl." WHERE place_id = ".$city."";
+    } else if ($alias != '' && $city != '') {
+        $query = "SELECT * FROM ".$tbl." WHERE alias = '".$alias."' and place_id = ".$city." ";
+    }
+    $num_rows = $this->db->query($query)->num_rows();
+    if ($num_rows > 0) {
+        $kq = 1;
+    } else {
+        $kq = 0;
+    }
+    return $kq;
 }  
 
 function gettbl_limited($tbl,$id,$start_row,$limit)
@@ -144,10 +160,11 @@ function registerphuhuynh($hoten, $email, $sdt, $pass, $type)
         $body=str_replace('<%email%>',$email,$body);    
         $body=str_replace('<%code%>',$code,$body); 
         $body=str_replace('<%type%>',$type,$body); 
-
+        $body=str_replace('<%base_url%>', base_url(), $body); 
         $Description="Đăng ký tài khoản phụ huynh";
         $data="";
         $CreateDate=date("Y-m-d H:i:s",time());
+        
         $queryconfrim="INSERT INTO comfirmtable(UserID,Code,Type,Status,Data,Description,CreateDate,UpdateDate) 
         VALUES('".$insertid."','".$code."','0','0','".$body."','".$Description."','".$CreateDate."','".$CreateDate."')";
         $insert=$this->db->query($queryconfrim);
@@ -160,9 +177,10 @@ function registerphuhuynh($hoten, $email, $sdt, $pass, $type)
         //             define('GPWD','Bbz123');
         //             global $message;
         // $this->smtpmailer($email,'timviec365-noreply@timviec365.vn',$header,$subject,$body);
-        $body = base64_encode($body);
-        $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
-        $arr = ['kq' => true , 'msg'=> 'Đăng ký thành công, bạn vui lòng kiểm tra email để xác thực tài khoản.'];
+        // $body = base64_encode($body);
+        $this->sendmailnew($email, $subject, $body);
+        // $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
+        $arr = ['kq' => true ,'UserId' => $insertid, 'msg'=> 'Đăng ký thành công, bạn vui lòng kiểm tra email để xác thực tài khoản.'];
         return $arr;
     }
 }
@@ -174,11 +192,13 @@ function resendmail($id,$name,$email,$type){
     $body=str_replace('<%email%>',$email,$body);    
     $body=str_replace('<%code%>',$code,$body);
     $body=str_replace('<%type%>',$type,$body); 
+    $body=str_replace('<%base_url%>', base_url(), $body); 
     $CreateDate=date("Y-m-d H:i:s",time());
     $subject='[GiaSu365] Kích hoạt tài khoản đăng ký';
     $header='Từ: GiaSu365';
-    $body = base64_encode($body);
-    $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
+    // $body = base64_encode($body);
+    $this->sendmailnew($email, $subject, $body);
+    // $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
     $arr = ['kq' => true , 'msg'=> 'Yêu cầu gửi lại email xác nhận tài khoản thành công. Vui lòng kiểm tra hộp thư đến hoặc hộp thư spam.'];
     return $arr;
 
@@ -186,20 +206,27 @@ function resendmail($id,$name,$email,$type){
 function resendmail2($email){
     
     $sql=" SELECT * from  users  where Email = '".$email."' and Active=0";
-    $select=$this->db->query($sql);
-    if ($select->UserType==1) {
+    $select=$this->db->query($sql)->result();
+    // var_dump($select[0]->UserType);
+    // die();
+    $UserID = $select[0]->UserID;
+    if ($select[0]->UserType) {
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     $body=file_get_contents(base_url().'EmailTemplate/XacThucEmail.htm');  
     $code="new_".rand(1000000,9999999);    
     $body=str_replace('<%name%>',$select->name,$body);
     $body=str_replace('<%email%>',$email,$body);    
     $body=str_replace('<%code%>',$code,$body); 
-    $body=str_replace('<%type%>',$select->UserType,$body);   
+    $body=str_replace('<%type%>',$select[0]->UserType,$body); 
+    $body=str_replace('<%base_url%>', base_url(), $body);  
     $CreateDate=date("Y-m-d H:i:s",time());
     $subject='[GiaSu365] Kích hoạt tài khoản đăng ký';
     $header='Từ: GiaSu365';
-    $body = base64_encode($body);
-    $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
+    // $body = base64_encode($body);
+    $this->sendmailnew($email, $subject, $body);
+    $sql = "UPDATE comfirmtable set Code = '$code' WHERE UserID = $UserID";
+    $select2=$this->db->query($sql);
+    // $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
     $arr = ['kq' => true , 'msg'=> 'Yêu cầu gửi lại email xác nhận tài khoản thành công. Vui lòng kiểm tra hộp thư đến hoặc hộp thư spam.'];
     return $arr;
     }
@@ -212,22 +239,25 @@ function resendmail2($email){
 function resendmail3($email){
     // $username=$email;
     $sql=" SELECT * from users where Email ='".$email."' and Active=0";
-    $select=$this->db->query($sql);
-    // echo $select;
-    // die();
-    if($select->UserType==0){
+    $select=$this->db->query($sql)->result();
+    $UserID = $select[0]->UserID;
+    if($select[0]->UserType==0){
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     $body=file_get_contents(base_url().'EmailTemplate/XacThucEmail.htm');  
     $code="new_".rand(1000000,9999999);    
     $body=str_replace('<%name%>',$select->name,$body);
     $body=str_replace('<%email%>',$email,$body);    
     $body=str_replace('<%code%>',$code,$body); 
-    $body=str_replace('<%type%>',$select->UserType,$body);   
+    $body=str_replace('<%type%>',$select[0]->UserType,$body);
+    $body=str_replace('<%base_url%>', base_url(), $body);    
     $CreateDate=date("Y-m-d H:i:s",time());
     $subject='[GiaSu365] Kích hoạt tài khoản đăng ký';
     $header='Từ: GiaSu365';
-    $body = base64_encode($body);
-    $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
+    // $body = base64_encode($body);
+    $this->sendmailnew($email, $subject, $body);
+    $sql = "UPDATE comfirmtable set Code = '$code' WHERE UserID = $UserID";
+    $select2=$this->db->query($sql);
+    // $this->CreateSendMail('timviec365-noreply@timviec365.com.vn',$email, "", "", $subject, $body);
     $arr = ['kq' => true , 'msg'=> 'Yêu cầu gửi lại email xác nhận tài khoản thành công. Vui lòng kiểm tra hộp thư đến hoặc hộp thư spam.'];
         return $arr;
     }
@@ -340,6 +370,78 @@ function SelectProvinceByID($id)
     {
         
         $sql="SELECT * FROM subject where ID= $subject";
+        
+        $query=$this->db->query($sql);
+        
+        $kq="";
+        if($query->num_rows()> 0)
+        {
+            $kq = $query->row();
+        }
+        
+        return $kq;
+    }
+      function selecttopictbyid($topic)
+    {
+        
+        $sql="SELECT * FROM topic where ID= $topic";
+        
+        $query=$this->db->query($sql);
+        
+        $kq="";
+        if($query->num_rows()> 0)
+        {
+            $kq = $query->row();
+        }
+        
+        return $kq;
+    }
+     function selecttopictbycitid($id)
+    {
+        
+        $sql="SELECT * FROM topic where place_id= $id and option = 1";
+        
+        $query=$this->db->query($sql);
+        
+        $kq="";
+        if($query->num_rows()> 0)
+        {
+            $kq = $query->row();
+        }
+        
+        return $kq;
+    }
+      function selecttopictbykey($key,$tbl)
+    {
+        
+        $sql="SELECT key_tag FROM ".$tbl." where key_tag like '%$key%' and ( option = 0 or option = 2 ) group by key_tag order by is_top desc";
+        
+        $query= $this->db->query($sql);
+        foreach ($query->result() as $item) {
+            $row[] = $item;
+        }
+        
+        return $row;
+    }
+     function selectvtbyid($topic)
+    {
+        
+        $sql="SELECT * FROM url_timviec where ID= $topic";
+        
+        $query=$this->db->query($sql);
+        
+        $kq="";
+        if($query->num_rows()> 0)
+        {
+            $kq = $query->row();
+        }
+        
+        return $kq;
+    }
+     function selectvtbycitid($id)
+    {
+        
+        $sql="SELECT * FROM url_timviec where place_id = $id and option = 1 " ;
         
         $query=$this->db->query($sql);
         
@@ -1149,7 +1251,70 @@ function check_mail($type,$data){
         return 0;
     }
 }
+function check_alias_class($id, $alias) {
+    $query = "SELECT ClassID FROM teacherclass WHERE UserID = $id AND Alias = '$alias' AND Active = 1";
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
+function check_h1($h1){
+    $query = 'SELECT * FROM `topic` WHERE `key_tag` = "'.$h1.'" ';
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    }else{
+        return 0;
+    }
+}
+function check_h1_n($h1){
+    $query = 'SELECT * FROM `topic` WHERE `key_tag` = "'.$h1.'" and option = 0 ';
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    }else{
+        return 0;
+    }
+}
+function check_h1_tv($h1){
+    $query = 'SELECT * FROM `url_timviec` WHERE `key_tag` = "'.$h1.'" ';
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    }else{
+        return 0;
+    }
+}
+function check_h1_tv_n($h1){
+    $query = 'SELECT * FROM `url_timviec` WHERE `key_tag` = "'.$h1.'" and option = 0 ';
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    }else{
+        return 0;
+    }
+}
+function check_h1_place($h1, $place){
+    $query = 'SELECT * FROM `topic` WHERE `key_tag` = "'.$h1.'" and place_id = '.$place.'';
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    }else{
+        return 0;
+    }
+}
+function check_h1_place_tv($h1, $place){
+    $query = 'SELECT * FROM `url_timviec` WHERE `key_tag` = "'.$h1.'" and place_id = '.$place.'';
+    $check = $this->db->query($query)->num_rows();
+    if ($check > 0) {
+        return 1;
+    }else{
+        return 0;
+    }
+}
 function check_sdt($type,$data){
     $query = 'SELECT `UserID` FROM `users` WHERE `Phone` = "'.$data.'" AND `UserType` = "'.$type.'"';
     $check = $this->db->query($query)->num_rows();
@@ -1160,44 +1325,68 @@ function check_sdt($type,$data){
     }
 }
 function check_seo_city($id) {
-    $this->db->where('City_ID', $id);
-    return $this->db->get('seobycity')->num_rows();
+    $this->db->where('place_id', $id);
+    $this->db->where('option', 1);
+    return $this->db->get('topic')->num_rows();
+}
+function check_seo_tvb($id) {
+    $this->db->where('place_id', $id);
+    $this->db->where('option', 1);
+    return $this->db->get('url_timviec')->num_rows();
+}
+function check_seo_tv($id, $option) {
+    $this->db->where('ID', $id);
+    $this->db->where('option', $option);
+    return $this->db->get('url_timviec')->num_rows();
+}
+
+function check_seo_city2($id) {
+    $this->db->where('ID', $id);
+    $this->db->where('option', 2);
+    return $this->db->get('topic')->num_rows();
+}
+function check_seo_both($id) {
+    $this->db->where('ID', $id);
+    $this->db->where('option', 2);
+    return $this->db->get('url_timviec')->num_rows();
 }
 function check_seo_subject($id) {
-    $this->db->where('subject_id', $id);
-    return $this->db->get('seobysubject')->num_rows();
+    $this->db->where('ID', $id);
+    return $this->db->get('topic')->num_rows();
 }
 function check_seo_subject_city($sub_id, $cit_id) {
     $this->db->where('Subject_ID', $sub_id);
     $this->db->where('City_ID', $cit_id);
     return $this->db->get('seobycitysubject')->num_rows();
 }
-function check_viec_city($id) {
-    $this->db->where('City_ID', $id);
-    return $this->db->get('viecbycity')->num_rows();
-}
-function check_viec_subject($id) {
-    $this->db->where('subject_id', $id);
-    return $this->db->get('viecbysubject')->num_rows();
-}
-function Get_seo_city_subject($sub_id, $cit_id) {
-    $sql = 'SELECT * from  seobycitysubject where Subject_ID = "'.$sub_id.'" and City_ID = "'.$cit_id.'"';
+// function check_viec_city($id) {
+//     $this->db->where('City_ID', $id);
+//     return $this->db->get('viecbycity')->num_rows();
+// }
+
+function Get_seo_tv($id, $option) {
+    $sql = 'SELECT * from  url_timviec where ID = "'.$id.'" and option = "'.$option.'"';
     return $query = $this->db->query($sql)->result();
 }
-function Get_viec_city($id) {
-    $sql = 'SELECT * from  viecbycity where City_ID = "'.$id.'"';
+
+function Get_seo_city($id, $option) {
+    $sql = 'SELECT * from  topic where place_id = "'.$id.'" and option = "'.$option.'"';
     return $query = $this->db->query($sql)->result();
 }
-function Get_viec_subject($id) {
-    $sql = 'SELECT * from  viecbysubject where subject_id = "'.$id.'"';
+function Get_seo_tvb($id, $option) {
+    $sql = 'SELECT * from  url_timviec where place_id = "'.$id.'" and option = "'.$option.'"';
     return $query = $this->db->query($sql)->result();
 }
-function Get_seo_city($id) {
-    $sql = 'SELECT * from  seobycity where City_ID = "'.$id.'"';
+function Get_seo_city2($id, $option) {
+    $sql = 'SELECT * from  topic where id = "'.$id.'"  and option = "'.$option.'"';
+    return $query = $this->db->query($sql)->result();
+}
+function Get_seo_both($id, $option) {
+    $sql = 'SELECT * from  url_timviec where id = "'.$id.'"  and option = "'.$option.'"';
     return $query = $this->db->query($sql)->result();
 }
 function Get_seo_subject($id) {
-    $sql = 'SELECT * from  seobysubject where subject_id = "'.$id.'"';
+    $sql = 'SELECT * from  topic where ID = "'.$id.'"';
     return $query = $this->db->query($sql)->result();
 }
 function GetCountJobbyEdu()
@@ -1755,7 +1944,119 @@ function GetWordtime()
         }
     }
     return $tg1;
+}
+function Gettopicbyh1($h1)
+{
+    $query="select * from topic where key_tag = '".$h1."' ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function Gettopicbyh1_n($h1)
+{
+    $query="select * from topic where key_tag = '".$h1."' and option = 0 ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function Gettopicbyh1_tv($h1)
+{
+    $query="select * from url_timviec where key_tag = '".$h1."' ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function Gettopicbyh1_tv_n($h1)
+{
+    $query="select * from url_timviec where key_tag = '".$h1."' and option = 0 ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function Gettopicbyh1place($h1, $place)
+{
+    $query="select * from topic where key_tag = '".$h1."' and place_id = ".$place." ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
 } 
+function Gettopicbyh1place_tv($h1, $place)
+{
+    $query="select * from url_timviec where key_tag = '".$h1."' and place_id = ".$place." ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+} 
+function GetinfobyID($tbl,$id)
+{
+    $query="select * from ".$tbl." where ID = ".$id." ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function GetinfobycitID($tbl,$id)
+{
+    $query="select * from ".$tbl." where place_id = ".$id." and option = 1 ";
+    $db_qr = $this->db->query($query);
+    if($db_qr->num_rows() > 0)
+    {
+        $tg1="";
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}      
 function GetSex()
 {
     $query="select * from sex order by SexID ASC";
@@ -2035,7 +2336,8 @@ function TimGiaSuTheoMonHoc($key)
 }
 function DemGiaSuTheoTinhThanh()
 {
-    $query="select c1.cit_name,c1.cit_id,IFNULL(SUM(c2.sogiasu),0) as giasutt  from city as c1 left join (select c.cit_id,c.cit_name,COUNT(u.UserID) as sogiasu from city as c left JOIN users as u on c.cit_id=u.CityID where u.Active=1 and u.`Delete`=0 and u.UserType=1 group by c.cit_id) as c2 on c1.cit_id=c2.cit_id GROUP BY c1.cit_id";
+    $query="select c1.cit_name,c1.cit_id,IFNULL(SUM(c2.sogiasu),0) as giasutt  from city as c1 left join (select c.cit_id,c.cit_name,COUNT(u.UserID) as sogiasu from city as c left JOIN users  as u JOIN userteacher as ut on u.UserID=ut.UserID on c.cit_id=u.CityID where u.Active=1  and u.Email <>'' and u.`Delete`=0 and u.UserType=1 group by c.cit_id) as c2 on c1.cit_id=c2.cit_id  GROUP BY c1.cit_id";
+    // JOIN userteacher as ut on u.UserID=ut.UserID
     $db_qr = $this->db->query($query);
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -2063,6 +2365,19 @@ function timgiasutheotinhthanh($key)
 }
 function GetListClassHome($number){
     $query="select * from teacherclass ORDER BY ClassID desc limit 0,".$number;
+    $db_qr = $this->db->query($query);
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function GetListClassby($id, $number){
+    $query="SELECT * from teacherclass  WHERE UserID = $id and Active = 1 ORDER BY ClassID desc limit 0,".$number;
     $db_qr = $this->db->query($query);
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -2226,8 +2541,8 @@ function GetListTeacher($number)
     ,u.Longitude
 
     from users as u JOIN userteacher as ut on u.UserID=ut.UserID
-    where u.`Delete`=0 and u.Email <>'' and u.Active=1 and u.UserType=1 and u.UserID in ( select DISTINCT UserID from usersubject where SubjectID in(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16))
-    ORDER BY u.CreateDate desc LIMIT 0,".$number;
+    where u.`Delete`=0 and u.Email <>'' and u.UserType=1 
+    ORDER BY u.CreateDate desc LIMIT 0,".$number; //and u.UserID in ( select DISTINCT UserID from usersubject where SubjectID in(1,2,3,4,5,6,7,8,10,11,12,13,14,15,16))
     $db_qr = $this->db->query($query);
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -2321,8 +2636,8 @@ function GetTeacherFeature()
     ,u.Latitude
     ,u.Longitude
 
-    from users as u JOIN userteacher as ut on u.UserID=ut.UserID where u.Email <>''
-    ORDER BY ut.Free DESC
+    from users as u JOIN userteacher as ut on u.UserID=ut.UserID JOIN viewuser as k on u.UserID=k.UserID where u.Email <>'' 
+    ORDER BY k.View DESC
     limit 0, 7";
     $db_qr = $this->db->query($query);
     // var_dump($db_qr);
@@ -2386,25 +2701,44 @@ if($db_qr->num_rows() > 0)
 }
 return array('total'=>$total,'data'=>$tg1);
 }
-function GetTeacherMore($id)
+function GetTeacherMore($id,$cityid)
 {
-    $query="select ut.*,u.`Name`
-    ,u.UserName
-    ,u.Phone
-    ,u.Email
-    ,u.CityID
-    ,u.CityName
-    ,u.Address
-    ,u.Description
-    ,u.UserType
-    ,u.CreateDate
-    ,u.CreateBy
-    ,u.Image
-    ,u.Latitude
-    ,u.Longitude
-    from users as u JOIN userteacher as ut on u.UserID=ut.UserID where u.Email <>'' and ut.UserID <>'".intval($id)."' 
-    ORDER BY ut.Free DESC
-    limit 0, 5";
+    if (intval($cityid) > 0) {
+        $query="SELECT ut.*,u.`Name`
+        ,u.UserName
+        ,u.Phone
+        ,u.Email
+        ,u.CityID
+        ,u.CityName
+        ,u.Address
+        ,u.Description
+        ,u.UserType
+        ,u.CreateDate
+        ,u.CreateBy
+        ,u.Image
+        ,u.Latitude
+        ,u.Longitude
+        from users as u JOIN userteacher as ut on u.UserID=ut.UserID where u.Email <>'' and ut.UserID <>'".intval($id)."' and u.CityID =".$cityid."  ORDER BY ut.Free DESC
+        limit 0, 5";
+    } else {
+        $query="select ut.*,u.`Name`
+        ,u.UserName
+        ,u.Phone
+        ,u.Email
+        ,u.CityID
+        ,u.CityName
+        ,u.Address
+        ,u.Description
+        ,u.UserType
+        ,u.CreateDate
+        ,u.CreateBy
+        ,u.Image
+        ,u.Latitude
+        ,u.Longitude
+        from users as u JOIN userteacher as ut on u.UserID=ut.UserID where u.Email <>'' and ut.UserID <>'".intval($id)."' 
+         and u.active =1 ORDER BY ut.Free DESC
+        limit 0, 5";
+    }
     $db_qr = $this->db->query($query);
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -2505,9 +2839,55 @@ function GetListTeacherTLH($number){
     ,u.Longitude
 
     from users as u JOIN userteacher as ut on u.UserID=ut.UserID
-    where u.Email <>'' and u.`Delete`=0 and u.Active=1 and u.UserType=1 and u.UserID in ( select DISTINCT UserID from usersubject where SubjectID in(1,2,3))
+    where u.Email <>'' and u.`Delete`=0  and u.UserType=1 and ut.IdTitle  in (1,2,3)
     ORDER BY u.CreateDate desc LIMIT 0,".$number;
     $db_qr = $this->db->query($query);
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+// từ khóa liên quan
+function GetListtopicLq($id,$number){
+    $query="SELECT ID, key_tag, Alias from topic  WHERE SubjectID = $id and type = 1 and option = 0 ORDER BY ID desc LIMIT 0,".$number;
+    $db_qr = $this->db->query($query);
+   
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function GetListTeacherANHT($number){
+    $query="select ut.*,u.`Name`
+    ,u.UserName
+    ,u.Phone
+    ,u.Email
+    ,u.CityID
+    ,u.CityName
+    ,u.Address
+    ,u.Description
+    ,u.UserType
+    ,u.CreateDate
+    ,u.CreateBy
+    ,u.Image
+    ,u.Latitude
+    ,u.Longitude
+
+    from users as u JOIN userteacher as ut on u.UserID=ut.UserID
+    where u.Email <>'' and u.`Delete`=0  and u.UserType=1 and ut.IdTitle in (10,11,12,15,1)
+    ORDER BY u.CreateDate desc LIMIT 0,".$number;
+    $db_qr = $this->db->query($query);
+   
     $tg1="";
     if($db_qr->num_rows() > 0)
     {                
@@ -2534,7 +2914,7 @@ function GetListTeacherVSD($number){
     ,u.Latitude
     ,u.Longitude        
     from users as u JOIN userteacher as ut on u.UserID=ut.UserID
-    where u.Email <>'' and u.`Delete`=0 and u.Active=1 and u.UserType=1 and u.UserID in ( select DISTINCT UserID from usersubject where SubjectID in(1,2,3))
+    where u.Email <>'' and u.`Delete`=0  and u.UserType=1 and ut.IdTitle in (4,6,7,5,1)
     ORDER BY u.CreateDate desc LIMIT 0,".$number;
     $db_qr = $this->db->query($query);
     $tg1="";
@@ -2713,14 +3093,13 @@ function GetClassTop($number)
     ,u.CityID
     ,u.CityName,u.`Image`
     ,u.Address as diachidk
-    ,u.Description,IFNULL(t1.denghiday,0) as denghiday,IFNULL(t1.dongyday,0) as dongyday
+    ,u.Description,IFNULL(t1.denghiday,0) as denghiday
     from teacherclass as t left join users as u on t.UserID=u.UserID
     left JOIN (select ClassID,
-    SUM(CASE WHEN uc.Active = 0 THEN 1 ELSE 0 END) AS denghiday,
-    SUM(CASE WHEN uc.Active = 1 THEN 1 ELSE 0 END) AS dongyday
+    SUM(CASE WHEN uc.Active = 0 THEN 1 ELSE 0 END) AS denghiday
     from uservsclass as uc
     GROUP BY ClassID) t1 on t1.ClassID=t.ClassID";
-    $query.=" where t.ClassTitle <>'' and 1=1 and t.`Active`=1 and u.IsSearch=1 order by t.ClassID desc limit 0,".$number;
+    $query.=" where t.ClassTitle <>'' and 1=1 and t.`Active`=1 and u.IsSearch=1 order by t.Money desc, t.ClassID desc limit 0,".$number;
     $db_qr = $this->db->query($query); 
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -2826,6 +3205,61 @@ function Danhsachloptheomonhoc()
     }
     return $tg1;
 }
+function listurlteacher($tbl,$top,$limit)
+{
+    if ($top == 0 || $top == null) {
+       $query="SELECT * FROM ".$tbl." WHERE option = 0 or option = 2 GROUP BY key_tag  ORDER BY ID DESC LIMIT 0, ".$limit.""; 
+    } else {
+    $query="SELECT * FROM ".$tbl." WHERE is_top =".$top." and option = 0 or option = 2 GROUP BY key_tag ORDER BY ID DESC  LIMIT 0, ".$limit."";
+    }
+    $db_qr = $this->db->query($query); 
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+function listurlteacher_rcmd($tbl,$top,$limit)
+{
+    if ($top == 0 || $top == null) {
+       $query="SELECT * FROM ".$tbl." WHERE option = 0  ORDER BY ID DESC LIMIT 0, ".$limit.""; 
+    } else {
+    $query="SELECT * FROM ".$tbl." WHERE is_top =".$top." and option = 0 or option = 2 GROUP BY key_tag ORDER BY ID DESC  LIMIT 0, ".$limit."";
+    }
+    $db_qr = $this->db->query($query); 
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
+
+function listurlteacheroff($top,$start,$limit)
+{
+    if ($top == 0 || $top == null) {
+       $query="SELECT * FROM topic  ORDER BY ID DESC LIMIT ".$start.",".$limit."";
+    } else {
+    $query="SELECT * FROM topic WHERE is_top =".$top." ORDER BY ID DESC LIMIT ".$start.",".$limit."";
+    }
+    $db_qr = $this->db->query($query); 
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }
+    }
+    return $tg1;
+}
 function ListSubject($subject)
 {
     $query="select * from subject";
@@ -2880,7 +3314,19 @@ function ListDistrict($city2){
     }
     return $tg1;
 }
-
+function GetNamecity($id){
+    $query = "SELECT  cit_name from city where cit_id = '".$id."' ";
+    $db_qr = $this->db->query($query);
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }            
+    }
+    return $tg1;
+}
 function ListSubjectByKey($key)
 {
     $query="select * from `subject` where SubjectName like '%".$key."%'";
@@ -2926,9 +3372,70 @@ function ListTopic()
     }
     return $tg1;
 }
-function ListTopicBySubject($idsub)
+function ListTopicBySubject($idsub1, $idsub2, $idsub3)
 {
-    $query="select * from topic where SubjectID='".intval($idsub)."'";
+    if ($idsub2 == '' && $idsub3 == '') {
+        $query="select * from topic where SubjectID='".intval($idsub1)."' and type =1";
+    } else if ($idsub2 != '' && $idsub3 =='') {
+        $query="select * from topic where (SubjectID='".intval($idsub1)."' or  SubjectID='".intval($idsub2)."') and type = 1";
+    } else if ($idsub2 == '' && $idsub3 != '') {
+        $query="select * from topic where (SubjectID='".intval($idsub1)."' or  SubjectID='".intval($idsub3)."') and type =1";
+    } else if ($idsub2 != '' && $idsub3 != '') {
+        $query="select * from topic where (SubjectID='".intval($idsub1)."' or  SubjectID='".intval($idsub2)."' or SubjectID='".intval($idsub3)."') and type = 1";
+    }
+    $db_qr = $this->db->query($query); 
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        } 
+
+    }
+    return $tg1;
+}
+function ListTopicBySubject_new($idsub)
+{
+    $query="select * from topic where SubjectID='".intval($idsub)."' and type = 1";
+    $db_qr = $this->db->query($query); 
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        } 
+
+    }
+    return $tg1;
+}
+function ListTopicBySubject2($idsub1, $idsub2, $idsub3)
+{
+    if ($idsub2 == '' && $idsub3 == '') {
+        $query="select * from url_timviec where SubjectID='".intval($idsub1)."' and option = 0 and type = 1 ";
+    } else if ($idsub2 != '' && $idsub3 =='') {
+        $query="select * from url_timviec where SubjectID='".intval($idsub1)."' or  SubjectID='".intval($idsub2)."' and option = 0 and type = 1 ";
+    } else if ($idsub2 == '' && $idsub3 != '') {
+        $query="select * from url_timviec where SubjectID='".intval($idsub1)."' or  SubjectID='".intval($idsub3)."' and option = 0 and type = 1 ";
+    } else if ($idsub2 != '' && $idsub3 != '') {
+        $query="select * from url_timviec where SubjectID='".intval($idsub1)."' or  SubjectID='".intval($idsub2)."' or SubjectID='".intval($idsub3)."' and option = 0 and type = 1 ";
+    }
+    $db_qr = $this->db->query($query); 
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {                
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        } 
+
+    }
+    return $tg1;
+}
+function ListkeytagcBySubject($idsub)
+{
+    $query="select * from url_phuhuynh where sub_id='".intval($idsub)."'";
     $db_qr = $this->db->query($query); 
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -3014,6 +3521,7 @@ function InsertUser($Name,$username,$Phone,$Email,$CityID,$CityName,$Address,$De
         $body=str_replace('<%email%>',$Email,$body);    
         $body=str_replace('<%code%>',$code,$body);
         $body=str_replace('<%type%>',$UserType,$body);
+        $body=str_replace('<%base_url%>', base_url(), $body); 
 
         $Description="Đăng ký tài khoản gia sư";
         $data="";
@@ -3023,8 +3531,9 @@ function InsertUser($Name,$username,$Phone,$Email,$CityID,$CityName,$Address,$De
         $insert=$this->db->query($queryconfrim);
         $subject='[GiaSu365] Kích hoạt tài khoản đăng ký';
         $header='Từ: GiaSu365';
-        $body = base64_encode($body);
-        $this->CreateSendMail('timviec365-noreply@timviec365.vn',$Email, "", "", $subject, $body);
+        // $body = base64_encode($body);
+        // $this->CreateSendMail('timviec365-noreply@timviec365.vn',$Email, "", "", $subject, $body);
+        $this->sendmailnew($Email,$subject, $body);
         $result=['kq'=>true,'data'=>$insertid,'code'=>$code];
         return $result;
     }
@@ -3053,6 +3562,7 @@ function InsertUserTeacher($Name,$username,$Phone,$Email,$CityID,$CityName,$City
         $body=str_replace('<%email%>',$Email,$body);    
         $body=str_replace('<%code%>',$code,$body);
         $body=str_replace('<%type%>',$UserType,$body);
+        $body=str_replace('<%base_url%>', base_url(), $body); 
 
         $Description="Đăng ký tài khoản gia sư";
         $data="";
@@ -3062,8 +3572,9 @@ function InsertUserTeacher($Name,$username,$Phone,$Email,$CityID,$CityName,$City
         $insert=$this->db->query($queryconfrim);
         $subject='[GiaSu365] Kích hoạt tài khoản đăng ký';
         $header='Từ: GiaSu365';
-        $body = base64_encode($body);
-        $this->CreateSendMail('timviec365-noreply@timviec365.vn',$Email, "", "", $subject, $body);
+        // $body = base64_encode($body);
+        // $this->CreateSendMail('timviec365-noreply@timviec365.vn',$Email, "", "", $subject, $body);
+         $this->sendmailnew($Email, $subject, $body);
         $result=['kq'=>true,'data'=>$insertid,'code'=>$code];
         return $result;
     }
@@ -3207,7 +3718,7 @@ function DeleteTeacherTopic($UserID)
 }
 function UpdateTeacher($UserID,$WorkID,$WorkingName,$TeachType,$Free,$MonMorning,$MonAfter,$MonNight,$TueMorning,$TueAfter,$TueNight,
     $WeMorning,$WeAfter,$WeNight,$ThuMorning,$ThuAfter,$ThuNight,$FriMorning,$FriAfter,$FriNight,$SatMorning,$SatAfter
-    ,$SatNight,$SunMorning,$SunAfter,$SunNight,$ImgPassport,$TitleView,$IdTitle,$Orther,$School,$Major,$Graduationyear,$Workplace)
+    ,$SatNight,$SunMorning,$SunAfter,$SunNight,$ImgPassport,$TitleView,$IdTitle,$Orther,$School,$Major,$Graduationyear,$Workplace,$tenchude)
 {
     $result=['kq'=>false,'data'=>''];
     $query1="select * from userteacher where UserID='".$UserID."'";
@@ -3225,7 +3736,7 @@ function UpdateTeacher($UserID,$WorkID,$WorkingName,$TeachType,$Free,$MonMorning
         ,ThuNight='".$ThuNight."',FriMorning='".$FriMorning."',FriAfter='".$FriAfter."',FriNight='".$FriNight."',SatMorning='".$SatMorning."'
         ,SatAfter='".$SatAfter."' ,SatNight='".$SatNight."',SunMorning='".$SunMorning."',SunAfter='".$SunAfter."',SunNight='".$SunNight."'
         ,ImgPassport='".$ImgPassport."',TitleView='".$TitleView."',IdTitle='".$IdTitle."',UpdateDate='".$CreateDate."'
-        ,Orther='".$Orther."',School='".$School."',Major='".$Major."',Graduationyear='".$Graduationyear."',Workplace='".$Workplace."' where ID='".$tg->ID."'";
+        ,Orther='".$Orther."',School='".$School."',Major='".$Major."',Graduationyear='".$Graduationyear."',Workplace='".$Workplace."',TopicName='".$tenchude."' where ID='".$tg->ID."'";
         $insert=$this->db->query($query);
         $result=['kq'=>true];
     }
@@ -3234,7 +3745,7 @@ function UpdateTeacher($UserID,$WorkID,$WorkingName,$TeachType,$Free,$MonMorning
 }
 function InsertTeacher($UserID,$WorkID,$WorkingName,$TeachType,$Free,$MonMorning,$MonAfter,$MonNight,$TueMorning,$TueAfter,$TueNight,
     $WeMorning,$WeAfter,$WeNight,$ThuMorning,$ThuAfter,$ThuNight,$FriMorning,$FriAfter,$FriNight,$SatMorning,$SatAfter
-    ,$SatNight,$SunMorning,$SunAfter,$SunNight,$ImgEdu,$ImgPassport,$Vip,$IdTitle,$Idlopday,$TitleView,$Orther,$School,$Major,$Graduationyear,$Workplace)
+    ,$SatNight,$SunMorning,$SunAfter,$SunNight,$ImgEdu,$ImgPassport,$Vip,$IdTitle,$Idlopday,$TitleView,$Orther,$School,$Major,$Graduationyear,$Workplace,$chudemonhoc,$tenchude)
 {   
     // var_dump($TitleView);
     // die();
@@ -3242,11 +3753,11 @@ function InsertTeacher($UserID,$WorkID,$WorkingName,$TeachType,$Free,$MonMorning
     $CreateDate=date("Y-m-d H:i:s",time());
     $query="Insert into userteacher(UserID,WorkID,WorkingName,TeachType,Free,MonMorning,MonAfter,MonNight,TueMorning,TueAfter,TueNight,
     WeMorning,WeAfter,WeNight,ThuMorning,ThuAfter,ThuNight,FriMorning,FriAfter,FriNight,SatMorning,SatAfter,SatNight,SunMorning,SunAfter,SunNight,
-    ImgEdu,ImgPassport,Vip,IdTitle,IdLopday,TitleView,UpdateDate,Orther,School,Major,Graduationyear,Workplace)VALUES('".$UserID."','".$WorkID."','".$WorkingName."',
+    ImgEdu,ImgPassport,Vip,IdTitle,IdLopday,TitleView,UpdateDate,Orther,School,Major,Graduationyear,Workplace,TopicID,TopicName)VALUES('".$UserID."','".$WorkID."','".$WorkingName."',
     '".$TeachType."','".$Free."','".$MonMorning."','".$MonAfter."','".$MonNight."','".$TueMorning."','".$TueAfter."','".$TueNight."',
     '".$WeMorning."','".$WeAfter."','".$WeNight."','".$ThuMorning."','".$ThuAfter."','".$ThuNight."','".$FriMorning."','".$FriAfter."','".$FriNight."',
     '".$SatMorning."','".$SatAfter."','".$SatNight."','".$SunMorning."','".$SunAfter."','".$SunNight."','".$ImgEdu."','".$ImgPassport."'
-    ,'".$Vip."','".$IdTitle."','".$Idlopday."','Gia sư ".$TitleView."','".$CreateDate."','".$Orther."','".$School."','".$Major."','".$Graduationyear."','".$Workplace."')";
+    ,'".$Vip."','".$IdTitle."','".$Idlopday."','Gia sư ".$TitleView."','".$CreateDate."','".$Orther."','".$School."','".$Major."','".$Graduationyear."','".$Workplace."','".$chudemonhoc."','".$tenchude."')";
     $insert=$this->db->query($query);
     $insertid=$this->db->insert_id(); 
     if($insertid > 0){
@@ -3256,7 +3767,7 @@ function InsertTeacher($UserID,$WorkID,$WorkingName,$TeachType,$Free,$MonMorning
 }
 function UpdateClass($classid,$ClassTitle,$SubjectID,$SubjectName,$TopicArr,$Money,$Hours,$LearnType,$Phone,$City,$Address,$CMonMorning,$CMonAfter,$CMonNight
     ,$CTueMorning,$CTueAfter,$CTueNight,$CWeMorning,$CWeAfter,$CWeNight,$CThuMorning,$CThuAfter,$CThuNight,$CFriMorning,$CFriAfter,$CFriNight,$CSatMorning
-    ,$CSatAfter,$CSatNight,$CSunMorning,$CSunAfter,$CSunNight,$DescClass,$InWeek,$Student,$TeacherSex,$ExpectedDate,$TeachType,$IdLopDay,$District)
+    ,$CSatAfter,$CSatNight,$CSunMorning,$CSunAfter,$CSunNight,$DescClass,$InWeek,$Student,$TeacherSex,$ExpectedDate,$TeachType,$IdLopDay,$District,$NameTopic1)
 {
     $CreateDate=date("Y-m-d H:i:s",time());
     $result=['kq'=>false,'data'=>0];
@@ -3265,7 +3776,7 @@ function UpdateClass($classid,$ClassTitle,$SubjectID,$SubjectName,$TopicArr,$Mon
     CMonNight='".$CMonNight."',CTueMorning='".$CTueMorning."',CTueAfter='".$CTueAfter."',CTueNight='".$CTueNight."',CWeMorning='".$CWeMorning."',CWeAfter='".$CWeAfter."',
     CWeNight='".$CWeNight."',CThuMorning='".$CThuMorning."',CThuAfter='".$CThuAfter."',CThuNight='".$CThuNight."',CFriMorning='".$CFriMorning."',CFriAfter='".$CFriAfter."',CFriNight='".$CFriNight."',CSatMorning='".$CSatMorning."',
     CSatAfter='".$CSatAfter."',CSatNight='".$CSatNight."',CSunMorning='".$CSunMorning."',CSunAfter='".$CSunAfter."',CSunNight='".$CSunNight."',UpdateDate='".$CreateDate."',DescClass='".$DescClass."',InWeek='".$InWeek."',Student='".$Student."',TeacherSex='".$TeacherSex."',
-    TeachType='".$TeachType."',IdLopDay='".$IdLopDay."',District='".$District."' Where ClassID='".$classid."'";
+    TeachType='".$TeachType."',IdLopDay='".$IdLopDay."',District='".$District."', TopicName='".$NameTopic1."' Where ClassID='".$classid."'";
     $insert=$this->db->query($query);
 
     if($insert){
@@ -3295,19 +3806,19 @@ function refreshclass($userid)
 }
 function InsertClass($ClassTitle,$SubjectID,$SubjectName,$TopicArr,$Money,$Hours,$LearnType,$Phone,$City,$Address,$CMonMorning,$CMonAfter,$CMonNight
     ,$CTueMorning,$CTueAfter,$CTueNight,$CWeMorning,$CWeAfter,$CWeNight,$CThuMorning,$CThuAfter,$CThuNight,$CFriMorning,$CFriAfter,$CFriNight,$CSatMorning
-    ,$CSatAfter,$CSatNight,$CSunMorning,$CSunAfter,$CSunNight,$CreateBy,$DescClass,$InWeek,$Student,$TeacherSex,$ExpectedDate,$UserID,$TeachType,$IdLopDay,$quanhuyen)
+    ,$CSatAfter,$CSatNight,$CSunMorning,$CSunAfter,$CSunNight,$CreateBy,$DescClass,$InWeek,$Student,$TeacherSex,$ExpectedDate,$UserID,$TeachType,$IdLopDay,$quanhuyen, $NameTopic1, $alias_classname)
 {
     $CreateDate=date("Y-m-d H:i:s",time());
     $result=['kq'=>false,'data'=>0];
     $query="insert into teacherclass(ClassTitle,SubjectID,SubjectName,TopicArr,Money,Hours,LearnType,Phone,City,Address,CMonMorning,CMonAfter,
     CMonNight,CTueMorning,CTueAfter,CTueNight,CWeMorning,CWeAfter,CWeNight,CThuMorning,CThuAfter,CThuNight,CFriMorning,CFriAfter,CFriNight,CSatMorning,
     CSatAfter,CSatNight,CSunMorning,CSunAfter,CSunNight,Active,Hot,Vip,CreateDate,UpdateDate,CreateBy,DescClass,InWeek,Student,TeacherSex,ExpectedDate,UserID,
-    TeachType,IdLopDay,District)VALUES('".$ClassTitle."','".$SubjectID."','".$SubjectName."','".$TopicArr."','".$Money."','".$Hours."','".$LearnType."'
+    TeachType,IdLopDay,District,TopicName, Alias)VALUES('".$ClassTitle."','".$SubjectID."','".$SubjectName."','".$TopicArr."','".$Money."','".$Hours."','".$LearnType."'
     ,'".$Phone."','".$City."','".$Address."','".$CMonMorning."','".$CMonAfter."','".$CMonNight."','".$CTueMorning."'
     ,'".$CTueAfter."','".$CTueNight."','".$CWeMorning."','".$CWeAfter."','".$CWeNight."','".$CThuMorning."','".$CThuAfter."','".$CThuNight."'
     ,'".$CFriMorning."','".$CFriAfter."','".$CFriNight."','".$CSatMorning."','".$CSatAfter."','".$CSatNight."','".$CSunMorning."','".$CSunAfter."'
     ,'".$CSunNight."','1','0','0','".$CreateDate."','".$CreateDate."','".$CreateBy."','".$DescClass."','".$InWeek."','".$Student."','".$TeacherSex."'
-    ,'".$CreateDate."','".$UserID."','".$TeachType."','".$IdLopDay."','".$quanhuyen."')";
+    ,'".$CreateDate."','".$UserID."','".$TeachType."','".$IdLopDay."','".$quanhuyen."','".$NameTopic1."','".$alias_classname."')";
     $insert=$this->db->query($query);
     $insertid=$this->db->insert_id(); 
     if($insertid > 0){
@@ -3463,7 +3974,7 @@ function adduservsusers($userid,$saveuser,$active){
     $CreateDate=date("Y-m-d H:i:s",time());
     $query1="select * from usersaveuser where UserID ='".$userid."' and SaveUserID='".$saveuser."'";
     $db_qr = $this->db->query($query1);
-    if($db_qr->num_rows() <= 0)
+    if($db_qr->num_rows() == 0)
     {
         $query="insert into usersaveuser(UserID,SaveUserID,Active,Createdate)VALUES('".$userid."','".$saveuser."','".$active."','".$CreateDate."')";
         $insert=$this->db->query($query);
@@ -3471,6 +3982,19 @@ function adduservsusers($userid,$saveuser,$active){
         if($insertid > 0){
            $result=['kq'=>true,'data'=>$insertid]; 
        }  
+   } 
+   return $result;
+}
+function checkuservsusers($userid,$saveuser,$active){
+    $result=['kq'=>false,'data'=>0];
+    $CreateDate=date("Y-m-d H:i:s",time());
+    $query1="select * from usersaveuser where UserID ='".$userid."' and SaveUserID='".$saveuser."'";
+    $db_qr = $this->db->query($query1);
+    if($db_qr->num_rows() > 0)
+    {
+        $result = ['kq' => 1]; 
+    } else {
+        $result = ['kq' => 0];
    }
    return $result;
 }
@@ -3719,6 +4243,21 @@ function getpageteacherinvitebyuserid($userid,$page)
     }
     return $tg1;
 }
+function GetInfoTeacher_see($userid, $page)
+{   $perpage = 6;
+    $startrow = ($page -1)*$perpage;
+    $query="SELECT * FROM users as u join users_point_log as t on u.UserID = t.teacherid where t.userid = $userid and  type = 1 or type = 2 ORDER BY t.id DESC limit $startrow,$perpage";
+    $db_qr = $this->db->query($query);
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }  
+    }
+    return $tg1;
+}
 function getpageteacherfitbyuserid($userid,$page)
 {
     $perpage=6;
@@ -3779,6 +4318,20 @@ function Getclassbyuserid($classid)
     }
     return $tg1;
 }
+function Getclassbyuserid1($classid)
+{
+    $query="select UserID, ClassTitle from teacherclass where ClassID = '".$classid."'";
+    $db_qr = $this->db->query($query);
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;    
+        }  
+    }
+    return $tg1;
+}
 function gettopclassbyuser($user){
 
     $query1="select t.ClassTitle,t.ClassID,t.LearnType,c.UserId as giaovien,c.CreateDate as ngaynhan from teacherclass as t LEFT JOIN classvsuser as c on t.ClassID=c.ClassID where c.UserID ='".$user."' order by c.CreateDate desc limit 5";
@@ -3807,6 +4360,19 @@ function getpoint($user){
     }
     return $tg1;
 }
+function getpointfreebyID($get, $id) {
+    $query1 = "SELECT $get FROM users_point WHERE userid = $id";
+    $db_qr = $this->db->query($query1);
+    $tg1 = "";
+    if ($db_qr->num_rows() > 0) {
+       foreach($db_qr->result() as $itemcat)
+       {
+         $tg1[]=$itemcat;    
+       }  
+    }
+    return $tg1;
+}
+
 function addusersaveclass($userid,$classid){
     $result=['kq'=>false,'data'=>0];
     $CreateDate=date("Y-m-d H:i:s",time());
@@ -3937,7 +4503,8 @@ function deleteusersaveuser($userid,$usersaveid){
 }
 function deleteteacherclass($ClassID){
     $result=['kq'=>false,'data'=>''];
-    $query1="DELETE FROM teacherclass where ClassID = '".$ClassID."'";
+    // $query1="DELETE FROM teacherclass where ClassID = '".$ClassID."'";
+    $query1="UPDATE teacherclass set `Active` = 0 where ClassID = '".$ClassID."'";
     $db_qr = $this->db->query($query1);
     if($db_qr)
     {
@@ -4061,7 +4628,7 @@ function getlistclassbyuser($userid,$page)
     $perpage=6;
     $startrow=($page-1)*$perpage;
     $query="select t.*,t1.MetaDesc,t1.MetaTitle,t1.MetaKeywork,t1.Latitude,t1.Longitude
-    from teacherclass as t LEFT JOIN teacherclassmeta as t1 on t1.ClassID=t.ClassID where t.UserID='".$userid."' order by t.CreateDate desc
+    from teacherclass as t LEFT JOIN teacherclassmeta as t1 on t1.ClassID=t.ClassID where t.UserID='".$userid."' and t.Active = 1 order by t.CreateDate desc
     limit $startrow,$perpage";
     $db_qr = $this->db->query($query);
     $tg1="";
@@ -4076,7 +4643,7 @@ function getlistclassbyuser($userid,$page)
 }
 function getcountclassbyuser($userid)
 {
-    $query="select COUNT(*) as solophoc from teacherclass where UserID='".$userid."'";
+    $query="select COUNT(*) as solophoc from teacherclass where UserID='".$userid."' and Active = 1";
     $db_qr = $this->db->query($query);
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -4169,6 +4736,44 @@ if($db_qr->num_rows() > 0)
     }  
 }
 return $tg1; 
+}
+function sendmailnew($to,  $subject, $content) {
+    require_once(APPPATH.'/libraries/phpmailer/class.phpmailer.php');
+    require_once(APPPATH.'/libraries/phpmailer/class.smtp.php');
+    $mail = new PHPMailer();
+    $mail->IsSMTP(); // set mailer to use SMTP
+    $name = "Timviec365.com.vn";
+    $usernameSmtp = 'AKIA4H45CLBRDNNBQ4NW';
+    $passwordSmtp = 'BBhUIbTmBLQkalYzuYFoRFjnWZRXhzkiyod+qfGtxvME';  
+    $host = 'email-smtp.eu-west-1.amazonaws.com';
+    $port = 587;
+    $sender = 'no-reply@timviec365.com.vn';
+    $senderName = 'Timviec365.com.vn';
+
+    $mail             = new PHPMailer(true);
+
+    $mail->IsSMTP(); 
+    $mail->SetFrom($sender, $senderName);
+    $mail->Username   = $usernameSmtp;  // khai bao dia chi email
+    $mail->Password   = $passwordSmtp;              // khai bao mat khau   
+    $mail->Host       = $host;    // sever gui mail.
+    $mail->Port       = $port;         // cong gui mail de nguyen 
+    $mail->SMTPAuth   = true;    // enable SMTP authentication
+    $mail->SMTPSecure = "tls";   // sets the prefix to the servier        
+    $mail->CharSet  = "utf-8";
+    $mail->SMTPDebug  = 0;   // enables SMTP debug information (for testing)
+    // xong phan cau hinh bat dau phan gui mail
+    $mail->isHTML(true);
+    $mail->Subject    = $subject;// tieu de email 
+    $mail->Body       = $content;
+    $mail->addAddress($to,$name);
+    if(!$mail->Send()){
+        echo $mail->ErrorInfo;
+    }
+    else
+    {
+        return true;
+    }
 }
 function CreateSendMail($toFrom,$toAddress,$ccAddress,$bccAddress,$subject,$body) {	
  $int_type = 16;
@@ -4265,23 +4870,22 @@ function SendmailHunghapay($partner,$pass,$toAddress,$subject,$body,$int_type)
         }
         return $tg1;
     }
-    function GetListClassBySearch($keywork,$subject,$class,$topic,$place,$type,$sex,$page,$perpage)
+    function GetListClassBySearch($keywork,$subject,$class,$topic,$place,$type,$sex,$page,$perpage,$sub_id_s)
     {
        $query="SELECT t.*,u.`Name`,u.Phone as sodienthoaidk
        ,u.Email
        ,u.CityID
        ,u.CityName,u.`Image`
        ,u.Address as diachidk
-       ,u.Description,IFNULL(t1.denghiday,0) as denghiday,IFNULL(t1.dongyday,0) as dongyday
+       ,u.Description,IFNULL(t1.denghiday,0) as denghiday
        from teacherclass as t left join users as u on t.UserID=u.UserID
        left JOIN (select ClassID,
-       SUM(CASE WHEN uc.Active = 0 THEN 1 ELSE 0 END) AS denghiday,
-       SUM(CASE WHEN uc.Active = 1 THEN 1 ELSE 0 END) AS dongyday
+       SUM(CASE WHEN uc.Active = 0 THEN 1 ELSE 0 END) AS denghiday
        from uservsclass as uc
        GROUP BY ClassID) t1 on t1.ClassID=t.ClassID";
-       $query.=" where t.ClassTitle <> '' and u.IsSearch=1 and t.`Active`=1 and u.UserType = 0";
+       $query.=" where t.ClassTitle <> '' and u.IsSearch=1 and t.`Active`=1"; //and u.UserType = 0
        if(!empty($keywork) && strtolower($keywork)!='all'){
-        $query.=" and t.ClassTitle like '%".str_replace(' ','%',$keywork)."%'";
+        $query.=" and t.TopicName like '%".str_replace(' ','%',$keywork)."%'"; //ClassTitle
     }
     if(!empty($class)){
        $query.=" and FIND_IN_SET('".intval($class)."',t.IdLopDay)";
@@ -4289,8 +4893,14 @@ function SendmailHunghapay($partner,$pass,$toAddress,$subject,$body,$int_type)
     if(intval($place)>0 ){
         $query.=" and t.City ='".intval($place)."'";
     }
-    if(intval($subject) >0){
-        $query.=" and t.SubjectID='".intval($subject)."'";
+    if (intval($sub_id_s) > 0) {
+        $query.=" and t.SubjectID='".intval($sub_id_s)."'";
+    } else {
+    // xem
+        if(intval($subject) >0){
+        // $query.=" and t.SubjectID='".intval($subject)."'";
+           $query.=" and FIND_IN_SET('".intval($subject)."',t.TopicArr)";
+       }
     }
     // if(intval($topic)>0){
     //     $query.=" and FIND_IN_SET('".intval($topic)."',t.TopicArr)";
@@ -4302,8 +4912,11 @@ function SendmailHunghapay($partner,$pass,$toAddress,$subject,$body,$int_type)
     //     $query.=" and FIND_IN_SET('".intval($type)."',t.LearnType)";
     // }
     $query.=" order by t.ClassID desc";
-    $query.=" limit ".$page.",".$perpage;
+    // $query.=" limit ".$page.",".$perpage;
     $db_qr = $this->db->query($query);
+
+    // echo $this->db->last_query();
+    // die();
     $tg1="";
     if($db_qr->num_rows() > 0)
     {
@@ -4314,30 +4927,35 @@ function SendmailHunghapay($partner,$pass,$toAddress,$subject,$body,$int_type)
     }
     return $tg1;
 }
-function ListClassBySearchHeader($keywork,$subject,$class,$place,$district,$order,$page,$perpage)
+
+function ListClassBySearchHeader($keywork,$subject,$class,$place,$district,$order,$page,$perpage, $sub_id_s)
     {
        $query="SELECT t.*,u.`Name`,u.Phone as sodienthoaidk
        ,u.Email
        ,u.CityID
        ,u.CityName,u.`Image`
        ,u.Address as diachidk
-       ,u.Description,IFNULL(t1.denghiday,0) as denghiday,IFNULL(t1.dongyday,0) as dongyday
+       ,u.Description,IFNULL(t1.denghiday,0) as denghiday
        from teacherclass as t left join users as u on t.UserID=u.UserID
        left JOIN (select ClassID,
-       SUM(CASE WHEN uc.Active = 0 THEN 1 ELSE 0 END) AS denghiday,
-       SUM(CASE WHEN uc.Active = 1 THEN 1 ELSE 0 END) AS dongyday
+       SUM(CASE WHEN uc.Active = 0 THEN 1 ELSE 0 END) AS denghiday
        from uservsclass as uc
        GROUP BY ClassID) t1 on t1.ClassID=t.ClassID";
-       $query.=" where t.ClassTitle <> '' and u.IsSearch=1 and t.`Active`=1 and u.UserType = 0";
-       if(!empty($keywork) && strtolower($keywork)!='all'){
-        $query.=" and t.ClassTitle like '%".str_replace(' ','%',$keywork)."%'";
+       $query.=" where t.ClassTitle <> '' and u.IsSearch=1 and t.`Active`=1 ";
+       if(!empty($keywork)  && strtolower($keywork)!='all'){
+        $query.=" and ( t.TopicName like '%".str_replace(' ','%',$keywork)."%' or t.ClassTitle like  '%".str_replace(' ','%',$keywork)."%' )";
 
     }
     if(!empty($class)){
         $query.=" and FIND_IN_SET('".intval($class)."',t.IdLopDay)";
     }
+    if (intval($sub_id_s) > 0) {
+        $query.=" and t.SubjectID='".intval($sub_id_s)."'";
+    } else {
     if(intval($subject) >0){
-        $query.=" and t.SubjectID='".intval($subject)."'";
+        // $query.=" and t.SubjectID='".intval($subject)."'";
+        $query.=" and FIND_IN_SET('".intval($subject)."',t.TopicArr)";
+      } 
     }
     if(intval($place)>0 ){
         $query.=" and t.City ='".intval($place)."'";
@@ -4348,7 +4966,7 @@ function ListClassBySearchHeader($keywork,$subject,$class,$place,$district,$orde
      // $query.=")";
     }
     $query.=" order by t.ClassID desc";
-    $query.=" limit ".$page.",".$perpage;
+    // $query.=" limit ".$page.",".$perpage;
     $db_qr = $this->db->query($query);
     $tg1="";
     if($db_qr->num_rows() > 0)
@@ -4360,7 +4978,7 @@ function ListClassBySearchHeader($keywork,$subject,$class,$place,$district,$orde
     }
     return $tg1;
 }
-function ListClassBySearchHeader1($keywork,$subject,$class,$place,$district,$order,$page,$perpage)
+function ListClassBySearchHeader1($keywork,$subject,$class,$place,$district,$order,$page,$perpage, $sub_id_s)
     {
        $query="SELECT t.*,u.`Name`,u.Phone as sodienthoaidk
        ,u.Email
@@ -4376,7 +4994,7 @@ function ListClassBySearchHeader1($keywork,$subject,$class,$place,$district,$ord
        GROUP BY ClassID) t1 on t1.ClassID=t.ClassID";
        $query.=" where t.ClassTitle <> '' and u.IsSearch=1 and t.`Active`=1 and u.UserType = 0";
        if(!empty($keywork) && strtolower($keywork)!='all'){
-        $query.=" and t.ClassTitle like '%".str_replace(' ','%',$keywork)."%'";
+        $query.=" and ( t.TopicName like '%".str_replace(' ','%',$keywork)."%' or t.ClassTitle like  '%".str_replace(' ','%',$keywork)."%' )";
 
     }
     if(!empty($class)){
@@ -4408,6 +5026,7 @@ function ListClassBySearchHeader1($keywork,$subject,$class,$place,$district,$ord
 }
 function GetListClassBySearchTotal($keywork,$subject,$class,$topic,$place,$type,$sex)
 {
+   // check
    $query="SELECT t.*,u.`Name`,u.Phone as sodienthoaidk
    ,u.Email
    ,u.CityID
@@ -4431,7 +5050,8 @@ if(intval($place)>0 ){
     $query.=" and t.City ='".intval($place)."'";
 }
 if(intval($subject) >0){
-    $query.=" and t.SubjectID='".intval($subject)."'";
+    // $query.=" and t.SubjectID='".intval($subject)."'";
+    $query.=" and FIND_IN_SET('".intval($subject)."',t.TopicArr)";
 }
 if(intval($topic)>0){
     $query.=" and FIND_IN_SET('".intval($topic)."',t.TopicArr)";
@@ -4443,8 +5063,8 @@ if(intval($type)>0){
     $query.=" and FIND_IN_SET('".intval($type)."',t.LearnType)";
 }
 $db_qr = $this->db->query($query);
-// echo $this->db->last_query();
-// die();
+
+;
 $tg1=0;
 if($db_qr->num_rows() > 0)
 {
@@ -4507,9 +5127,22 @@ function GetListTeacherBySearchIndex($keywork,$subject,$class,$topic,$place,$dis
         }
     }
     return array('total'=>$total,'data'=>$tg1);
-}   
+} 
+function GetsubjectByTopicID($id, $tbl) {
+    $query = "SELECT sub_id FROM ".$tbl." WHERE ID = ".$id." and type = 2 ";
+    $db_qr = $this->db->query($query);
+    $tg1="";
+    if($db_qr->num_rows() > 0)
+    {
+        foreach($db_qr->result() as $itemcat)
+        {
+            $tg1[]=$itemcat;
+        }
+    }
+    return array('data'=>$tg1);
+}  
 
-function GetListTeacherBySearch($keywork,$subject,$classname,$topic,$place,$district,$type,$sex,$order,$page,$perpage)
+function GetListTeacherBySearch($keywork,$subject,$classname,$topic,$place,$district,$type,$sex,$order,$page,$perpage,$subid)
 {   
 
     $query="SELECT ut.*,u.`Name`
@@ -4527,10 +5160,22 @@ function GetListTeacherBySearch($keywork,$subject,$classname,$topic,$place,$dist
     ,u.Latitude
     ,u.Longitude
     from users as u JOIN userteacher as ut on u.UserID=ut.UserID
-    where u.Email <>'' and u.Active=1 and u.UserType=1";
+    where u.Email <>''  and u.UserType=1";
     if(!empty($keywork) && strtolower($keywork)!='all'){
         $query.=" AND (ut.TitleView like '%".str_replace(' ','%',$keywork)."%' or u.`Name` like '%".str_replace(' ','%',$keywork)."%')";
         
+    }
+    if (intval($subid) > 0) {
+          $query .= " AND FIND_IN_SET('".intval($subid)."',ut.IdTitle)";
+        //   if(!empty($subject)){
+        //     // $query.=" AND ut.TopicID like '%".$subject."%'";
+        //     $query.=" OR ut.TopicID in ( select DISTINCT TopicID from userteacher where  FIND_IN_SET('".intval($subject)."',TopicID) )";
+        // }
+    } else {
+           if(!empty($subject)){
+            // $query.=" AND ut.TopicID like '%".$subject."%'";
+            $query.=" AND ut.TopicID in ( select DISTINCT TopicID from userteacher where  FIND_IN_SET('".intval($subject)."',TopicID) )";
+    }
     }
     if(!empty($classname)){
         $query.=" AND u.UserID in ( select DISTINCT UserID from usersubject where TopicName like '%".$classname."%'";
@@ -4541,9 +5186,9 @@ function GetListTeacherBySearch($keywork,$subject,$classname,$topic,$place,$dist
         $query.=" AND u.CityID='".intval($place)."'";
     }
 
-    if(intval($type) > 0){
-        $query.=" AND ut.WorkID='".intval($type)."'";
-    }
+    // if(intval($type) > 0){
+    //     $query.=" AND ut.WorkID='".intval($type)."'";
+    // }
     if(intval($sex)>0){
         $query.=" AND u.sex ='".intval($sex)."'";
     }
@@ -4554,13 +5199,17 @@ function GetListTeacherBySearch($keywork,$subject,$classname,$topic,$place,$dist
     }
 
     
-    if(!empty($subject)){
-        $query.=" AND u.UserID in ( select DISTINCT UserID from userteacher where TitleView like '%".$subject."%' or  FIND_IN_SET('".intval($subject)."',IdTitle)";
-        if(intval($topic)>0){
-            $query.=" AND TopicID='".intval($topic)."'";
-        }
-        $query.=")";
-    }
+    // if(!empty($subject)){
+    //     $query.=" AND u.UserID in ( select DISTINCT UserID from userteacher where TitleView like '%".$subject."%' or  FIND_IN_SET('".intval($subject)."',IdTitle)";
+    //     if(intval($topic)>0){
+    //         $query.=" AND TopicID='".intval($topic)."'";
+    //     }
+    //     $query.=")";
+    // }
+    //  if(!empty($subject)){
+    //     // $query.=" AND ut.TopicID like '%".$subject."%'";
+    //     $query.=" AND ut.TopicID in ( select DISTINCT TopicID from userteacher where  FIND_IN_SET('".intval($subject)."',TopicID) )";
+    // }
     // if(!empty($subject) && !empty($classname)){
     //     // $query.=" AND   SubjectID = '".intval($subject)."'";
     //     $query.=")";
@@ -4577,16 +5226,15 @@ function GetListTeacherBySearch($keywork,$subject,$classname,$topic,$place,$dist
     }
     else if($order == '' || $order == 0){
          // $query.=" ORDER BY u.UserID desc";
-        $query.=" ORDER BY u.CreateDate desc";
+        $query.=" ORDER BY u.UserID desc";
     }
     
     $total=$this->db->query($query)->num_rows();
-    $query.=" LIMIT ".$page."".$perpage;
+    $query.=" LIMIT ".$page.",".$perpage;
     // $query.=" LIMIT ".$page.",".$perpage;
     $db_qr = $this->db->query($query);
-    
+ 
    
-
     $tg1="";
     if($db_qr->num_rows() > 0)
     {
@@ -4617,11 +5265,12 @@ function ListTeacherBySearchHeader($keywork,$subject,$class,$place,$district,$or
     ,u.Image
     ,u.Latitude
     ,u.Longitude
-    from users as u JOIN userteacher as ut on u.UserID=ut.UserID
-    where u.Email <>'' and u.Active=1 and u.UserType=1";
-     
+    from users as u JOIN userteacher as ut on u.UserID=ut.UserID 
+    where u.Email <>''  and u.UserType=1 "; // JOIN usersubject as uk on u.UserID = uk.UserID GROUP BY Email
+    // var_dump($keywork);
+    // die();
     if(!empty($keywork) && strtolower($keywork)!='all'){
-        $query.=" and (ut.TitleView like '%".str_replace(' ','%',$keywork)."%')";
+        $query.=" and ((ut.TitleView like '%".str_replace(' ','%',$keywork)."%') or (ut.TopicName like '%".str_replace(' ','%',$keywork)."%'))"; // uk.TopicName
     }
     if(!empty($class)){
         $query.=" and (ut.TitleView like '%".str_replace(' ','%',$class)."%') or ut.IdTitle like '%".$class."%'";
@@ -4636,6 +5285,7 @@ function ListTeacherBySearchHeader($keywork,$subject,$class,$place,$district,$or
         $query.=" and u.UserID in ( select DISTINCT UserID from usersubject where SubjectID ='".intval($subject)."'";
         $query.=")";
     }
+    $query .= " GROUP BY u.Email";
     if(strtolower($order)=='last'){
         $query.=" ORDER BY u.CreateDate desc";
     }else if(strtolower($order)=='pricelow'){

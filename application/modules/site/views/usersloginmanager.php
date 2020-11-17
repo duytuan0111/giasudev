@@ -40,7 +40,7 @@
                             <th style="width:45%">Họ tên gia sư
                             </th>
                             <th style="width:35%">Gia sư môn</th>
-                            <th style="width:20%">Ngày mời</th>
+                            <th style="width:20%" class="th_ngaymoi">Ngày mời</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -48,7 +48,7 @@
                             foreach($topteacherinvite as $n){ ?>
                             <tr>
                                 
-                                <td><a href=""><?php echo $n->Name; ?></a></td>
+                                <td><a href="<?php echo base_url(); ?><?php echo vn_str_filter($n->Name) ?>-gv<?php echo $n->UserID ?>"><?php echo $n->Name; ?></a></td>
                                 <td><?php echo $n->TitleView; ?></td>
                                 <td><?php echo date('d/m/Y',strtotime($n->ngaymoi)) ?></td>
                             </tr>    
@@ -74,13 +74,13 @@
                             <th style="width:45%">Tên công việc
                             </th>
                             <th style="width:35%">Công ty</th>
-                            <th style="width:20%">Ngày nộp</th>
+                            <th style="width:20%" class="th_ngaymoi">Ngày nộp</th>
                         </tr>
                         </thead>
                         <tbody>
                         <?php foreach($topteachsave as $n){ ?>
                             <tr>
-                                <td><a href=""><?php echo $n->Name; ?></a></td>
+                                <td><a href="<?php echo base_url(); ?><?php echo vn_str_filter($n->Name) ?>-gv<?php echo $n->UserID ?>"><?php echo $n->Name; ?></a></td>
                                 <td><?php echo $n->TitleView; ?></td>
                                 <td><?php echo date('d/m/Y',strtotime($n->ngayluu)) ?></td>
                             </tr>

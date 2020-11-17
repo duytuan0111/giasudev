@@ -3,6 +3,18 @@ $CI=&get_instance();
 $CI->load->model('site/site_model');
 
 ?>
+<style>
+    @media (max-width: 479px) {
+        .divyeucau textarea {
+            padding-left: 18px;
+            margin-left: 1px !important;
+        }
+        .quanhuyenmobile {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    }
+</style>
 <section class="padd-0">
 <div class="container">
     <div class="row">
@@ -147,7 +159,7 @@ $CI->load->model('site/site_model');
                     </div>
                     <div class="col-md-12">
                             <label>Môn học sẽ dạy</label>
-                            <div class="form-control">
+                            <div class="form-control quanhuyenmobile">
                                 <?php 
                                 $arrIdTitle = explode(',',$info->IdTitle);
                                 ?>
@@ -194,7 +206,7 @@ $CI->load->model('site/site_model');
                             <div id="grouptopic">
                             <?php if(count($usersubject) > 0){ 
                                 for($i=0;$i<count($usersubject);$i++){
-                                    echo "<div id='group-topic".$usersubject[$i]."'>" ;
+                                    echo "<div class='child_".vn_str_filter($subjectname[$i])."' id='group-topic".$usersubject[$i]."'>" ;
                                     echo "<label>Lớp hoặc chủ đề môn học <span>(".$subjectname[$i].")</span></label>";
                                     $lstopic=$CI->site_model->ListTopicBySubject($usersubject[$i]);
                                     if(count($lstopic) >0){
@@ -270,7 +282,7 @@ $CI->load->model('site/site_model');
                        
                                 </select>
                             </div>
-                            <div class="form-control">
+                            <div class="form-control quanhuyenmobile">
                                 <select id="txtquanhuyen" class="checkquanhuyen" name="txtquanhuyen" multiple="multiple">
                                    <option value="">Quận/Huyện</option>
                                    <?php 
@@ -483,28 +495,36 @@ $('#datetimepicker1').datetimepicker({
     $('#txtcityclass').val(<?php echo $info->CityID ?>).select2();
      var configulr='<?php echo site_url(); ?>';
      var id_diadiem = <?php echo $info->CityID ?>;
-
-     $('#monhoc').change(function () {
+     $('#monhoc').on('select2:unselect', function(e){
+        var monhoc1 = $('#monhoc').val();
+        var data = e.params.data;
+        var id = data.id;
+        $('#group-topic'+id).remove();
+     });
+     // 
+     $('#monhoc').on('select2:select', function () {
             var monhoc=$(this).val();
+            if (monhoc == null) {
+                $('#grouptopic').empty();
+            }
             /*monhoc=monhoc1.split(',');*/
             var abc1= '<?php echo join(',',$usersubject) ?>';
             var tg=abc1.split(",");
             if(monhoc.length > 0){
-                
-                    
                     $('#grouptopic div#group-topic0').remove();
-                    for(var i=0; i<monhoc.length; i++) {
-                        if(tg.indexOf(monhoc[i]) < 0){
+                        for(var i=0; i<monhoc.length; i++) {
+                            $('#group-topic'+monhoc[i]).remove(); // them
+                        // if(tg.indexOf(monhoc[i]) < 0){
                         if(typeof($('#group-topic'+monhoc[i]).attr('data-val'))==='undefined'){
                         var strhtml="<div id='group-topic"+monhoc[i]+"' data-val='"+monhoc[i]+"'>";
-                         
                             strhtml+="<label>Lớp hoặc chủ đề môn học <span>("+$(this).find('option[value="' + monhoc[i] + '"]').text()+")</span></label>";
                             $.ajax({
                                       
-                                      url: configulr+"/site/AjaxchudeCheckbox",
+                                      url: configulr+"/site/AjaxchudeCheckboxNew",
                                       type: "POST",
                                       data: { idmon: monhoc[i] },
                                       dataType: 'json',
+                                      async: false,
                                       beforeSend: function () {
                                           $("#boxLoading").show();
                                       },
@@ -518,7 +538,7 @@ $('#datetimepicker1').datetimepicker({
                                             strhtml+="</ul></div>";
                                             strhtml+="</div>";
                                             $('#grouptopic').append(strhtml);
-                                            
+
                                             }else{
                                                 /*alert('không tồn tại');*/
                                             }
@@ -532,14 +552,15 @@ $('#datetimepicker1').datetimepicker({
                                   }); 
                         
                         }
-                         }
+                         // }
                            /*alert($(this).find('option[value="' + monhoc[i] + '"]').text());*/
                      } 
                      
                 }
             });
      $('#btnteacherupdateinfo').on('click',function(){
-        var tg=[];
+            var tg=[];
+            var tgName = [];
             var sexteach=[];
             
                 sexteach.push($('input[name=location1]:checked').val());
@@ -548,8 +569,13 @@ $('#datetimepicker1').datetimepicker({
             for(var i=0;i< itemtopic.length;i++){
                 
               var valuethis=  $('input[id='+$(itemtopic[i]).attr('id')+']:checked').val();
+              var valuethat=  $('input[id='+$(itemtopic[i]).attr('id')+']:checked').parent().find('label').text();
                if (typeof (valuethis) !== "undefined") {
                 tg.push(valuethis);
+                }
+                if (typeof (valuethat) !== "undefined") 
+                {
+                    tgName.push(valuethat);
                 }
                 
             };
@@ -677,6 +703,7 @@ $('#datetimepicker1').datetimepicker({
             data.append('monhoc', arrmonhoc);
             data.append('quanhuyen', arrquanhuyen);
             data.append('chudemonhoc', tg.join());
+            data.append('tentopic', tgName.join());
             data.append('khuvucday', $('#txtcityclass').val());
             data.append('tenkhuvucday', $('#txtcityclass option:selected').text());            
             data.append('hinhthucday', $('input[name=teachtype]:checked').val());

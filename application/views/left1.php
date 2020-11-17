@@ -10,6 +10,9 @@ $CI->load->model('site/site_model');
  }else if(current_url()==site_url('mn-hv-gia-su-moi-day')){
    $menu1=true;
     $active1=true; 
+ }else if(current_url()==site_url('mn-hv-gia-su-da-xem-thong-tin')){
+   $menu1=true;
+    $active1=true; 
  }else if(current_url()==site_url('mn-hv-gia-su-phu-hop')){
     $menu1=true;
     $active1=true; 
@@ -59,7 +62,11 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
     $check = $CI ->site_model->checknews($tg['UserId']);
     $uinfo=$CI ->site_model->GetUserInfoByUserID($userid);
     $point=$CI->site_model->getpoint($userid);
-}
+    $diem_free = $CI->site_model->getpointfreebyID('point_free',$userid);
+    $diem_mua = $CI->site_model->getpointfreebyID('point_pay',$userid);
+    // var_dump($diem_free);
+    // die();
+} 
     
 foreach ($point as $key ) {
     $diem += $key;
@@ -92,11 +99,11 @@ foreach ($point as $key ) {
             <?php if(empty($uinfo->Image)) {
                     $tg=explode('-',date('d-m-Y',strtotime($uinfo->CreateDate)));?>
                     
-                <img src="<?php echo base_url(); ?>images/no-image2.png" alt="" class="img-t-01">
+                <img src="<?php echo base_url(); ?>images/no-image2.png" alt="<?php echo $uinfo->Name; ?>" class="img-t-01">
                 <?php } else {?>
-                <img src="<?php echo base_url(); ?>upload/images/<?php echo $uinfo->Image ?>" class="img-t-01" />
+                <img alt="<?php echo $uinfo->Name; ?>" src="<?php echo base_url(); ?>upload/images/<?php echo $uinfo->Image ?>" class="img-t-01" />
                 <?php } ?>
-              <a><?php echo $userlogin; ?></a>
+              <a><?php echo $uinfo->Name; ?></a>
             </div>
             <div class="col-md-12" style="margin: 0 auto 23px auto;">
             <div class="uvhoanthienhoso">
@@ -106,22 +113,33 @@ foreach ($point as $key ) {
                   
                     </div>
                   </div> -->
-                  <span style="text-align: center; display: block;" class="ntdmoney">TKC: <?php echo $balance; ?> vnđ <span> và <?php $diem ?> điểm</span></span>
+                  <span style="text-align: center; display: block;" class="ntdmoney">Điểm : <span><?php if (!empty($diem_free)) {echo $diem_free[0]->point_free;} else { echo 5;} ?> điểm miễn phí, </span><span><?php if (!empty($diem_mua)) {echo $diem_mua[0]->point_pay;} else { echo 0;} ?> điểm đã mua</span></span>
+
                 <!-- <label class="activesearch">
                     Cho phép gia sư tìm kiếm
                     <input value="1" <?php if($footer!=''){ if($footer->IsSearch ==1){echo "checked";} } ?> name="buttonRounded" type="checkbox" id="buttonRounded">
                     <span class="lever"></span>                    
                 </label> -->
             </div>
-            <div class="groupbtnuv" style="text-align: center;">                
-                <span class="btnrefreshuv" onclick="location='<?php echo site_url() ?>'">Làm mới</span>
+            <div class="groupbtnuv" style="text-align: center;">     
+                <span class="btnrefreshuv">Làm mới</span>
                 <span class="btnupdateuv" onclick="location.href='<?php echo site_url('mn-hv-thong-tin-ho-so') ?>'">Hoàn thiện</span>
             </div>
             </div>
             <div style="clear:bold;"></div>
             <nav id="sidebar">
                 <ul class="list-unstyled components">
+                  <?php if(current_url()==site_url('mn-hv-dang-tin')){ ?>
+                    <li class="active">
+                        <i class="fa fa-uv-updatevip"></i><a href="<?php echo site_url('mn-hv-dang-tin') ?>">Đăng tin</a>
+                    </li>
+                    <?php }else{ ?>
+                    <li>
+                        <i class="fa fa-uv-updatevip"></i><a href="<?php echo site_url('mn-hv-dang-tin') ?>">Đăng tin</a>
+                    </li>
+                    <?php } ?>
                 <?php if(current_url()==site_url('phu-huynh-manager')){ ?>
+
                     <li class="active">
                         <i class="fa fa-settings"></i><a href="<?php echo site_url('phu-huynh-manager') ?>">Quản lý chung</a>
                     </li>
@@ -130,6 +148,7 @@ foreach ($point as $key ) {
                         <i class="fa fa-settings"></i><a href="<?php echo site_url('phu-huynh-manager') ?>">Quản lý chung</a>
                     </li>
                     <?php } ?>
+                
                     <li>
                         <i class="fa fa-uv-jobmanager"></i><a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle <?php if($menu1){echo "";}else{echo "collapsed";} ?>">Quản lý gia sư</a>
                         <ul class="list-unstyled collapse <?php if($active1){echo "in";}else{echo "";} ?>" id="homeSubmenu" style="">
@@ -151,6 +170,15 @@ foreach ($point as $key ) {
                                 <i class="fa fa-uv-ungtuyen"></i><a href="<?php echo site_url('mn-hv-gia-su-moi-day'); ?>">Gia sư đã mời dạy</a>
                             </li>
                             <?php } ?>
+                             <?php if(current_url()==site_url('mn-hv-gia-su-da-xem-thong-tin')){ ?>
+                               <li class="active">
+                                  <i class="fa fa-uv-phuhop"></i><a href="<?php echo site_url('mn-hv-gia-su-da-xem-thong-tin') ?>">Gia sư đã xem thông tin</a>
+                                </li>
+                           <?php }else{ ?>
+                               <li>
+                                  <i class="fa fa-uv-phuhop"></i><a href="<?php echo site_url('mn-hv-gia-su-da-xem-thong-tin') ?>">Gia sư đã xem thông tin</a>
+                                </li>
+                           <?php } ?>
                            <?php if(current_url()==site_url('mn-hv-gia-su-phu-hop')){ ?>
                                <li class="active">
                                   <i class="fa fa-uv-phuhop"></i><a href="<?php echo site_url('mn-hv-gia-su-phu-hop') ?>">Gia sư phù hợp</a>

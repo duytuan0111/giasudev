@@ -184,7 +184,7 @@
                                                 <?php if(!empty($n->Image)){?>
                                             <img alt="<?php echo $n->new_title ?>" src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),63,63,80) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                         <?php }else{ ?>
-                                         <img src="<?php gethumbnail("images/no-image2.png","no-image2.png",strtotime($n->usc_create_time),63,40,80) ?>" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                         <img src="<?php gethumbnail("images/no-image2.png","no-image2.png",strtotime($n->usc_create_time),63,40,80) ?>" alt="<?php echo $n->new_title ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                          <?php } ?>
                                                 </a>                                                
                                                 <span><?php if(!empty($n->Birth)){echo date("d/m/Y",strtotime($n->Birth));} ?></span>
@@ -265,7 +265,7 @@
                                             <?php if(!empty($n->Image)){?>
                                                 <img alt="<?php echo $n->new_title ?>" src="<?php gethumbnail(geturlimageAvatar(strtotime($n->usc_create_time)).$n->usc_logo,$n->usc_logo,strtotime($n->usc_create_time),268,150,80) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                             <?php }else{ ?>
-                                             <img src="<?php gethumbnail("images/no-image2.png","no-image2.png",strtotime($n->usc_create_time),268,171,80) ?>" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                             <img src="<?php gethumbnail("images/no-image2.png","no-image2.png",strtotime($n->usc_create_time),268,171,80) ?>" alt="<?php echo $n->new_title ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                              <?php } ?>
                                           </a>
                                        </div>
@@ -302,7 +302,7 @@
                                         <?php if(!empty($n->Image)){?>
                                             <img alt="<?php echo $n->new_title ?>" src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),268,150,80) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                         <?php }else{ ?>
-                                         <img src="<?php gethumbnail("images/no-image2.png","no-image2.png",strtotime($n->usc_create_time),268,171,80) ?>" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                         <img src="<?php gethumbnail("images/no-image2.png","no-image2.png",strtotime($n->usc_create_time),268,171,80) ?>" alt="<?php echo $n->new_title ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                          <?php } ?>
                                       </a>
                                    </div>

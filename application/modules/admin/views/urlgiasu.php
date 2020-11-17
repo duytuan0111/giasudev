@@ -132,9 +132,17 @@ $admin=$this->db->get('tbl_admin')->row();
 <form name="frmsearch" method="post" action="<?php echo site_url('admin/urlgiasu'); ?>">
 <input class="text-search" name="txt_search" type="text" value="<?php if(isset($_SESSION['txt_search'])){ echo $_SESSION['txt_search'];} ?>" placeholder="Từ khóa tìm kiếm" />
 
-<select name="search_status" style="width:110px;">
+<select name="search_status" id="search_status" style="width:110px;">
+	<option value="3" <?php if(isset($_SESSION['search_status']) and $_SESSION['search_status']==3){ ?>selected="selected"<?php } ?>>Tất cả</option>
 	<option value="0" <?php if(isset($_SESSION['search_status']) and $_SESSION['search_status']==0){ ?>selected="selected"<?php } ?>>Môn học</option>
 	<option value="1" <?php if(isset($_SESSION['search_status']) and $_SESSION['search_status']==1){ ?>selected="selected"<?php } ?>>Địa điểm</option>
+	<option value="2" <?php if(isset($_SESSION['search_status']) and $_SESSION['search_status']==2){ ?>selected="selected"<?php } ?>>Môn học & địa điểm</option>
+</select>
+<select name="search_address" id="search_address" style="width:110px;">
+	<option value>-- Tỉnh/ thành --</option>
+	<?php foreach ($listcity as $k) { ?>
+	<option value="<?php echo $k->cit_id; ?>" <?php if(isset($_SESSION['search_address']) and $_SESSION['search_address']== $k->cit_id ){ ?>selected="selected"<?php } ?>><?php echo $k->cit_name; ?></option>
+	<?php } ?>
 </select>
 <input class="button_w" type="submit" name="submit" value="Tìm kiếm" />
 </form>
@@ -144,9 +152,12 @@ $admin=$this->db->get('tbl_admin')->row();
 	<table width="100%" style="display:block;">
 		<tr class="title">
 			<td width="5%" align="center"><input type="checkbox" onclick="checkall('checkbox', this)" name="check"/></td>
+			<td width="5%" align="center">Top</td>        
 			<td width="5%" align="center">STT</td>        
 			<td width="20%">Key tag</td>        
+			<td width="20%">Địa điểm</td>        
 			<td width="20%">Url</td>
+			<td width="5%" align="center">Index</td> 
 			<td width="5%"></td>
 			
 		</tr>
@@ -155,22 +166,34 @@ $admin=$this->db->get('tbl_admin')->row();
 		<tr class="<?php echo $stt%2 ? 'odd' : 'even'; ?>">
 			<td align="center">
 				<div id="request-form">
-					<input type="checkbox" name="checkbox[]" class="checkbox" value="<?php echo $n->id ?>" />
+					<input type="checkbox" name="checkbox[]" class="checkbox" value="<?php echo $n->ID ?>" />
 				</div>
 			</td>
-			<td align="center"><?php echo $n->id; ?></td>					
-			<td><p><?php echo ($n->key_tag);?></p></td>		
+			<td align="center">
+				<div id="request-form">
+					<input type="checkbox" name="is_top" class="checkbox_is_search" <?php echo ($n->is_top == 1) ? 'checked' : '' ?> value="" data-val="<?php echo $n->ID ?>" />
+				</div>
+			</td>
+			<td align="center"><?php echo $n->ID; ?></td>					
+			<td align="center"><p><?php echo ($n->NameTopic);?></p></td>
+			<td align="center"><p><?php echo $n->place_name;?></p></td>			
 			<td>
 				<?php if ($n->option == 0) { ?>
-				<a target="blank" href="<?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias ?>-s1p0.html"><?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias ?>-s1p0.html</a> 
+				<a target="blank" href="<?php echo base_url(); ?>tim-gia-su-<?php echo $n->alias ?>-m<?php echo $n->ID; ?>l0t0.html"><?php echo base_url(); ?>tim-gia-su-<?php echo $n->alias ?>-m<?php echo $n->ID; ?>l0t0.html</a> 
 				<?php } else if($n->option == 1){ ?>
-					<a target="blank" href="<?php echo base_url(); ?>tim-gia-su-tai-<?php echo $n->alias?>-c1p0.html"><?php echo base_url(); ?>tim-gia-su-tai-<?php echo vn_str_filter($n->place_name)?>-c<?php echo $n->place_id ?>p0.html</a>
+					<a target="blank" href="<?php echo base_url(); ?>tim-gia-su-tai-<?php echo vn_str_filter($n->place_name)?>-m0l0t<?php echo $n->place_id ?>.html"><?php echo base_url(); ?>tim-gia-su-tai-<?php echo vn_str_filter($n->place_name)?>-m0l0t<?php echo $n->place_id ?>.html</a>
 				<?php } else if($n->option == 2) { ?>
-					<a target="blank" href="<?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias?>-tai-<?php echo vn_str_filter($n->place_name); ?>-s1r0c1.html"><?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias?>-tai-<?php echo vn_str_filter($n->place_name); ?>-s1r0c1.html</a>
+					<!-- <a target="blank" href="<?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias?>-tai-<?php echo vn_str_filter($n->place_name); ?>-m<?php echo $n->ID ?>l0t<?php echo $n->place_id; ?>.html"><?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias?>-tai-<?php echo vn_str_filter($n->place_name); ?>-m<?php echo $n->ID ?>l0t<?php echo $n->place_id; ?>.html</a> -->
+					<a target="blank" href="<?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias ?>-m<?php echo $n->ID ?>l0t<?php echo $n->place_id; ?>.html"><?php echo base_url(); ?>tim-gia-su-mon-<?php echo $n->alias ?>-m<?php echo $n->ID ?>l0t<?php echo $n->place_id; ?>.html</a>
 				<?php } ?>
+			</td>
+			<td align="center">
+				<div id="request-form">
+					<input type="checkbox" name="index" class="checkbox_index" <?php echo ($n->index == 1) ? 'checked' : '' ?> value="" data-val="<?php echo $n->ID ?>" />
+				</div>
 			</td>			
 			<td align="center">						
-				<a href="<?php echo base_url(); ?>admin/exit_urlgiasu/<?php echo $n->id ?>" class="btn btn-sm btn-danger">Sửa</a>
+				<a href="<?php echo base_url(); ?>admin/exit_urlgiasu/<?php echo $n->ID ?>" class="btn btn-sm btn-danger">Sửa</a>
 			</td> 
 
 			
@@ -187,6 +210,69 @@ $admin=$this->db->get('tbl_admin')->row();
 	<?php echo $pagination; ?>
 </div>
 <script type="text/javascript">
+	$(document).ready(function() {
+		var url = '<?php echo base_url(); ?>';
+		// $('.button_w').click(function(event) {
+		// 	if ($('#search_status').val() == 3) {
+		// 		window.location.href = url+'admin/urlgiasu';
+		// 	}
+		// });
+		$('.checkbox_is_search').change(function(event) {
+			var checkbox_is_search = $(this).val();
+			var id = $(this).attr('data-val');
+			if ($(this).is(':checked') == true) {
+				checkbox_is_search = 1;
+			} else {
+				checkbox_is_search = 0
+			}
+			$.ajax({
+				url: url+'admin/update_is_top/'+id,
+				type: 'POST',
+				dataType: 'JSON',
+				data: {is_top: checkbox_is_search},
+				success: function(data) {
+					if (data.kq == true) {
+						window.location.reload();
+					} else {
+						alert('Cập nhật không thành công');
+					}
+				},
+				error: function(xhr) {
+					alert('Cập nhật không thành công');
+				}
+			})
+			
+			
+		});
+		// check index
+		$('.checkbox_index').change(function(event) {
+			var index = $(this).val();
+			var id = $(this).attr('data-val');
+			if ($(this).is(':checked') == true) {
+				index = 1;
+			} else {
+				index = 0;
+			}
+			$.ajax({
+				url: url+'admin/update_index/'+id,
+				type: 'POST',
+				dataType: 'JSON',
+				data: {index: index, tbl: 'topic'},
+				success: function(res) {
+					if (res.kq == true) {
+						window.location.reload();
+					} else {
+						alert('error');
+					}
+				}, 
+				error: function(kq) {
+					alert('Error');
+				}
+			})
+			
+			
+		});
+	});
 	function check_statusck(tblname,field,status,fieldid,id)
 	{
 		$.ajax({

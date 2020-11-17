@@ -1,11 +1,23 @@
 <?php 
 ?>
+<style>
+    @media (max-width: 479px) {
+        .img-dkychung {
+            margin-left: 27px;
+        }
+    }
+    @media (min-width: 768px) and (max-width: 1024px)  {
+           .img-dkychung {
+            margin-left: -38px;
+        }
+    }
+</style>
 <header class="logingenaral">
    <div class="container">
         <a href="<?php echo base_url() ?>" class="backurl"><i class="fa fa-backurl"></i></a>
         <div class="logo-login">
-            <a href="<?php echo base_url() ?>" title="timviec365">
-               <img src="images/logo-01.png" alt="#" style="background-color:#203043;">
+            <a href="https://timviec365.com.vn/" title="timviec365">
+               <img src="<?php echo base_url(); ?>upload/images/logo-new2.png" class="img-dnchung" alt="trang chủ" style="padding: 0px 10px;">
             </a>
          </div>
         <a href="<?php echo base_url(); ?>dang-nhap-chung" class="btn btndangky">Đăng nhập</a>
@@ -26,7 +38,7 @@
                         </li>
                     </ul>
                     <span class="btnloginuv" onclick="location='dang-ky-nguoi-dung'">Đăng ký tìm gia sư</span>
-                    <a  class="supportregister" href="<?php echo base_url() ?>huong-dan-dang-ky-tk">Hướng dẫn đăng ký tìm gia sư</a>
+                    <!-- <a  class="supportregister" href="<?php echo base_url() ?>huong-dan-dang-ky-tk">Hướng dẫn đăng ký tìm gia sư</a> -->
                 </div>
             </div>
             <div class="col-md-6 col-sm-12">
@@ -41,7 +53,7 @@
                         </li>
                     </ul>
                     <span class="btnloginntd" onclick="location='dang-ky-gia-su'">Đăng ký làm gia sư</span>
-                    <a class="supportregisterntd" href="<?php echo base_url() ?>huong-dan-dang-ky-gia-su">Hướng dẫn đăng ký làm gia sư</a>
+                    <!-- <a class="supportregisterntd" href="<?php echo base_url() ?>huong-dan-dang-ky-gia-su">Hướng dẫn đăng ký làm gia sư</a> -->
                 </div>
             </div>        
             

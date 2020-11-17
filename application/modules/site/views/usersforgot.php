@@ -1,15 +1,35 @@
-<?php ?>
+<?php  ?>
 <header class="logingenaral">
+  <style>
+    @media (max-width: 479px) {
+        .note {
+          margin-right: 70px !important;
+        }
+        .img-dkychung {
+            margin-left: 27px;
+        }
+        .btnuserforgotpassword {
+          padding: 0px 30px !important;
+        }
+    }
+    @media (min-width: 768px) and (max-width: 1024px)  {
+       .img-dkychung {
+        margin-left: -38px;
+    }
+}
+</style>
    <div class="container">
-        <a href="<?php echo base_url() ?>" class="backurl"><i class="fa fa-backurl"></i></a>
+        <a href="<?php echo base_url() ?>phu-huynh-dang-nhap" class="backurl"><i class="fa fa-backurl"></i></a>
         <div class="logo-login">
-            <a href="<?php echo base_url() ?>" title="trang chủ">
-               <img src="images/logo-2.png" alt="#" style="background-color:#203043;">
+            <a href="https://timviec365.com.vn/" title="trang chủ">
+                <img src="<?php echo base_url(); ?>upload/images/logo-new2.png" alt="Trang chủ" style="">
             </a>
          </div>
         <a href="<?php echo base_url() ?>dang-ky-chung" class="btn btndangky">Đăng ký</a>
    </div>
 </header>
+<div id="wait" style="display:none;width:69px;height:89px;position:absolute;top:21%;left:50%;padding:2px; z-index: 1"><img src='<?php echo base_url(); ?>upload/images/demo_wait.gif' width="64" height="64" /><br>Đang gửi..</div>
+
 <section class="padd-0">
     <div class="container">
         <div class="formlogin frmfogotpass">
@@ -28,7 +48,7 @@
                 </div>
                 </div>
                 <p>Mời bạn nhập tài khoản Email đã đăng kí. Gia sư 365 sẽ gửi tới bạn hướng dẫn để tạo mật khẩu mới, vui lòng kiểm tra email. </p>
-                <a class="btnuserforgotpassword" id="btnusersforgot">Lấy lại mật khẩu</a>
+                <button class="btnuserforgotpassword" id="btnusersforgot">Lấy lại mật khẩu</button>
                 <div class="linkregister">
                 <span>Bạn đã có tài khoản? <a href="<?php echo base_url() ?>dang-nhap-chung">đăng nhập</a></span>
             </div>
@@ -38,13 +58,50 @@
     </div>
 </section>
 <script>
-$(document).ready(function() {
-  var configulr='<?php echo site_url() ?>';
-  var regex_email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-  $('#btnusersforgot').on('click',function(){
-    
-    if($('#emailuser').val() =='')
+  jQuery(document).ready(function($) {
+    var configulr='<?php echo site_url() ?>';
+    $('#emailuser').keyup(function(event) {
+      if($('#emailuser').val() == '')
+      {
+        if($('#div_emailuser').hasClass('errorClass') == false)
+        {
+          $('#div_emailuser').addClass('errorClass');
+          $('#div_emailuser').after('<p id="emailuser_error" style="color:red;float:left">Email không được để trống.</p>');
+        }
+        $('#emailuser').focus();
+      }
+      else
+      {
+        $('#div_emailuser').removeClass("errorClass");
+        $('#emailuser_error').remove();
+      }
+    });
+    $("#emailuser").blur(function(event) {
+       var regex_email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+       if($('#emailuser').val() == ''){
+        if($('#div_emailuser').hasClass('errorClass') == false){
+          $('#div_emailuser').addClass('errorClass');
+          $('#div_emailuser').after('<p id="emailuser_error" style="color:red;float:left">Email không được để trống.</p>');
+        } 
+        $('#emailuser').focus();
+      }
+      else
+      {
+        if(regex_email.test($('#emailuser').val()) == false)
+        {
+          if($('#div_emailuser').hasClass('errorClass') == false)
+          {
+            $('#div_emailuser').addClass('errorClass');
+            $('#div_emailuser').after('<p id="emailuser_error" style="color:red; float:left">Email không đúng định dạng.</p>');
+          }
+          $('#emailuser').focus();
+        }
+      }
+    });
+    $('.btnuserforgotpassword').click(function(event) {
+       var configulr='<?php echo site_url() ?>';
+       var regex_email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+       if($('#emailuser').val() =='')
     {
       if($('#div_emailuser').hasClass('errorClass') == false)
       {
@@ -78,7 +135,8 @@ $(document).ready(function() {
           dataType: 'json',
           beforeSend: function () 
           {
-            $("#boxLoading").show();
+            $("#wait").css('display', 'block');
+            $(".btnuserforgotpassword").attr('disabled', true);
           },
           success: function (reponse) 
           {
@@ -98,51 +156,12 @@ $(document).ready(function() {
           },
           complete: function () 
           {
-            $("#boxLoading").hide();
+            $("#wait").css('display', 'none');
+             $(".btnuserforgotpassword").attr('disabled', false);
           }
         });
       }
     };
+    });
   });
-  $('#emailuser').keyup(function(){
-  //Nhap ban phim
-    if($('#emailuser').val().length == 0)
-    {
-      if($('#div_emailuser').hasClass('errorClass') == false)
-      {
-        $('#div_emailuser').addClass('errorClass');
-        $('#div_emailuser').after('<p id="emailuser_error" style="color:red;float:left">Email không được để trống.</p>');
-      }
-      $('#emailuser').focus();
-    }
-    else
-    {
-      $('#div_emailuser').removeClass("errorClass");
-      $('#emailuser_error').remove();
-    }
-  });
-  $('#emailuser').blur(function(){
-    var regex_email = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if($('#emailuser').val() == ''){
-      if($('#div_emailuser').hasClass('errorClass') == false){
-        $('#div_emailuser').addClass('errorClass');
-        $('#div_emailuser').after('<p id="emailuser_error" style="color:red;float:left">Email không được để trống.</p>');
-      } 
-      $('#emailuser').focus();
-    }
-    else
-    {
-      if(regex_email.test($('#emailuser').val()) == false)
-      {
-        if($('#div_emailuser').hasClass('errorClass') == false)
-        {
-          $('#div_emailuser').addClass('errorClass');
-          $('#div_emailuser').after('<p id="emailuser_error" style="color:red; float:left">Email không đúng định dạng.</p>');
-        }
-        $('#emailuser').focus();
-      }
-    }
-  });    
-});
-
 </script>

@@ -15,9 +15,9 @@ $admin=$this->db->get('tbl_admin')->row();
 		<?php 
 			if(isset($id))
 			{
-				$this->db->where('id',$id);
-				$item=$this->db->get('url_phuhuynh')->row();				
-				$id=$item->id;            
+				$this->db->where('ID',$id);
+				$item=$this->db->get('topic')->row();				
+				$id=$item->ID;            
 			}
 			?>  
 		<input type="hidden" name="id" value="<?php if(isset($id)) { echo $id; }; ?>" />			<div class="gray">
@@ -34,6 +34,28 @@ $admin=$this->db->get('tbl_admin')->row();
 		<tr>
 			<td width="150"><strong>Alias:</strong></td>
 			<td><input type="text" name="alias" id="alias" required="" readonly></td>
+		</tr>
+		<tr>
+			<td width="150"><strong>Type: </strong></td>
+			<td>
+				<select name="type" id="type">
+					<option value="1" >Cụ thể</option>
+					<option value="2" >Tổng quát</option>
+
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td width="150"><strong>Môn học: </strong></td>
+			<td>
+				<select name="sub_id" id="sub_id">
+					<option value>-- Chọn môn học --</option>
+
+					<?php foreach ($listsubject as $m) { ?>
+					<option value="<?php echo $m->ID; ?>" data-val="<?php echo $m->SubjectName; ?>"><?php echo $m->SubjectName; ?></option>
+					<?php } ?>
+				</select>
+			</td>
 		</tr>
 		<tr>
 			<td width="150"><strong>Địa điểm: </strong></td>
@@ -103,7 +125,7 @@ $admin=$this->db->get('tbl_admin')->row();
 <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function() {
-		$('#key_tag').change(function(event) {
+		$('#key_tag').keyup(function(event) {
 				var key_tag 	= $(this).val();
 				var slug		=  key_tag.toLowerCase();
 				 //Đổi ký tự có dấu thành không dấu
@@ -134,6 +156,8 @@ $admin=$this->db->get('tbl_admin')->row();
 		
 		$('.submit').click(function(event) {
 			event.preventDefault();
+			var sub_id = $('#sub_id').val();
+			var type = $('#type').val();
 			var place = $('#place').val();
 			var cit_name = $('#place').find(':selected').attr('data-val');
 			var h1 = $('#h1').val();
@@ -144,19 +168,23 @@ $admin=$this->db->get('tbl_admin')->row();
 			var key = $('#seo_keyword').val();
 			var description = $('#seo_description').val();
 			var url='<?php echo site_url(); ?>';
+
 			if (h1 == '') {
 				alert('Tiêu đề không được để trống');
 			} else if (key_tag == '' && place == '') {
 				alert('bạn phải lựa chọn key tag hoặc địa điểm');
+			} else if ((key_tag != '' && sub_id == '') || (sub_id != '' && key_tag == '')) {
+				alert('bạn phải chọn môn học theo key tag');
 			} else {
+				// 
 				$.ajax({
 					url: url+"admin/add_url_giasu",
 					type: "POST",
 					dataType: "JSON",
-					data: {h1: h1, place: place, cit_name: cit_name, key_tag: key_tag, alias: alias,content:content, title: title, keyword: key, description: description},
+					data: {h1: h1, place: place, type: type, sub_id: sub_id, cit_name: cit_name, key_tag: key_tag, alias: alias,content:content, title: title, keyword: key, description: description},
 					success: function(reponse) {
 						if (reponse.kq == 0) {
-							alert('Key tag đã tồn tại');
+							alert('Bản ghi đã tồn tại');
 						} else if(reponse.kq == 1) {
 							alert('Thêm thành công');
 							window.location.href = url+'admin/urlgiasu';

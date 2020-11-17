@@ -5,9 +5,10 @@
 			if(isset($id))
 			{
 
-				$this->db->where('id',$id);			          
-				$item=$this->db->get('url_phuhuynh')->row();
-				$id=$item->id;
+				$this->db->where('ID',$id);			          
+				$item=$this->db->get('topic')->row();
+				$id=$item->ID;
+				
 				
 			}
 		?>     
@@ -18,11 +19,41 @@
 			<td width="150"><strong>Tiêu đề (h1):</strong></td>
 			<td><input type="text" name="h1" id="h1" value="<?php if(isset($id)) {echo htmlspecialchars($item->h1);} ?>" /></td>
 		</tr>
+		<?php if ($item->option == 2 || $item->option == 0) { ?>
 		<tr>
 			<td width="150"><strong>Key tag:</strong></td>
 			<td><input type="text" name="key_tag" id="key_tag" required="" value="<?php if(isset($id)) {echo htmlspecialchars($item->key_tag);} ?>"  /></td>
 		</tr>
+		<?php } ?>
+		<input type="hidden" name="alias" id="alias" value="<?php echo $item->alias; ?>">
+		<input type="hidden" name="option" id="option" value="<?php echo $item->option; ?>">
+		<input type="hidden" name="place_id_old" id="place_id_old" value="<?php echo $item->place_id; ?>">
+		<?php if ($item->option == 2 || $item->option == 0) { ?>
 		<tr>
+			<td width="150"><strong>Type: </strong></td>
+			<td>
+				<select name="type" id="type">
+					<option value="1" <?php echo ($item->type == 1) ? 'selected' : ''; ?> >Cụ thể</option>
+					<option value="2" <?php echo ($item->type == 2) ? 'selected' : ''; ?> >Tổng quát</option>
+
+				</select>
+			</td>
+		</tr>
+		 <tr>
+			<td width="150"><strong>Môn học: </strong></td>
+			<td>
+				<select name="sub_id" id="sub_id">
+					<option value>-- Chọn môn học --</option>
+
+					<?php foreach ($listsubject as $m) { ?>
+						<option value="<?php echo $m->ID; ?>" <?php echo ($m->ID == $item->sub_id) ? 'selected' : ''; ?> data-val="<?php echo $m->SubjectName; ?>"><?php echo $m->SubjectName; ?></option>
+					<?php } ?>
+				</select>
+			</td>
+		</tr> 
+		<?php } ?>
+		<?php if ($item->option == 2) { ?>
+		 <tr>
 			<td width="150"><strong>Địa điểm: </strong></td>
 			<td>
 				<select name="place" id="place">
@@ -33,7 +64,8 @@
 					<?php } ?>
 				</select>
 			</td>
-		</tr>
+		</tr> 
+		<?php } ?>
 		<tr><td colspan="2">				
 			<strong>Nội dung</strong>
 			​<textarea rows="5" cols="70" name="editor" id="editor" /><?php if(isset($id)) {echo $item->content;} ?></textarea>
@@ -80,9 +112,15 @@
 <!-- Tích hợp jck soạn thảo-->
 <script type="text/javascript"> 
 	$(document).ready(function() {
+		var current_url = $(location).attr('href');
 		$('.submit').click(function(event) {
 			event.preventDefault();
 			var option = $('#option').val();
+			var type = $('#type').val();
+			var alias = $('#alias').val();
+			var sub_id = $('#sub_id').val();
+			var place = $('#place').val();
+			var cit_name = $('#place').find(':selected').attr('data-val');
 			var id = $('#id').val();
 			var h1 = $('#h1').val();
 			var key_tag = $('#key_tag').val();
@@ -91,20 +129,28 @@
 			var key = $('#seo_keyword').val();
 			var description = $('#seo_description').val();
 			var url='<?php echo site_url(); ?>';
-			if (h1 == '') {
+			var place_id_old = $('#place_id_old').val();
+			var current_url = $(location).attr('href');
+			if (h1 == '' ) {
 				alert('Tiêu đề không được để trống');
-			} else if (key_tag == '') {
+			} else if ((key_tag == '' && option == 0) || (key_tag == '' && option == 2)) {
 				alert('Key tag không được để trống');
+			} else if (place == '' && option == 1) {
+				alert('Địa điểm không được để trống');
+			} else if (option == 2 && (key_tag == '' || sub_id == '' || place == '')) {
+				alert('key tag, môn học, địa điểm không được để trống');
 			} else {
 				$.ajax({
 					url: url+"admin/edit_url_giasu",
 					type: "POST",
 					dataType: "JSON",
-					data: {id: id,option: option, h1: h1, key_tag: key_tag,content:content, title: title, keyword: key, description: description},
+					data: {id: id, sub_id: sub_id, type: type, option: option, alias: alias, cit_name: cit_name, place: place, h1: h1, key_tag: key_tag,content:content, title: title, keyword: key, description: description, place_id_old: place_id_old},
 					success: function(reponse) {
 						if (reponse.kq == 1) {
 							alert('Cập nhật thành công');
-							window.location.href = url+'admin/urlgiasu';
+							window.location.reload();
+						} else if (reponse.kq == 0) {
+							alert('bản ghi đã tồn tại');
 						}
 					},
 					error: function(xhr) {

@@ -1,14 +1,4 @@
-<?php
 
-/**
- * @author lolkittens
- * @copyright 2018
- */
-echo  $itemconfirm['kq'];
-?>
-<div class="container">
- <?php $this->load->view('headerfun'); ?>
-</div>
 <section class="padd-0">
   <div class="container">
     <br />
@@ -21,7 +11,7 @@ echo  $itemconfirm['kq'];
           <p>Vui lòng đăng nhập để tìm gia sư miễn phí.</p>
           <p>Giasu365 xin chân thành cảm ơn !!!</p>
       <?php }else{ ?>
-          <h3 class="text-center">Xác thực tài khoản tại Timviec365.vn</h3>
+          <h3 class="text-center">Xác thực tài khoản tại Timviec365.com.vn</h3>
           <p  class="text-center">Xác thực tài khoản thất bại !!!</p>
       <?php } ?>           
     </div>
@@ -51,8 +41,9 @@ echo  $itemconfirm['kq'];
           },
           success: function (obj) {
           if(obj.kq != true){
-            alert('Bạn đã kích hoạt thành công');
-            window.location.href=configulr+'dang-nhap-chung';
+            // alert('Bạn đã kích hoạt thành công');
+            // window.location.href=configulr+'dang-nhap-chung';
+            // window.location.reload();
           }else{
             alert('Xác nhận thất bại');
           }

@@ -21,15 +21,57 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){
   }else{
     $taohoso=site_url('mn-gia-su-cap-nhat-thong-tin');
   }
+//
 // var_dump($active); die();
   $check=true;
 }
 $detect = new Mobile_Detect;
 ?>
+
 <!-- Main Banner Section Start -->
 <div class="container">
   <hr class="timeline" style="width: 1%;">
 </div>
+<style>
+  .itemnews .itemnews_l img {
+    width: 55px;
+    height: 51px;
+  }
+  .slick-dots li button {
+    font-size: 0;
+    line-height: 0;
+    display: none !important;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    cursor: pointer;
+    color: transparent;
+    border: 0;
+    outline: none;
+    background: transparent;
+}
+.itemnews {
+    position: relative;
+    width: 100%;
+    height: 157px !important;
+    border-bottom: 1px solid #dedede;
+}
+.item_hd:hover {
+  
+}
+@media (max-width: 479px) {
+  .box_hotline strong {
+    display: block;
+    margin-top: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    font-family: "Roboto";
+  }
+  .viewnow {
+    display: block !important;
+  }
+}
+</style>
 <div class="clearfix"></div>
 <?
 if($usertype==1)
@@ -41,7 +83,7 @@ if($usertype==1)
             <div class="col-md-12 titledetail">
                 <div class="tit_hd">
                     <h3><i class="fa fa-ntd-logout"></i> Lớp có học phí cao nhất</h3> 
-                    <a href="<?php echo site_url('tim-lop-hoc') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="#"/></a>
+                    <a href="<?php echo site_url('tim-lop-hoc') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="Xem tất cả"/></a>
                 </div>
             </div>  
             <div class="col-md-12 topmoney">
@@ -55,7 +97,7 @@ if($usertype==1)
                             <div class="col-md-4 col-xs-12 padd-l-5 padd-r-5">
                                 <div class="item_hd vip" data-object="<?php echo $n->UserID ?>" data-type="<?php echo $n->UserID ?>">
                                     <div class="company_logo">
-                                        <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>">
+                                        <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>">
                                             <?php if(!empty($n->Image)){?>
                                                 <img src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" alt="<?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                             <?php }else{ ?>
@@ -64,8 +106,8 @@ if($usertype==1)
                                         </a>
                                     </div>
                                     <div class="right_item">
-                                        <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->ClassTitle ?></a>
-                                        <a href="" title="" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <i class="fa fa-chat"></i></a>
+                                        <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->ClassTitle ?></a>
+                                        <a href="" title="" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <!-- <i class="fa fa-chat"></i> --></a>
                                         <span class="money_item">Từ: <span><?php echo number_format($n->Money)." vnđ/h" ?></span></span>
                                         <span class="time_item"><?php echo Getcitybyindex($n->City) ?></span>
                                     </div>
@@ -100,19 +142,19 @@ if($usertype==1)
                           <div class="itemnews_l">
                               <a class="logouser">
                                   <?php if(!empty($n->Image)){?>
-                                     <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>"><img src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' /></a> 
+                                     <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>"><img alt="lớp <?php echo $n->ClassTitle; ?>" src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' /></a> 
                                   <?php }else{ ?>
-                                    <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>"> <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' /></a> 
+                                    <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>"> <img src="images/no-image2.png" alt="lớp <?php echo $n->ClassTitle; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' /></a> 
                                   <?php } ?>
                               </a>
                               
                               <span><?php echo date("d/m/Y",strtotime($n->CreateDate)); ?></span>
                           </div>
                           <div class="itemnews_r">
-                              <a  href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
-                              <p><?php $gn_text=$n->DescClass; 
-                              if ( strlen( $n->DescClass ) > 150 ) {
-                                  $gn_text = substr( $n->DescClass, 0, 150 );
+                              <a  href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
+                              <p class="chitietmobile"><?php $gn_text=$n->DescClass; 
+                              if ( strlen( $n->DescClass ) > 100 ) {
+                                  $gn_text = substr( $n->DescClass, 0, 100 );
                                   $space   = strrpos( $gn_text, ' ' );
                                   $gn_text = substr( $gn_text, 0, $space ). '...';           
                               }
@@ -121,7 +163,7 @@ if($usertype==1)
                               <span class="btn"><?php $tg=explode(',',$n->LearnType);
                               echo GetLearnType($tg[0]); ?></span>
                               <span class="btn"><?php echo Getcitybyindex($n->City) ?></span>
-                              <span class="xacthuc"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="Phụ huynh đã xác thực"></i><i data-toggle="tooltip" data-placement="top" title="Chat với học viên" class="fa fa-uv-chat-cam"></i></span>
+                              <span class="xacthuc"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="Phụ huynh đã xác thực"></i><!-- <i data-toggle="tooltip" data-placement="top" title="Chat với học viên" class="fa fa-uv-chat-cam"></i> --></span>
                               <span class="dadenghiday">Đã đề nghị dạy:&nbsp;&nbsp;<?php echo $n->denghiday  ?><i class="fa fa-user-dnd"></i></span>
                           </div>
                       </div>
@@ -220,15 +262,15 @@ else if($usertype==0)
 ?>
   <div class="container col-popover">
     <div class="tit_hd">
-      <div class="ir_h3"><h2><img src="images/icon-gia-su-blue.png" alt="Gia sư tiếng anh, nhật, hàn, trung"/><span>Gia sư tiếng Anh, Nhật, Hàn, Trung</span></h2>
+      <div class="ir_h3"><h2><img src="images/icon-gia-su-blue.png" alt="Gia sư tiếng anh, nhật, hàn, trung"/><span class="span_nhathan">Gia sư tiếng Anh, Nhật, Hàn, Trung</span></h2>
       </div>
-      <a href="<?php echo site_url('tim-giao-vien-day-kem') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="#"/></a>
+      <a href="<?php echo site_url('tim-gia-su') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="xem tất cả"/></a>
     </div>
     <div class="">
       <div class="main_hd slick">
-        <?php if(!empty($tinmoinhat)){
+        <?php if(!empty($anhnhathantrung)){
           $tg=0;
-          foreach($tinmoinhat as $n){ 
+          foreach($anhnhathantrung as $n){ 
             if($tg%18==0){
               echo "<div class='box_slider_hd'>";
             }
@@ -239,15 +281,15 @@ else if($usertype==0)
                   <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>">
                     <?php if(!empty($n->Image)){?>
                       <?php $tg1= explode('-',date('d-m-Y',strtotime($n->CreateDate))); ?>
-                      <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg1[2]."/".$tg1[1]."/".$tg1[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                      <img  alt="gia sư <?php echo $n->Name ?>" src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg1[2]."/".$tg1[1]."/".$tg1[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                     <?php }else{ ?>
-                      <img src="<?php gethumbnail('images/no-image2.png','no-image2.png',strtotime($n->CreateDate),60,60,80) ?>" alt="<?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                      <img src="<?php gethumbnail('images/no-image2.png','no-image2.png',strtotime($n->CreateDate),60,60,80) ?>" alt="gia sư <?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                     <?php } ?>
                   </a>
                 </div>
                 <div class="right_item">
-                  <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->TitleView ?></a>
-                  <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i></a>
+                  <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->Name ?></a>
+                  <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_co"><i class="fa fa-giasuname"></i><?php echo str_replace(' ,', ', ', $n->TitleView); ?> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> --></a>
                   <span class="money_item">Từ: <span><?php echo number_format($n->Free)." vnđ/h" ?></span></span>
                   <span class="time_item"><?php echo $n->CityName ?></span>
                 </div>
@@ -274,7 +316,7 @@ else if($usertype==0)
               <div class="ir_h3">   
                 <h2 class="vltg"><img src="images/icon-gia-su-blue.png" alt="gia su toan ly hoa"/><span>Gia sư Toán, Lý, Hóa</span></h2>
               </div>
-              <a href="<?php echo site_url('tim-giao-vien-day-kem') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="#"/></a>
+              <a href="<?php echo site_url('tim-gia-su') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="Xem tất cả"/></a>
             </div>
             <div class="main_tg">
               <?php if(!empty($toanlyhoa)){
@@ -286,19 +328,19 @@ else if($usertype==0)
                         <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>">
                           <?php if(!empty($n->Image)){?>
                             <?php $tg=explode('-',date('d-m-Y',strtotime($n->CreateDate))); ?>
-                            <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                            <img alt="gia sư <?php echo $n->Name; ?>" src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                           <?php }else{ ?>
-                            <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                            <img src="gia sư images/no-image2.png" alt="<?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                           <?php } ?>
                         </a>
                       </div>
                       <div class="right_item">
-                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->TitleView ?></a>
-                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i></a>
+                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->Name ?></a>
+                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_co"><i class="fa fa-giasuname"></i><?php echo str_replace(' ,', ', ', $n->TitleView); ?> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> --></a>
                         <span class="money_item">Từ: <span><?php echo number_format($n->Free)." vnđ/h" ?></span></span>
                         <span class="time_item"><?php echo $n->CityName ?></span>
                       </div>
-                      <span class="oldview">Đã xem</span>
+                      <!-- <span class="oldview">Đã xem</span> -->
                     </div>
                   </div>
                   <?php
@@ -307,14 +349,14 @@ else if($usertype==0)
             </div>
           </div>
           <div class="banner_cv">
-            <a href="#" title="#"><img class="bannerads" src="images/banner2.png" alt="#"/></a>
+            <a href="#" title="#"><img class="bannerads" src="images/banner2.png" alt="banner cv"/></a>
           </div>
           <div class="vl_lc">
             <div class="tit_hd">
               <div class="ir_h3">
                 <h2><img src="images/icon-gia-su-blue.png" alt="gia sư văn sử địa"/><span>Gia sư văn, sử, địa</span></h2>
               </div>
-              <a href="<?php echo site_url('tim-giao-vien-day-kem') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="#"/></a>
+              <a href="<?php echo site_url('tim-gia-su') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="xem tất cả"/></a>
             </div>
             <div class="main_lc">
               <?php if(!empty($vansudia)){
@@ -327,9 +369,9 @@ else if($usertype==0)
                         <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>">
                           <?php if(!empty($n->Image)){?>
                             <?php $tg=explode('-',date('d-m-Y',strtotime($n->CreateDate))); ?>
-                            <img src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                            <img alt="gia sư <?php echo $n->Name; ?>" src="<?php echo base_url(); ?>upload/users/thumb/<?php echo $tg[2]."/".$tg[1]."/".$tg[0]."/".$n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                           <?php }else{ ?>
-                            <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                            <img alt="gia sư <?php echo $n->Name; ?>" src="images/no-image2.png" alt="gia sư <?php echo $n->Name; ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                           <?php } ?>
                           <span class="viewnow">Xem hồ sơ</span>
                         </a>
@@ -337,9 +379,9 @@ else if($usertype==0)
                     </div>
                     <div class="col-md-9 col-xs-12">
                       <div class="giasu_info">
-                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="giasu_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i></a>
+                        <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="giasu_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> --></a>
                         <div title="#" class="giasu_titleview">
-                          <span>Gia sư:</span><?php echo str_replace('Gia sư','',$n->TitleView);?>
+                          <span>Gia sư:</span><?php echo str_replace('Gia sư','',str_replace(' ,', ', ', $n->TitleView));?>
                         </div>
                         <div>
                           <span>Khu vực: <span><?php echo $n->CityName ?></span></span>
@@ -385,7 +427,7 @@ else if($usertype==0)
           </div>
         </div>
         <div class="col-md-4 col-xs-12">
-          <div class="box_job_search cate">
+         <!--  <div class="box_job_search cate">
             <h3>GIA SƯ THEO MÔN HỌC</h3>
             <div class="main_sc">
               <input type="text" placeholder="Nhập từ khóa..." id="keymonhon" name="keymonhoc">
@@ -398,7 +440,7 @@ else if($usertype==0)
                 } ?>
               </ul>
             </div>
-          </div>
+          </div> -->
           <div class="box_job_search city">
             <h3>GIA SƯ THEO TỈNH THÀNH</h3>
             <div class="main_sc">
@@ -406,13 +448,14 @@ else if($usertype==0)
               <ul class="giasutt">
                 <?php if(!empty($giasutheott)){
                   foreach($giasutheott as $n){?>
-                    <li><a href="<?php echo base_url() ?>giao-vien&key=all&subject=0&topic=0&place=<?php echo $n->cit_id ?>&type=0&sex=0&order=last"><?php echo $n->cit_name ?> <span>(<?php echo $n->giasutt ?>)</span></a></li> 
+                    <li><a href="<?php echo base_url() ?>tim-gia-su-tai-<?php echo vn_str_filter($n->cit_name); ?>-m0l0t<?php echo $n->cit_id; ?>.html"><?php echo $n->cit_name ?> <span>(<?php echo $n->giasutt ?>)</span></a></li> 
+                    <!-- <li><a href="<?php echo base_url() ?>giao-vien&key=all&subject=0&topic=0&place=<?php echo $n->cit_id ?>&type=0&sex=0&order=last"><?php echo $n->cit_name ?> <span>(<?php echo $n->giasutt ?>)</span></a></li>  -->
                   <?php }
                 } ?>
               </ul>
             </div>
           </div>
-          <div class="box_job_search user">
+         <!--  <div class="box_job_search user">
             <h3>TÌM KIẾM HỒ SƠ GIA SƯ</h3>
             <div class="main_sc">        
               <form onsubmit="return false" action="" method="post">  
@@ -525,7 +568,7 @@ else if($usertype==0)
                 <center><input class="btn btnsearchuv" type="button" name="submit" value="Tìm kiếm"></center>
               </form>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -539,13 +582,13 @@ else if($usertype==3)
     <div class="tit_hd">
       <div class="ir_h3"><h2><img src="images/icon-gia-su-blue.png" alt="Gia sư đang tìm lớp"/><span>Gia sư đang tìm lớp</span></h2>
       </div>
-      <a href="<?php echo site_url('tim-giao-vien-day-kem') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="#"/></a>
+      <a href="<?php echo site_url('tim-gia-su') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="Xem tất cả"/></a>
     </div>
     <div class="">
       <div class="main_hd slick">
         <?php if(!empty($tinmoinhat)){
           $tg=0;
-          foreach($tinmoinhat as $n){ 
+         foreach($tinmoinhat as $n){ 
             if($tg%18==0){
               echo "<div class='box_slider_hd'>";
             }
@@ -563,8 +606,8 @@ else if($usertype==3)
                   </a>
                 </div>
                 <div class="right_item">
-                   <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_new"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i></a>
-                  <a class="title_co"><i class="fa fa-online"></i><?php echo $n->TitleView ?></a>
+                   <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name ?>" class="title_new"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> --></a>
+                  <a class="title_co"><i class="fa fa-online"></i><?php echo str_replace(' ,', ', ', $n->TitleView) ?></a>
                 
                   <span class="money_item">Từ: <span><?php echo number_format($n->Free)." vnđ/h" ?></span></span>
                   <span class="time_item"><?php echo $n->CityName ?></span>
@@ -589,7 +632,7 @@ else if($usertype==3)
             <div class="col-md-12 titledetail">
                 <div class="tit_hd">
                     <h3><i class="fa fa-ntd-logout"></i> Lớp có học phí cao nhất</h3> 
-                    <a href="<?php echo site_url('tim-lop-hoc') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="#"/></a>
+                    <a href="<?php echo site_url('tim-lop-hoc') ?>" class="span_hd">Xem tất cả <img src="images/ic_muiten.png" alt="Xem tất cả"/></a>
                 </div>
             </div>  
             <div class="col-md-12 topmoney">
@@ -603,7 +646,7 @@ else if($usertype==3)
                             <div class="col-md-4 col-xs-12 padd-l-5 padd-r-5">
                                 <div class="item_hd vip" data-object="<?php echo $n->UserID ?>" data-type="<?php echo $n->UserID ?>">
                                     <div class="company_logo">
-                                        <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>">
+                                        <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>">
                                             <?php if(!empty($n->Image)){?>
                                                 <img src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>"alt="<?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                             <?php }else{ ?>
@@ -612,8 +655,8 @@ else if($usertype==3)
                                         </a>
                                     </div>
                                     <div class="right_item">
-                                        <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->ClassTitle ?></a>
-                                        <a href="" title="" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <i class="fa fa-chat"></i></a>
+                                        <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>" class="title_new"><i class="fa fa-online"></i><?php echo $n->ClassTitle ?></a>
+                                        <a href="" title="" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <!-- <i class="fa fa-chat"></i> --></a>
                                         <span class="money_item">Từ: <span><?php echo number_format($n->Money)." vnđ/h" ?></span></span>
                                         <span class="time_item"><?php echo Getcitybyindex($n->City) ?></span>
                                     </div>
@@ -686,14 +729,14 @@ else if($usertype==3)
                                       <img src="images/no-image2.png" alt="<?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                   <?php } ?>
                               </a>
-                              <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
+                              <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
                               <span><?php echo date("d/m/Y",strtotime($n->CreateDate)); ?></span>
                           </div>
                           <div class="itemnews_r">
-                              <a  href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
-                              <p><?php $gn_text=$n->DescClass;
-                              if ( strlen( $n->DescClass ) > 150 ) {
-                                  $gn_text = substr( $n->DescClass, 0, 150 );
+                              <a  href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
+                              <p class="chitietmobile"><?php $gn_text=$n->DescClass;
+                              if ( strlen( $n->DescClass ) > 100 ) {
+                                  $gn_text = substr( $n->DescClass, 0, 100 );
                                   $space   = strrpos( $gn_text, ' ' );
                                   $gn_text = substr( $gn_text, 0, $space ). '...';           
                               }
@@ -702,7 +745,7 @@ else if($usertype==3)
                               <span class="btn"><?php $tg=explode(',',$n->LearnType);
                               echo GetLearnType($tg[0]); ?></span>
                               <span class="btn"><?php echo Getcitybyindex($n->City) ?></span>
-                              <span class="xacthuc"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="Phụ huynh đã xác thực"></i><i data-toggle="tooltip" data-placement="top" title="Chat với học viên" class="fa fa-uv-chat-cam"></i></span>
+                              <span class="xacthuc"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="Phụ huynh đã xác thực"></i><!-- <i data-toggle="tooltip" data-placement="top" title="Chat với học viên" class="fa fa-uv-chat-cam"></i> --></span>
                               <span class="dadenghiday">Đã đề nghị dạy:&nbsp;&nbsp;<?php echo $n->denghiday  ?><i class="fa fa-user-dnd"></i></span>
                           </div>
                       </div>
@@ -716,7 +759,7 @@ else if($usertype==3)
         </div>
         <div class="col-md-4 col-xs-12">
           <div class="box_job_search user">
-            <h3><i class="fa fa-userl"></i> Gia sư tiêu biểu</h3>
+            <h2><i class="fa fa-userl"></i> Gia sư tiêu biểu</h2>
             <div class="boxfeature">
               <?php if(!empty($chude)){
                 foreach($chude as $n){ ?>
@@ -730,9 +773,9 @@ else if($usertype==3)
                    <?php } ?>
                   </div>
                   <div class="feature-caption">
-                    <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name"><i class="fa fa-online"></i><?php echo $n->Name ?> <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i></a>
+                    <a href="<?php echo base_url().vn_str_filter($n->Name).'-gv'.$n->UserID ?>" title="<?php echo $n->Name; ?>" class="feature_name" style="margin-bottom: -12px;margin-top:-15px; display: block;"><i class="fa fa-online"></i><h3 style="display: inline;background-color: #FFFFFF; color: #00baba; font-size: 15px; font-weight: 500; padding-left: 0px;text-transform: none; margin: -11px auto;"><?php echo $n->Name ?></h3> <!-- <i class="fa fa-chat" data-toggle="tooltip" title="Chat với gia sư"></i> --></a>
                     <div title="#" class="feature_titleview"><span>Gia sư: </span><?php 
-                      echo str_replace('Gia sư','',$n->TitleView); ?>
+                      echo str_replace('Gia sư','',str_replace(' ,', ', ', str_replace(' ,', ', ', $n->TitleView))); ?>
                     </div>
                     <div>
                       <span>Khu vực: <span><?php echo $n->CityName ?></span></span>
@@ -747,11 +790,11 @@ else if($usertype==3)
           <div class="box_hotline">
             <div class="bg1">
               <p>HOTLINE CHO NHÀ TUYỂN DỤNG</p>
-              <strong><img src="images/vl9.png" alt="">HOTLINE:  0981509188</strong>
+              <strong><img src="images/vl9.png" alt="Hotline cho nhà tuyển dụng">HOTLINE:  0981509188</strong>
             </div>
             <div class="bg2">
               <p>HOTLINE CHO ỨNG VIÊN</p>
-              <strong><img src="images/vl10.png" alt="">HOTLINE:  0981509188</strong>
+              <strong><img src="images/vl10.png" alt="Hotline cho ứng viên">HOTLINE:  0981509188</strong>
             </div>
           </div>
         </div>
@@ -867,8 +910,7 @@ else if($usertype==3)
     });
 
     $("#keymonhon").keypress(function (e) {
-      if (e.which === 13) {
-        e.preventDefault();
+        // e.preventDefault();
         $.ajax(
         {
           url: configulr+"site/ajaxtimgiasutheomonhoc",
@@ -890,12 +932,10 @@ else if($usertype==3)
             $("#boxLoading").hide();
           }
         }); 
-      }
     });
 
     $("#keytinhthanh").keypress(function (e) {
-      if (e.which === 13) {
-        e.preventDefault();
+        // e.preventDefault();
         $.ajax(
         {
           url: configulr+"site/ajaxtimgiasutheotinhthanh",
@@ -917,7 +957,6 @@ else if($usertype==3)
             $("#boxLoading").hide();
           }
         }); 
-      }
     });
   });
 </script>

@@ -186,6 +186,7 @@ function UserManager()
             }
         }
     });
+  
     var self = this;
     $('#btndangnhap').on('click',function(){
         var cknhatuyendung=1;

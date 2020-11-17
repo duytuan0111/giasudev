@@ -143,7 +143,7 @@ $admin=$this->db->get('tbl_admin')->row();
 							<input type="checkbox" name="checkbox[]" class="checkbox" value="<?php echo $item->ClassID; ?>" />
 						</div>
 					</td>					
-					<td><a ><?php echo $item->ClassTitle; ?></a></td>			<!--href="<?php echo site_url('admin/edit_doanhnghiep/'.$item->ClassID); ?>"-->
+					<td><a href="<?php echo site_url('admin/edit_doanhnghiep/'.$item->ClassID); ?>" ><?php echo $item->ClassTitle; ?></a></td>			<!--href="<?php echo site_url('admin/edit_doanhnghiep/'.$item->ClassID); ?>"-->
 					<td align="center"><?php 
 			//$ngays	=explode(' ',$item->created_day);
 			//$ngay=explode('-',$ngays[0]);

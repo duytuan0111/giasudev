@@ -47,10 +47,10 @@
                                    <?php if($n->Active ==1){echo "Chưa phản hồi";}else{echo "Đã phản hồi";} ?> 
                                 </td>
                             </tr>
-                            <?php } } ?>                            
-                            
+                            <?php } } else { echo "<p class='text-center'>Không tìm thấy bản ghi.</p>"; } ?>
+
                         </tbody>
-                        <?php //if(!empty($giasudaluu) && count($giasudaluu) >= 6){ ?>
+                        <?php if (!empty($giasudaluu)) { ?>
                            <tfoot>
                             <tr>
                                 <td colspan="5">
@@ -58,7 +58,7 @@
                                 </td>
                             </tr>
                         </tfoot> 
-                        <?php// } ?>
+                        <?php  } ?>
                         
                     </table>
                     

@@ -1,4 +1,12 @@
 <?php
+$urlweb .= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+if($urlweb != $canonical)
+{
+ header("HTTP/1.1 301 Moved Permanently"); 
+ header("Location: $canonical");
+ exit();
+}
 $CI=&get_instance();
 $CI->load->model('site/site_model');
 $type = 3;
@@ -138,22 +146,33 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
         font-size: 14px;
         border-radius: 5px;
     }
+    .h3-fk1 {
+        font-size: 18px;
+        color: #2c2c2c;
+        font-weight: 500;
+        height: 30px;
+        line-height: 30px;
+        margin: 0;
+        float: left;
+        background: #fff;
+        margin-right: 5px;
+    }
 </style>
 <section class="padd-top-20 padd-bot-20">
     <div class="container">
         <div class="row">
             <div class="col-md-12 titledetail">
                 <div class="tit_hd">
-                 <h3><i class="fa fa-ntd-logout"></i> Thông tin lớp học</h3>         
+                 <p class="h3-fk1"><i class="fa fa-ntd-logout"></i> Thông tin lớp học</p>         
               </div>
             </div>             
         </div>
         <div class="row">
             <div class="col-md-2 col-sm-12 padd-r-0">
-                <div class="detailjob-header">
+                <div class="detailjob-header class-img-left">
                     <?php if(!empty($item->Image)){?>
                                         <!-- <img class="img-responsive" src="<?php gethumbnail(geturlimageAvatar(strtotime($item->CreateDate)).$item->Image,$item->Image,strtotime($item->CreateDate),180,180,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' /> -->
-                                        <img class="img-responsive" src="<?php echo base_url(); ?>upload/images/<?php echo $item->Image ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                        <img alt="<?php echo $item->Name ?>" class="img-responsive" src="<?php echo base_url(); ?>upload/images/<?php echo $item->Image ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                     <?php } else{ ?>
                                      <img class="img-responsive" src="images/no-image2.png" alt="<?php echo $item->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                      <?php } ?>
@@ -163,20 +182,21 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                 <div class="detailjob-header">                    
                     <div class="detailjob-info col-md-8 col-sm-12 padd-l-0">
                         <h1 class="detailjob-name"><a><i class="fa fa-online-big" data-toggle="tooltip" title="" data-original-title="Phụ huynh đang online"></i> <?php echo $item->ClassTitle ?></a></h1>
-                        <div class="detailjob-cty"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="" data-original-title="Phụ huynh đã xác thực"></i>Tạo bởi:<span class="font-bold"> <?php echo $item->Name; ?></span><span>Mã số lớp: ML<?php echo $item->ClassID ?></span><span>Ngày tạo: <?php echo date("d/m/Y",strtotime($item->CreateDate)) ?></span></div>
-                        <div class="detailjob-cty"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="" data-original-title="Yêu cầu gia sư là:"></i>Yêu cầu gia sư là: <strong><?php $teachertype = $CI->site_model->GetTeacherTypeBy($item->TeachType); echo $teachertype[0]->NameType ?></strong><span>Giới tính: <strong><?php 
-                                   if ($item->TeacherSex ==0) {
-                                    echo 'Nam'; } else if ($item->TeacherSex == 1) {
-                                        echo 'Nữ';
-                                    } else {
-                                        echo 'Chưa cập nhật';
+                        <div class="detailjob-cty"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="" data-original-title="Phụ huynh đã xác thực"></i>Tạo bởi:<span class="font-bold"> <?php if ($item->Name != '') {echo $item->Name;} else { echo 'Chưa cập nhật'; } ?></span><span>Mã số lớp: ML<?php echo $item->ClassID ?></span><span>Ngày tạo: <?php echo date("d/m/Y",strtotime($item->CreateDate)) ?></span></div>
+                        <div class="detailjob-cty"><i class="fa fa-shield" data-toggle="tooltip" data-placement="top" title="" data-original-title="Yêu cầu gia sư là:"></i>Yêu cầu gia sư là: <strong><?php $teachertype = $CI->site_model->GetTeacherTypeBy($item->TeachType); echo $teachertype[0]->NameType ?></strong><span>Giới tính: <strong> <?php 
+                                    $tg=explode(',',$item->TeacherSex);
+                                    $sex = '';
+                                    foreach ($tg as $key => $value) {
+                                        $sex .= GetSex($tg[$key]).", ";
                                     }
-                         ?></strong></span></div>
+
+                                    echo rtrim($sex,', ');
+                                ?></strong></span></div>
                         <div class="detailjob-cty">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Trạng thái: <a class="font-bold"><?php 
                         if($item->dongyday > 0){echo "Đã có giáo viên";}else{echo "Đang tìm giáo viên";}
                         ?></a></div>
                         <div class="detailjob-salary"><i class="fa fa-usd-bold"></i><strong>Mức học phí: </strong> từ <?php echo number_format($item->Money)." vnđ/h" ?></div>
-                        <div class="detailjob-location"><i class="fa fa-map-marker"></i><strong>Địa chỉ: </strong><?php $DistrictName = $CI->site_model->GetDistrictByID($item->District); echo $DistrictName->cit_name ?> <strong>, </strong><?php $CitytName = $CI->site_model->GetDistrictByID($item->City); echo $CitytName->cit_name ?></div>
+                        <div class="detailjob-location"><i class="fa fa-map-marker"></i><strong>Địa chỉ: </strong><?php $DistrictName = $CI->site_model->GetDistrictByID($item->District); if ($DistrictName->cit_name != '') {echo $DistrictName->cit_name; echo ', '; }  ?> <strong> </strong><?php $CitytName = $CI->site_model->GetDistrictByID($item->City); echo $CitytName->cit_name ?></div>
                         <div class="detailjob-location"><i class="fa fa-map-marker"></i><strong>Địa chỉ cụ thể: </strong><?php if(!empty($item->Address)){echo $item->Address;}else{echo $item->Addressu;} ?></div>
                         <!-- <div class="detailjob-location"><i class="fa fa-map-marker"></i><strong>Quận / Huyện: </strong><?php $DistrictName = $CI->site_model->GetDistrictByID($item->District); echo $DistrictName->cit_name ?> </div>
                         <div class="detailjob-location"><i class="fa fa-map-marker"></i><strong>Địa chỉ cụ thể: </strong><?php if(!empty($item->Address)){echo $item->Address;}else{echo $item->Addressu;} ?></div> -->
@@ -199,7 +219,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                             $queryString = $_SERVER['QUERY_STRING'];
                             // echo "Query: " .base_url(). $queryString;
                             ?>
-                            <li><div class="fb-like fb_iframe_widget" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button" data-action="like" data-size="small" data-show-faces="true" data-share="true" fb-xfbml-state="rendered" fb-iframe-plugin-query="action=like&amp;app_id=&amp;container_width=0&amp;href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;layout=button&amp;locale=vi_VN&amp;sdk=joey&amp;share=true&amp;show_faces=true&amp;size=small"><span style="vertical-align: bottom; width: 112px; height: 20px;"><iframe name="ff41c8dbc049a8" width="1000px" height="1000px" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" title="fb:like Facebook Social Plugin" src="https://www.facebook.com/v3.1/plugins/like.php?action=like&amp;app_id=&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fconnect%2Fxd_arbiter%2Fr%2F__Bz3h5RzMx.js%3Fversion%3D42%23cb%3Df2afb4f993516a%26domain%3Dlocalhost%26origin%3Dhttp%253A%252F%252Flocalhost%253A9001%252Ff25d959f42fbcb8%26relation%3Dparent.parent&amp;container_width=0&amp;href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;layout=button&amp;locale=vi_VN&amp;sdk=joey&amp;share=true&amp;show_faces=true&amp;size=small" style="border: none; visibility: visible; width: 112px; height: 20px;" class=""></iframe></span></div></li>
+                            <li style=""><div class="fb-like fb_iframe_widget"  data-href="https://developers.facebook.com/docs/plugins/" data-layout="button" data-action="like" data-size="small" data-show-faces="true" data-share="true" fb-xfbml-state="rendered" fb-iframe-plugin-query="action=like&amp;app_id=&amp;container_width=0&amp;href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;layout=button&amp;locale=vi_VN&amp;sdk=joey&amp;share=true&amp;show_faces=true&amp;size=small"><span style="vertical-align: bottom; width: 112px; height: 20px;"><iframe name="ff41c8dbc049a8" width="1000px" height="1000px" frameborder="0" allowtransparency="true" allowfullscreen="true" scrolling="no" allow="encrypted-media" title="fb:like Facebook Social Plugin" src="https://www.facebook.com/v3.1/plugins/like.php?action=like&amp;app_id=&amp;channel=https%3A%2F%2Fstaticxx.facebook.com%2Fconnect%2Fxd_arbiter%2Fr%2F__Bz3h5RzMx.js%3Fversion%3D42%23cb%3Df2afb4f993516a%26domain%3Dlocalhost%26origin%3Dhttp%253A%252F%252Flocalhost%253A9001%252Ff25d959f42fbcb8%26relation%3Dparent.parent&amp;container_width=0&amp;href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;layout=button&amp;locale=vi_VN&amp;sdk=joey&amp;share=true&amp;show_faces=true&amp;size=small" style="border: none; visibility: visible; width: 112px; height: 20px;" class=""></iframe></span></div></li>
                             <li><?php echo '<a aria-label="facebook" rel="nofollow" href="https://www.facebook.com/sharer/sharer.php?u=https://timviec365.vn/ssl/'. $queryString . '"  target="_blank"><i class="fa fa-facebook-square"></i></a> '?></li>
                             <li><?php echo '<a aria-label="facebook" rel="nofollow" href="http://www.twitter.com/share?url=https://timviec365.vn/ssl/'. $queryString . '" target="_blank"><i class="fa fa-twitter-square"></i></a>'?></li>
 
@@ -214,7 +234,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
             <div class="col-md-70 col-sm-12">
                 <div class="top-detail">                    
                     <div class="detailjob-body">
-                        <h3 class="title">Thông tin cơ bản</h3>
+                        <h2 class="title">Thông tin cơ bản</h2>
                         <div class="detailjob-body1">
                             <div class="col-md-4">
                                 <p><strong>Số học viên: </strong> <?php echo $item->Student ?></p>
@@ -249,7 +269,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                             ));
                             ?>
                                 <p><strong>Số buổi trong tuần: </strong> <?php echo $num[1]; ?></p>
-                                <p><strong>Số giờ học 1 buổi: </strong> <?php echo $item->Hours ?></p>
+                                <p><strong>Số giờ học 1 buổi: </strong> <?php echo $item->Hours ?> giờ</p>
                                
                             </div>
                             <div class="col-md-4">
@@ -268,12 +288,17 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                                 ?></p>
                             </div>
                         </div>
+                        <div class="detailjob-body1">
+                            <div class="col-md-11">
+                                <p><strong>Chủ đề môn học: </strong> <?php if($item->TopicName != '') { echo $item->TopicName; } else { echo 'Chưa cập nhật'; } ?></p>
+                            </div>
+                        </div>
                         <div class="clr"></div>
-                        <h3 class="title">Chi tiết nội dung</h3>
+                        <h2 class="title">Chi tiết nội dung</h2>
                         <div class="detaijob-body2">
                             <p><?php echo nl2br($item->DescClass) ?></p>
                         </div>
-                        <h3 class="title">Lịch học dự kiến <small>(Có thể thỏa thuận)</small></h3>
+                        <h2 class="title">Lịch học dự kiến <small>(Có thể thỏa thuận)</small></h2>
                         <div class="detaijob-body2 lichday">
                              <div class="col-md-15 col-sm-12 padd-l-5 padd-r-5">
                                 <div>Thứ 2
@@ -406,7 +431,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                             <a data-val="<?php echo "class_".$item->ClassID ?>" class="btnviewcontactinfo"><i class="fa fa-view-att-white"></i> Xem liên hệ</a>
                         </li>
                         <li>
-                            <a class="btnsaveclass" data-val="<?php echo $item->ClassID ?>"><i class="fa fa-block-download"></i> Lưu hồ sơ</a>
+                            <a class="btnsaveclass" data-val="<?php echo $item->ClassID ?>"><i class="fa fa-block-download"></i> Lưu lớp học</a>
                         </li>
                         <!-- <?php if($type== 1){ ?> -->
                         <li>
@@ -419,7 +444,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                     </ul>
             </div>
             <div class="col-md-30 col-sm-12 col-right-search padd-l-0">
-                <div class="box_job_search user">
+                <!-- <div class="box_job_search user">
         	        <h3><i class="fa fa-userl"></i> Tìm kiếm lớp dạy</h3>
         	        <div class="main_sc">        
         	        	<form action="" method="post">	
@@ -534,7 +559,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
         					<center><input class="btn btnsearchuv" type="button" name="submit" value="Tìm kiếm"></center>
         				</form>
         		    </div>
-        	    </div>
+        	    </div> -->
                <!--  <div class="timkiemungvien registerclass">
                     <div class="box-f box-document">
                         <h3 class="title">Gửi email cho ứng viên</h3>
@@ -568,21 +593,28 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                         <div class="col-md-4 col-sm-12 padd-l-5 padd-r-5">
                             <div class="item_hd vip" data-object="<?php echo $n->UserID ?>" data-type="<?php echo $n->UserID ?>">
                                <div class="company_logo">
-                                  <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>">
+                                  <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" title="<?php echo $n->ClassTitle; ?>">
                                     <?php if(!empty($n->Image)){?>
-                                        <img src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),63,63,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                        <img alt="<?php echo $n->ClassTitle; ?>" src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                     <?php }else{ ?>
-                                     <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                     <img alt="<?php echo $n->ClassTitle; ?>" src="images/no-image2.png"  onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                      <?php } ?>
                                   </a>
                                </div>
                                <div class="right_item">
-                                  <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" title="#" class="title_new"><i class="fa fa-online"></i><?php echo $n->ClassTitle ?></a>
-                                  <a href="" title="" class="title_co"><i class="fa fa-giasuname"></i><?php echo $n->Name ?> <i class="fa fa-chat"></i></a>
-                                  
-                                  <span class="time_item"><i class="fa fa-makerbrow"></i> Địa điểm: <span><?php echo $n->CityName ?></span></span>
+                                  <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" title="#" class="title_new"><i class="fa fa-online"></i><?php echo $n->ClassTitle ?></a>
+                                  <p  title="" class="title_co"><i class="fa fa-giasuname"></i><?php if ($n->Name != '') {echo $n->Name;} else { echo 'Chưa cập nhật'; } ?> <!-- <i class="fa fa-chat"></i> --></p>
+                                  <?php
+                                  $gn_text=$n->Address;
+                                  if ( strlen( $n->Address ) > 30 ) {
+                                    $gn_text = substr( $n->Address, 0, 30 );
+                                     $space   = strrpos( $gn_text, ' ' );
+                                     $gn_text = substr( $gn_text, 0, $space ). '...';
+                                 }
+                                 ?>
+                                  <span class="time_item"><i class="fa fa-makerbrow"></i> Địa điểm: <span><?php echo $gn_text ?></span></span>
                                </div>
-                               <span class="oldview">Đã xem</span>
+                               <!-- <span class="oldview">Đã xem</span> -->
                             </div>
                         </div>
                   <?php
@@ -590,9 +622,9 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
                     ?>
                     
                  </div> 
-                 <div class="pull-right">
-                 <a href="<?php echo base_url() ?>tim-kiem-lop-hoc" class="span_hd">Xem thêm lớp học liên quan <img src="images/ic_muiten.png" alt="#"></a>
-                 </div>       
+                 <!-- <div class="pull-right">
+                 <a href="<?php echo base_url() ?>tim-kiem-lop-hoc" class="span_hd">Xem thêm lớp học liên quan <img src="images/ic_muiten.png" ></a>
+                 </div>  -->      
     </div>
 </section>
 <!-- Modal dang nhap -->
@@ -800,8 +832,7 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
             }
         }
 
-
-    var cknhatuyendung = 1;
+var cknhatuyendung = 1;
     // if(typeof ($('input[name=rememberlogin]:checked').val())=== "undefined"){
     //     cknhatuyendung=0;
     // }
@@ -823,43 +854,44 @@ if(isset($_SESSION['UserInfo']) || !empty($_SESSION['UserInfo'])){ //TypeUser
           window.location.reload();
 
         } else {
-
-          var clickcomfirm=confirm(reponse.msg);
-          if (clickcomfirm==true)
-            {
-              var useremail = $('#useremail').val();
-              $.ajax({
-                url: configulr+"/site/forgetmail",
-                type: "POST",
-                data:{
-                  email:useremail
-                },
-                dataType: 'json',
-                success: function (res) 
-                { 
-                    if (res.kq == true) 
-                    {   
-                        alert('Vui lòng kiểm tra tin email để nhận mã xác thực kích hoạt tài khoản');
-                    }
-                    // else 
-                    // {
-                    //     alert('Gửi email không thành công. Vui lòng kiểm tra lại.');
-                    // }
-                },
-                error: function (xhr) 
-                {
-                    console.log(xhr);
-                },
-                complete: function () 
-                {
-                    $("#boxLoading").hide();
-                }
-            });
-            }
-          else
-            {
-              // alert('không có gì');
-            }
+          if (reponse.sttlogin == 1) {
+            window.location.href = configulr+'xac-thuc-tai-khoan';
+          } else {
+            alert('Đăng nhập không thành công vui lòng thử lại');
+          }
+          // var clickcomfirm=confirm(reponse.msg);
+          // if (clickcomfirm==true)
+          //   {
+          //     var useremail = $('#useremail').val();
+          //     $.ajax({
+          //       url: configulr+"/site/forgetmail",
+          //       type: "POST",
+          //       data:{
+          //         email:useremail
+          //       },
+          //       dataType: 'json',
+          //       success: function (res) 
+          //       { 
+          //           if (res.kq == true) 
+          //           {   
+          //               alert('Vui lòng kiểm tra tin email để nhận mã xác thực kích hoạt tài khoản');
+          //           }
+          //           // else 
+          //           // {
+          //           //     alert('Gửi email không thành công. Vui lòng kiểm tra lại.');
+          //           // }
+          //       },
+          //       error: function (xhr) 
+          //       {
+          //           console.log(xhr);
+          //       },
+          //       complete: function () 
+          //       {
+          //           $("#boxLoading").hide();
+          //       }
+          //   });
+          //   }
+         
         }
       },
       error: function(xhr) {

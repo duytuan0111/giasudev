@@ -4,12 +4,13 @@ $CI->load->model('site/site_model');
 $footer=$CI->site_model->getconfig();
 $urlweb= current_url();
 ?>
+</div>
 <div class="clearfix"></div>
 
 	<footer class="footer" <?php echo "style='border-top:1px solid #e6e6e6'"; ?>>
 
 		<div class="row no-padding">
-			<div class="container">
+			<div class="container"> <!-- class="container" -->
 				<div class="col-md-3 col-sm-12">
 					<div class="footer-widget">
 						<h3 class="widgettitle widget-title">LIÊN KẾT NHANH</h3>
@@ -25,7 +26,7 @@ $urlweb= current_url();
 
 						<div class="textwidget widget-img">
 							<div class="textwidget lknhanh">
-								<img class=" lazyload" data-src="images/map.png" src="images/map.png" alt="">
+								<img class=" lazyload" data-src="images/map.png" src="images/map.png" alt="bản đồ timviec365">
 							</div>
 						</div>
 					</div>
@@ -54,22 +55,22 @@ $urlweb= current_url();
 					<div class="footer-widget">
 
 						<div class="textwidget lknhanh">
-							<img class=" lazyload" data-src="/images/banner2.png" src="images/banner2.png" alt="Banner CV">
+							<img class=" lazyload" data-src="/images/banner2.png" src="images/banner2.png" alt="Tìm việc làm">
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 		<div class="row copyright">
-			<div class="container">
+			<!-- <div class="container"> -->
 				
-				<a href="" title="" aria-label="facebook"  rel="noopener noreferrer"><img src="images/dk.png" alt=""></a>
-				<a href="" title="" aria-label="facebook"  rel="noopener noreferrer"><img src="images/secu.png" alt=""></a>
+				<a href="" title="" aria-label="facebook"  rel="noopener noreferrer"><img src="images/dk.png" alt="Đã đăng ký bộ công thương"></a>
+				<a href="" title="" aria-label="facebook"  rel="noopener noreferrer"><img src="images/secu.png" alt="DMCA.com Protection Status"></a>
 				<?php echo $footer->content_thu ?>
-			</div>
+			<!-- </div> -->
 		</div>
 		<div class="row home_tag">
-			<div class="container">
+			<div> <!-- class="container" -->
 				<?php echo $footer->meta_footer ?>
 			</div>
 		</div>
@@ -265,7 +266,7 @@ $urlweb= current_url();
 					}
 					else
 					{
-						window.location.href = 'https://timviec365.com.vn/gia-su/tim-giao-vien-day-kem';
+						window.location.href = 'https://timviec365.com.vn/gia-su/tim-gia-su';
 					}
 				}
 				else

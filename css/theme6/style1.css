@@ -8509,7 +8509,7 @@ div.sapo{
 .item_hd .money_item span{color:#f23e03;}
 .item_hd .right_item span+span{position: relative;padding-left:8px;}
 .item_hd .right_item span+span:before{content:"";width:0px;border-left:1px solid #262626;height:10px;position:absolute;left:0px;top:3px;}
-.item_hd:hover::before {
+/*.item_hd:hover::before {
     content: "";
     position: absolute;
     left: -7px;
@@ -8519,7 +8519,7 @@ div.sapo{
     z-index: -1;
     border: 1px solid #e2e2e2;
     box-shadow: 0px 4px 4px rgba(81,81,81,.12);
-}
+}*/
 .tit_hd {
     float: left;
     width: 100%;
@@ -8720,18 +8720,17 @@ height: 552px;
     z-index: 9999;
     border-left: 1px solid #e1e1e1;
 }
-.main_tg .item_hd:hover::before {
+/*.main_tg .item_hd:hover::before {
     content: "";
     position: absolute;
     left: -5px;
     right: -5px;
     bottom: -1px;
     top: 87px;
-    /* height: 0px; */
     z-index: 0;
     border-bottom: 1px solid #e2e2e2;
     box-shadow: 0px 4px 4px rgba(81,81,81,.12);
-}
+}*/
 .main_tg .item_hd:hover .title_new{color:#ffaf26}
 .main_tg {
     float: left;

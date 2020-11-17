@@ -20,6 +20,7 @@ $admin=$this->db->get('tbl_admin')->row();
 				$id=$item->id;            
 			}
 			?>  
+			<!--  -->
 		<input type="hidden" name="id" value="<?php if(isset($id)) { echo $id; }; ?>" />			<div class="gray">
 		<table width="100%"><tr><td>		
 		<table class="tab1">
@@ -36,12 +37,38 @@ $admin=$this->db->get('tbl_admin')->row();
 			<td><input type="text" name="alias" id="alias" required="" readonly></td>
 		</tr>
 		<tr>
-			<td width="150"><strong>Option:</strong></td>
-			<td><select name="option" id="option">
-				<option value="0">Môn học</option>
-				<option value="1">Địa điểm</option>
-				<!-- <option value="2">Môn học & Tỉnh thành</option> -->
-			</td></select>
+			<td width="150"><strong>Type: </strong></td>
+			<td>
+				<select name="type" id="type">
+					<option value="1" >Cụ thể</option>
+					<option value="2" >Tổng quát</option>
+
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td width="150"><strong>Môn học: </strong></td>
+			<td>
+				<select name="sub_id" id="sub_id">
+					<option value>-- Chọn môn học --</option>
+
+					<?php foreach ($listsubject as $m) { ?>
+					<option value="<?php echo $m->ID; ?>" data-val="<?php echo $m->SubjectName; ?>"><?php echo $m->SubjectName; ?></option>
+					<?php } ?>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td width="150"><strong>Địa điểm: </strong></td>
+			<td>
+				<select name="place" id="place">
+					<option value>-- Chọn địa điểm --</option>
+
+					<?php foreach ($listcity as $k) { ?>
+					<option value="<?php echo $k->cit_id; ?>" data-val="<?php echo $k->cit_name; ?>"><?php echo $k->cit_name; ?></option>
+					<?php } ?>
+				</select>
+			</td>
 		</tr>
 		<!-- 	<tr class="second">
 			<td><strong>Link đặt bài viết</strong></td>
@@ -99,7 +126,7 @@ $admin=$this->db->get('tbl_admin')->row();
 <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function() {
-		$('#key_tag').change(function(event) {
+		$('#key_tag').keyup(function(event) {
 				var key_tag 	= $(this).val();
 				var slug		=  key_tag.toLowerCase();
 				 //Đổi ký tự có dấu thành không dấu
@@ -129,7 +156,11 @@ $admin=$this->db->get('tbl_admin')->row();
 		});
 		$('.submit').click(function(event) {
 			event.preventDefault();
-			var option = $('#option').val();
+			var sub_id = $('#sub_id').val();
+			var type = $('#type').val();
+			var place = $('#place').val();
+			var cit_name = $('#place').find(':selected').attr('data-val');
+			//
 			var h1 = $('#h1').val();
 			var key_tag = $('#key_tag').val();
 			var alias = $("#alias").val();
@@ -140,17 +171,19 @@ $admin=$this->db->get('tbl_admin')->row();
 			var url='<?php echo site_url(); ?>';
 			if (h1 == '') {
 				alert('Tiêu đề không được để trống');
-			} else if (key_tag == '') {
-				alert('Key tag không được để trống');
-			} else {
+			} else if (key_tag == '' && place == '') {
+				alert('bạn phải lựa chọn key tag hoặc địa điểm');
+			} else if ((key_tag != '' && sub_id == '') || (sub_id != '' && key_tag == '')) {
+				alert('bạn phải chọn môn học theo key tag');
+			}  else {
 				$.ajax({
 					url: url+"admin/add_url_phuhuynh",
 					type: "POST",
 					dataType: "JSON",
-					data: {h1: h1, key_tag: key_tag, option: option, alias: alias,content:content, title: title, keyword: key, description: description},
+					data: {h1: h1, key_tag: key_tag, type: type, sub_id: sub_id, place: place, cit_name: cit_name, alias: alias,content:content, title: title, keyword: key, description: description},
 					success: function(reponse) {
 						if (reponse.kq == 0) {
-							alert('Key tag đã tồn tại');
+							alert('Bản ghi đã tồn tại');
 						} else if(reponse.kq == 1) {
 							alert('Thêm thành công');
 							window.location.href = url+'admin/url_phuhuynh';

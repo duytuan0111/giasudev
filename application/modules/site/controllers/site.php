@@ -4,21 +4,24 @@ class site extends Controller
 	function site()
 	{
 		parent::Controller(); 		
-		$this->load->model('site_model');	
+		$this->load->model('site_model');
+    $this->load->library('Globals');	
 		$this->load->helper('locdau');	
     $this->load->helper('resize');	
     $this->load->helper('images');	
     $this->load->helper('device');
+    $this->load->helper('cookie');
 		//$this->output->enable_profiler(TRUE);	
 		//$this->load->library('resize-class'); 
   }   	
   function index()
   {   	
+
     $data['home'] = false;		
     $sql=$this->site_model->gettblwidthid('tbl_meta',1);
-    $data['meta_title']=$sql->title;
-    $data['meta_key']=$sql->metakeywork;
-    $data['meta_des']=$sql->metadesc;
+    $data['meta_title']= 'Gia sư 365 - Gia sư hàng đầu - Trung tâm gia sư uy tín | Timviec365.com.vn';
+    $data['meta_key']='gia sư 365, gia sư';
+    $data['meta_des']='Trung tâm gia sư uy tín, gia sư hàng đầu, nơi kết nối phụ huynh với gia sư, hoàn toàn miễn phí, không qua trung gian';
     if(!empty($sql->name)){
       $data['metah1']=$sql->name;
     }else{
@@ -27,6 +30,7 @@ class site extends Controller
 
     $data['tinmoinhat']=$this->site_model->GetListTeacher(18); 
     $data['toanlyhoa']=$this->site_model->GetListTeacherTLH(12);
+    $data['anhnhathantrung']=$this->site_model->GetListTeacherANHT(12);
     $data['vansudia']=$this->site_model->GetListTeacherVSD(5);
     $data['giasutheomonhoc']=$this->site_model->DemGiaSuTheoMonHoc();
     $data['giasutheott']=$this->site_model->DemGiaSuTheoTinhThanh();
@@ -42,12 +46,57 @@ class site extends Controller
         //$data['ungviennoibat']=$this->site_model->GetListCandidate("1=1 ",5,'order by u.use_update_time desc');		
     $data['canonical']=base_url();	
 		//$data['amp']=site_url('amp');
+    // $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+    // $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+    $data['list_search_teacher'] = $this->site_model->listurlteacher_rcmd($table='topic',$top=0,$limit=6);
+    $data['list_class_teacher'] = $this->site_model->listurlteacher_rcmd($table='url_timviec',$top=0,$limit=6);
+    $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+    $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+    $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+    $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
     $data['showsearch']=true;
     $data['robots']= 'noindex,nofollow';	
     $data['content']='content';
     $data['classheader']='navbar navbar-default white bootsnav on no-full';		
     $this->load->view('template',$data);
-  } 
+  }
+  function ajax_live_search(){
+    $tbl = $_POST['tbl'];
+    $key = $_POST['key1'];
+    $lst_topic = $this->site_model->selecttopictbykey($key,$tbl);
+    if (!empty($lst_topic)) {
+      $kq = true;
+      $html .= "<h4>Gợi ý tìm kiếm</h4>";
+      foreach ($lst_topic as $key) {
+        $html .= "<a href='#' class='fk-search'>".$key->key_tag."</a>";
+      }
+    } else {
+      $kq = false;
+      $html .= "<h4>Gợi ý tìm kiếm</h4>";
+      $html .= "<a href='#'>Không tìm thấy gợi ý nào phù hợp</a>";
+    }
+    $result = ['kq' => $kq, 'html' => $html];
+    echo json_encode($result);
+  }
+   function ajax_live_search1(){
+    $tbl = $_POST['tbl'];
+    $key = $_POST['key1'];
+    $lst_topic = $this->site_model->selecttopictbykey($key,$tbl);
+    if (!empty($lst_topic)) {
+      $kq = true;
+      $html .= "<h4>Gợi ý tìm kiếm</h4>";
+      foreach ($lst_topic as $key) {
+        $html .= "<a href='#' class='fk-search1'>".$key->key_tag."</a>";
+      }
+    } else {
+      $kq = false;
+      $html .= "<h4>Gợi ý tìm kiếm</h4>";
+      $html .= "<a href='#'>Không tìm thấy gợi ý nào phù hợp</a>";
+    }
+    $result = ['kq' => $kq, 'html' => $html];
+    echo json_encode($result);
+  }
 
   function generallogin()
   {
@@ -715,7 +764,7 @@ class site extends Controller
     $data['meta_des']="Đăng nhập gia sư";       
         //$data['congtymoinhat']=$this->site_model->GetTopCompany(10);
         //$data['ungviennoibat']=$this->site_model->GetListCandidate("1=1 ",5,'order by u.use_update_time desc');		
-    $data['canonical']=base_url();	
+    $data['canonical']=base_url('').'phu-huynh-manager';	
     $userid=0;
     if($_SESSION['UserInfo'] !=''){
       $tg=$_SESSION['UserInfo'];
@@ -786,6 +835,32 @@ class site extends Controller
     $data['robots']= 'noindex,nofollow';	
     $data['content']='mnusersinviteteacher';
     $data['classheader']='navbar navbar-default white bootsnav on no-full';		
+    $this->load->view('templatemanager',$data);
+  }
+   function mnuserseeinfo()
+  {
+    $data['home'] = false;
+    $data['meta_title']="Đăng nhập chung";
+    $data['meta_key']="Đăng nhập gia sư";
+    $data['meta_des']="Đăng nhập gia sư";        
+        //$data['congtymoinhat']=$this->site_model->GetTopCompany(10);
+        //$data['ungviennoibat']=$this->site_model->GetListCandidate("1=1 ",5,'order by u.use_update_time desc');   
+    $data['canonical']=base_url();  
+    $userid=0;
+    if($_SESSION['UserInfo'] !=''){
+      $tg=$_SESSION['UserInfo'];
+      $userid=$tg['UserId'];
+    }
+
+    $data['giasudadaxem']=$this->site_model->GetInfoTeacher_see($userid, 1);
+    $data['giaovienluu']=$this->site_model->countteacheinvite($userid);
+        //$data['teacherinvite']=$this->site_model->countteacheinvite($userid);
+        //$data['topteacherinvite']=$this->site_model->getlistteachersavebyuserid($userid);
+        //$data['topteachsave']=$this->site_model->getlistteacherinvitebyuserid($userid);
+    $data['showsearch']=true;
+    $data['robots']= 'noindex,nofollow';  
+    $data['content']='mnuserseeinfo';
+    $data['classheader']='navbar navbar-default white bootsnav on no-full';   
     $this->load->view('templatemanager',$data);
   }
   function mnusersfitteacher()
@@ -1141,6 +1216,7 @@ class site extends Controller
     $place=$_POST['place'];
     $class = $_POST['class'];
     $district= $_POST['district'];
+    $h1 = $key;
     if(!empty($key)){
       $key = str_replace(' ','+',trim($key));
       // $key1=$this->site_model->Selectkey($key)->Name;
@@ -1195,7 +1271,7 @@ class site extends Controller
 //=====(:any)-m(:num)l(:num)t(:num).html(/:num)?
     if((!empty(CheckSubject($subject)) && intval($class)==0 && intval($place)==0) && empty($key))
     {
-      $link=base_url().'mon-'.$monhoc.'-m'.intval($subject).'l0t0.html';
+      $link=base_url().'tim-gia-su-'.$monhoc.'-m'.intval($subject).'l0t0.html';
     }
     else if(!empty(CheckClass($class)) && intval($subject)==0 && intval($place)==0 && empty($key))
     {
@@ -1203,12 +1279,12 @@ class site extends Controller
     }
     else if(!empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0 && empty($key))
     {
-      $link=base_url().$tinhthanh.'-m0l0t'.intval($place).'.html';
+      $link=base_url().'tim-gia-su-'.$tinhthanh.'-m0l0t'.intval($place).'.html';
     }
 //=====(:any)/(:any)-s(:num)r(:num)c(:num).html
-    else if(!empty(CheckSubject1($subject)) && (intval($place)==1 ||intval($place)==45) && intval($class)==0 && intval($district)==0 && empty($key))
+    else if(!empty(CheckSubject1($subject)) && (!empty($place)) && intval($class)==0 && intval($district)==0 && empty($key))
     {
-      $link=base_url().'mon-'.$monhoc.'/'.$tinhthanh.'-s'.intval($subject).'r0c'.intval($place).'.html';
+      $link=base_url().'tim-gia-su-mon-'.$monhoc.'-'.$tinhthanh.'-m'.intval($subject).'l0t'.intval($place).'.html';
     }
     else if(!empty(CheckSubject1($subject)) && !empty(CheckClass($class)) && intval($place)==0 && empty($key))
     {
@@ -1221,10 +1297,41 @@ class site extends Controller
     }
 //===='tim-gia-su?key=(:any)&subject=(:num)&topic=(:num)&place=(:num)&district=(:num)&type=(:num)&sex=(:num)&order=(:any)(/:num)
     else if(!empty($key) && !empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0) {
-      $link=base_url()."tim-gia-su?keywork=".$key."&place=".intval($place).'.html';
+      $check_h1_place = $this->site_model->check_h1_place($h1, $place);
+      if ($check_h1_place == 1) {
+        
+        $get_top_by1 = $this->site_model->Gettopicbyh1place($h1, $place);
+        if ($get_top_by1[0]->option == 0) {
+
+          $link = base_url()."tim-gia-su-".$get_top_by1[0]->alias."-m".$get_top_by1[0]->ID."l0t0.html";
+        } else if ($get_top_by1[0]->option == 1) {
+          $link = base_url()."tim-gia-su-tai-".vn_str_filter($get_top_by1[0]->place_name)."-m0l0t".$get_top_by1[0]->place_id.".html";
+        } else if ($get_top_by1[0]->option == 2) {
+          $link = base_url()."tim-gia-su-mon-".$get_top_by1[0]->alias."-m".$get_top_by1[0]->ID."l0t".$get_top_by1[0]->place_id.".html";
+        }
+
+      } else {
+        $link=base_url()."tim-gia-su?keywork=".$key."&place=".intval($place).'.html';
+      }
+      // $link=base_url()."tim-gia-su?keywork=".$key."&place=".intval($place).'.html';
     }
     else if(!empty($key) && empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0) {
-      $link=base_url()."tim-gia-su?keywork=".$key."&place=".intval($place).'.html';
+      $check_h1 = $this->site_model->check_h1_n($h1);
+
+      if ($check_h1 == 1) {
+        
+        $get_top_by = $this->site_model->Gettopicbyh1_n($h1);
+        if ($get_top_by[0]->option == 0) {
+          $link = base_url()."tim-gia-su-".$get_top_by[0]->alias."-m".$get_top_by[0]->ID."l0t0.html";
+        } else if ($get_top_by[0]->option == 1) {
+          $link = base_url()."tim-gia-su-tai-".vn_str_filter($get_top_by[0]->place_name)."-m0l0t".$get_top_by[0]->place_id.".html";
+        } else if ($get_top_by[0]->option == 2) {
+          $link = base_url()."tim-gia-su-mon-".$get_top_by[0]->alias."-m".$get_top_by[0]->ID."l0t".$get_top_by[0]->place_id.".html";
+        }
+      } else {
+        $link=base_url()."tim-gia-su?keywork=".$key."&place=".intval($place).'.html';
+      }
+      // $link=base_url()."tim-gia-su?keywork=".$key."&place=".intval($place).'.html';
     }
     else if (empty($key) && empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0) {
       $result['blank'] = true;
@@ -1245,7 +1352,14 @@ class site extends Controller
 
   function tutorresultteacher($keywork,$subject,$topic,$place,$type,$sex,$order)
   {
+    $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+    $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
 
+    $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+    $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+    $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+    $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
     $page=$start_row=$this->uri->segment(2);
     if (isset($_POST['district'])) {
       $district = $_POST['district'];
@@ -1277,7 +1391,7 @@ class site extends Controller
    $data['keywork']=$keywork;
    $class = '';
    // $order = 'last';
-   $result=$this->site_model->GetListTeacherBySearch($keywork,$subject,$class,$topic,$place,$district,$type,$sex,$order,0,20);
+   $result=$this->site_model->GetListTeacherBySearch($keywork,$subject,$class,$topic,$place,$district,$type,$sex,$order,0,20,$sub_id_s=0);
    $link=base_url()."giao-vien&key=".$keywork."&subject=".intval($subject)."&topic=".intval($topic)."&place=".intval($place)."&type=".intval($type)."&sex=".intval($sex)."&order=".$order;
    $data['lstitem']=$result['data'];
   //  var_dump($data['lstitem']);
@@ -1416,6 +1530,13 @@ class site extends Controller
         $data['home'] = false;  
         $data['showsearch']=true; 
         $sql=$this->site_model->gettblwidthid('tbl_meta',1);
+        $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+        $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+        $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+        $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+        $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+        $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
         $data['meta_title']=$sql->title;
         $data['meta_key']=$sql->metakeywork;
         $data['meta_des']=$sql->metadesc;
@@ -1441,19 +1562,14 @@ class site extends Controller
        $order = 'last';
 
        $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject, 'class'=>$class,'place'=>$place,'district' => $district];
-       
        $result=$this->site_model->ListTeacherBySearchHeader($keywork,$subject,$class,$place,$district,$order,$page,$perpage);
 
       $data['keywork']=$keywork;
     
       $data['topkey'] = $this->site_model->ListTopKeywork();
-
-     
-      // echo "<script type='text/javascript'>alert('$keywork');</script>";
-      // die();
-       $link=base_url()."tim-gia-su?keywork=".$keywork."&subject=".intval($subject)."&class=".intval($class)."&place=".intval($place)."&district=".intval($district).'.html';
-      //  var_dump( $link);
-      //  die();
+      $kw = str_replace(' ', '+', $keywork);
+       $link=base_url()."tim-gia-su?keywork=".$kw."&place=".intval($place).'.html';
+      
       
        $data['lstitem']=$result['data'];
        
@@ -1485,7 +1601,12 @@ class site extends Controller
        $data['lstonline']=$this->site_model->GetTeacherOnline(10);
        $data['selectbox']=base_url()."giao-vien&key=".$keywork."&subject=".intval($subject)."&topic=".intval($topic)."&place=".intval($place)."&type=".intval($type)."&sex=".intval($sex)."&order=".intval($order);
 
-       $data['canonical']=base_url()."giao-vien"; 
+       // $data['canonical']=base_url()."giao-vien"; 
+       $data['canonical'] = $link;
+       // var_dump($data['canonical']);
+       // die();
+       // var_dump($data['canonical']);
+       // die();
 
        $data['robots']= 'noindex,nofollow'; 
        $data['content']='searchtutorresultteacher';
@@ -1762,6 +1883,7 @@ if($db_qr->num_rows() > 0)
       $place=$_POST['place'];
       $class = $_POST['class'];
       $district= $_POST['district'];
+      $h1 = $key;
       
       if(strlen($key)>0)
       {
@@ -1828,33 +1950,62 @@ if($db_qr->num_rows() > 0)
     
     if(!empty(CheckSubject($subject)) && intval($class)==0 && intval($place)==0 && empty($key))
     {
-      $link=base_url().'viec-lam-gia-su-mon-'.$monhoc.'-s'.intval($subject).'c0p0.html';
+      $link=base_url().'tim-viec-lam-gia-su-'.$monhoc.'-s'.intval($subject).'c0p0.html';
     }
     else if(!empty(CheckClass($class)) && intval($subject)==0 && intval($place)==0 && empty($key))
     {
-      $link=base_url().'viec-lam-gia-su-'.$lop.'-s0c'.intval($class).'p0.html';
+      $link=base_url().'tim-viec-lam-gia-su-'.$lop.'-s0c'.intval($class).'p0.html';
     }
     else if(!empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0 && empty($key))
     {
-      $link=base_url().'viec-lam-gia-su-'.$tinhthanh.'-s0c0p'.intval($place).'.html';
+      $link=base_url().'tim-viec-lam-gia-su-'.$tinhthanh.'-s0c0p'.intval($place).'.html';
     }
     else if(!empty(CheckSubject1($subject)) && (intval($place)==1 ||intval($place)==45) && intval($class)==0 && intval($district)==0 && empty($key))
     {
-      $link=base_url().'viec-lam-gia-su-mon-'.$monhoc.'/'.$tinhthanh.'-m'.intval($subject).'c0p'.intval($place).'.html';
+      $link=base_url().'tim-viec-lam-gia-su-mon-'.$monhoc.'/'.$tinhthanh.'-m'.intval($subject).'c0p'.intval($place).'.html';
     }
     else if(!empty(CheckSubject1($subject)) && !empty(CheckClass($class)) && intval($place)==0 && empty($key))
     {
-      $link=base_url().'viec-lam-gia-su-mon-'.$monhoc.'/'.$lop.'-m'.intval($subject).'c'.intval($class).'p0.html'; 
+      $link=base_url().'tim-viec-lam-gia-su-mon-'.$monhoc.'/'.$lop.'-m'.intval($subject).'c'.intval($class).'p0.html'; 
     }
     else if(intval($place)==45 && intval($district)>0 && intval($subject)==0 && intval($class)==0 && empty($key))
     {
-      $link=base_url().'viec-lam-gia-su-'.$quanhuyen.'-p45d'.intval($district).'.html';
+      $link=base_url().'tim-viec-lam-gia-su-'.$quanhuyen.'-p45d'.intval($district).'.html';
     }
     else if(!empty($key) && !empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0) {
-      $link=base_url()."tim-viec-lam-gia-su?keywork=".$key."&place=".intval($place).'.html';
-    }
+        $check_h1 = $this->site_model->check_h1_place_tv($h1,$place);
+        // var_dump($key);
+        // die();
+       if ($check_h1 == 1) {
+         $get_top_by = $this->site_model->Gettopicbyh1place_tv($h1,$place);
+        if ($get_top_by[0]->option == 0) {
+          $link = base_url()."tim-viec-lam-gia-su-".$get_top_by[0]->alias."-s".$get_top_by[0]->ID."c0p0.html";
+        } else if ($get_top_by[0]->option == 1) {
+          $link = base_url()."tim-viec-lam-gia-su-tai-".vn_str_filter($get_top_by[0]->place_name)."-s0c0p".$get_top_by[0]->place_id.".html";
+        } else if ($get_top_by[0]->option == 2) {
+          $link = base_url()."tim-viec-lam-gia-su-mon-".$get_top_by[0]->alias."-m".$get_top_by[0]->ID."c0p".$get_top_by[0]->place_id.".html";
+        }
+       } else {
+          $link=base_url()."tim-viec-lam-gia-su?keywork=".$key."&place=".intval($place).'.html';
+       }
+     }
+      // $link=base_url()."tim-viec-lam-gia-su?keywork=".$key."&place=".intval($place).'.html';
     else if(!empty($key) && empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0) {
-      $link=base_url()."tim-viec-lam-gia-su?keywork=".$key."&place=".intval($place).'.html';
+      
+      $check_h1 = $this->site_model->check_h1_tv_n($h1);
+      if ($check_h1 == 1) {
+        $get_top_by = $this->site_model->Gettopicbyh1_tv_n($h1);
+        if ($get_top_by[0]->option == 0) {
+          $link = base_url()."tim-viec-lam-gia-su-".$get_top_by[0]->alias."-s".$get_top_by[0]->ID."c0p0.html";
+        } else if ($get_top_by[0]->option == 1) {
+          $link = base_url()."tim-viec-lam-gia-su-tai-".vn_str_filter($get_top_by[0]->place_name)."-s0c0p".$get_top_by[0]->place_id.".html";
+        } else if ($get_top_by[0]->option == 2) {
+          $link = base_url()."tim-viec-lam-gia-su-mon-".$get_top_by[0]->alias."-m".$get_top_by[0]->ID."c0p".$get_top_by[0]->place_id.".html";
+        }
+      } else {
+         $link=base_url()."tim-viec-lam-gia-su?keywork=".$key."&place=".intval($place).'.html';
+      }
+      // $link=base_url()."tim-viec-lam-gia-su?keywork=".$key."&place=".intval($place).'.html';
     }
     else if(empty($key) && empty($place) && intval($subject)==0 && intval($class)==0 && intval($district)==0) {
       $result['blank'] = true;
@@ -1933,7 +2084,7 @@ function tutorresultfind($keywork,$subject,$topic,$place,$type,$sex)
     $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
   } 
   $class = '';
-  $data['lstitem']=$this->site_model->GetListClassBySearch($keywork,$subject,$class,$topic,$place,$type,$sex,0,20);
+  $data['lstitem']=$this->site_model->GetListClassBySearch($keywork,$subject,$class,$topic,$place,$type,$sex,0,20,$sub_id_s=0);
 
   $data['monhoc']=$this->site_model->ListSubject(); 
         //$data['chude']=$this->site_model->ListTopic();
@@ -1979,7 +2130,7 @@ function searchtutorresultfind($alias,$keywork,$subject,$class,$place,$district,
 
 
   $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject, 'class'=>$class,'topic'=>$topic,'place'=>$place,'district' => $district,'type'=>$type,'sex'=>$sex];
-  $data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district,$order,0,20);
+  $data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district,$order,0,20,$sub_id_s=0);
   $data['nav_search'] = 2;
   $data['topkey'] = $this->site_model->ListTopKeywork();
   $data['monhoc']=$this->site_model->ListSubject(); 
@@ -1996,6 +2147,15 @@ function searchtutorresultfind($alias,$keywork,$subject,$class,$place,$district,
 }
 function searchtutorresultbycity($alias,$keywork,$place)
 {
+  $data['search_class'] = 2;
+  $data['nav_search'] = 2;
+  $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+  $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+  $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+  $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+  $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+  $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
   $subject  = '';
   $class    = '';
   $district = '';
@@ -2021,9 +2181,8 @@ function searchtutorresultbycity($alias,$keywork,$place)
   {
     $keywork = $keywork;
   }
-
   $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject, 'class'=>$class,'topic'=>$topic,'place'=>$place,'district' => $district,'type'=>$type,'sex'=>$sex];
-  $data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district,$order,0,20);
+  $data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district,$order,0,20,$sub_id_s=0);
   $data['nav_search'] = 2;
   $data['topkey'] = $this->site_model->ListTopKeywork();
   $data['monhoc']=$this->site_model->ListSubject(); 
@@ -2070,7 +2229,7 @@ function searchtutorresultbykeyword($alias,$keywork,$place)
 
   $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject, 'class'=>$class,'topic'=>$topic,'place'=>$place,'district' => $district,'type'=>$type,'sex'=>$sex];
   $keywork = $alias;
-  $data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district,$order,0,20);
+  $data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district,$order,0,20,$sub_id_s=0);
   $data['nav_search'] = 2;
   $data['topkey'] = $this->site_model->ListTopKeywork();
   $data['monhoc']=$this->site_model->ListSubject(); 
@@ -2117,7 +2276,7 @@ function searchtutorresultbyplace($alias,$keywork,$place)
 
   $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject, 'class'=>$class,'topic'=>$topic,'place'=>$place,'district' => $district,'type'=>$type,'sex'=>$sex];
   $place = $alias_new;
-  $data['lstitem']=$this->site_model->ListClassBySearchHeader1($keywork,$subject,$classid,$place,$district,$order,0,20);
+  $data['lstitem']=$this->site_model->ListClassBySearchHeader1($keywork,$subject,$classid,$place,$district,$order,0,20,$sub_id_s);
   $data['nav_search'] = 2;
   $data['topkey'] = $this->site_model->ListTopKeywork();
   $data['monhoc']=$this->site_model->ListSubject(); 
@@ -2136,19 +2295,28 @@ function searchtutorresultbyplace($alias,$keywork,$place)
 //
 function AllTeacher()
 {
+
+  $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+  $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+  $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+  $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+  $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+  $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
   $data['home'] = false;	
   $data['showsearch']=true;	
   $sql=$this->site_model->gettblwidthid('tbl_meta',1);
-  $data['meta_title']=$sql->title;
-  $data['meta_key']=$sql->metakeywork;
-  $data['meta_des']=$sql->metadesc;
+  $data['meta_title']= "Tìm việc làm gia sư, tìm lớp học gia sư | Timviec365.com.vn";
+  $data['meta_key']= "Tìm lớp gia sư";
+  $data['meta_des']= "Tìm việc làm gia sư, danh sách lớp học cần gia sư trên toàn quốc. Tham khảo ngay để tìm lớp gia sư nhanh chóng, hiệu quả và chất lượng nhất tại Timviec365.com.vn";
   if(!empty($sql->name)){
     $data['metah1']=$sql->name;
   }else{
     $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
   } 
   $data['lstitem']=$this->site_model->GetTopClassByMoney(12);
-  $data['newitem']=$this->site_model->GetClassTop(20);
+  $data['newitem']=$this->site_model->GetClassTop(1000);
   $data['monhoc']=$this->site_model->ListSubject(); 
   $data['countcity']=$this->site_model->CountClassByCity();
   $data['countsubject']=$this->site_model->Danhsachloptheomonhoc();
@@ -2160,9 +2328,9 @@ function AllTeacher()
         //$data['giasutheott']=$this->site_model->DemGiaSuTheoTinhThanh();
         //$data['congtymoinhat']=$this->site_model->GetTopCompany(10);
         //$data['ungviennoibat']=$this->site_model->GetListCandidate("1=1 ",5,'order by u.use_update_time desc');		
-  $data['canonical']=base_url()."tim-gia-su";	
+  $data['canonical']=base_url()."tim-lop-hoc";	
 		//$data['amp']=site_url('amp');
-
+  $data['url_logo'] = base_url().'images/logo-01.png';
   $data['robots']= 'noindex,nofollow';	
   $data['content']='allteacher';
   $data['classheader']='navbar navbar-default white bootsnav on no-full';	
@@ -2171,6 +2339,15 @@ function AllTeacher()
       }
       function DetailClass($alias,$id)
       {
+        //$data['amp']=site_url('amp');
+    $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+    $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+    $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+    $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+    $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+    $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
         $data['home'] = false;	
         $data['showsearch']=true;	
 
@@ -2210,6 +2387,7 @@ function AllTeacher()
           }
 
           $data['canonical']=base_url()."lop-hoc/".vn_str_filter($itemclass->ClassTitle)."-".$itemclass->ClassID;	
+          $data['url_logo'] =  base_url().'upload/images/'.$itemclass->Image;
           $data['robots']= 'noindex,nofollow';	
           $data['content']='detailclass';
 		//$data['amp']=site_url('amp');
@@ -2223,16 +2401,45 @@ function AllTeacher()
       }
       function DetailTeacher($alias,$id)
       {
+
+        //$data['amp']=site_url('amp'); // 
+        $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+        $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+        $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+        $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+        $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+        $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
         $data['home'] = false;	
         $data['showsearch']=true;	
-
+        $data['check_save_teacher'] = '';
         $itemclass=$this->site_model->GetFirstTeacher($id);
+        $cityid = $itemclass->CityID;
         if($itemclass !=""){
 
           $data['meta_title']=$itemclass->Name." | gia sư ".$itemclass->WorkingName." | timviec";
           $data['meta_key']="Gia sư ".$itemclass->WorkingName.", trung tâm gia sư,".$itemclass->TitleView;
           $data['meta_des']=$itemclass->Description;
+          $sub_id_lq = $itemclass->IdTitle;
+          $list_kq_lq = [];
+          $list_mh = explode(',', $sub_id_lq);
+          $data_topic_lq1 = [];
+          $data_topic_lq2 = [];
+          $data_topic_lq3 = [];
 
+          if (intval($list_mh[0]) > 0) {
+            $data_topic_lq1 = $this->site_model->GetListtopicLq($list_mh[0],8);
+          }
+          if (intval($list_mh[1]) > 0) {
+            $data_topic_lq2 = $this->site_model->GetListtopicLq($list_mh[1], 8);
+          }
+          if (intval($list_mh[2]) > 0) {
+            $data_topic_lq3 = $this->site_model->GetListtopicLq($list_mh[2], 8);
+          }
+          $data_topic_lq = array_merge($data_topic_lq1, $data_topic_lq2, $data_topic_lq3);  
+        
+          $data['list_kq_lq'] = $data_topic_lq;
           $data['item']=$itemclass;
           if(isset($_SESSION['viewteacher']) && !empty($_SESSION['viewteacher'])){
             $tgview=$_SESSION['viewteacher'];
@@ -2254,12 +2461,29 @@ function AllTeacher()
             $_SESSION['viewteacher']=join(',',$tgview);
             $data['countview']=$countview;
           }
-          $data['monhoc']=$this->site_model->ListSubject();
-        //$data['relative']=$this->site_model->GetListClassRelative($itemclass->ClassID,$itemclass->SubjectID);
+      
+          // check gia su da luu.
+          if(!empty($_SESSION['UserInfo'])){
+            $tg=$_SESSION['UserInfo'];
+            $userid=$tg['UserId'];
+            if ($tg['TypeUser' == 0] || $tg['UserType'] == 0) {
+             $check_save_teacher =$this->site_model->checkuservsusers($userid,$id,1);
+              if ($check_save_teacher['kq']  == 1) {
+                $data['check_save_teacher'] = 1;
+              } else {
+                $data['check_save_teacher'] = 0;
+              }
+           }
 
-          $data['moreteach']=$this->site_model->GetTeacherMore($id);
+         }
+          $data['monhoc']=$this->site_model->ListSubject();
+          //$data['relative']=$this->site_model->GetListClassRelative($itemclass->ClassID,$itemclass->SubjectID);
+
+          $data['moreteach']=$this->site_model->GetTeacherMore($id,$cityid);
           $data['lstonline']=$this->site_model->GetTeacherOnline(10);		
-          $data['canonical']=base_url()."lop-hoc/".vn_str_filter($itemclass->ClassTitle)."-".$itemclass->ClassID;	
+          $data['canonical']=base_url().vn_str_filter($itemclass->Name)."-gv".$itemclass->UserID;	
+          $tg3=explode('-',date('d-m-Y',strtotime($itemclass->CreateDate)));
+          $data['url_logo'] = base_url().'upload/users/thumb/'.$tg3[2].'/'.$tg3[1].'/'.$tg3[0].'/'.$itemclass->Image;
           $data['robots']= 'noindex,nofollow';	
           $data['content']='detailteacher';
           $data['topic']=$this->site_model->GetTopicbyUserID($id);
@@ -2277,12 +2501,20 @@ function AllTeacher()
           $order='last';
         }
         $page=(!empty($this->uri->segment(2)))?$this->uri->segment(2):0;
+        $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+        $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+        $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+        $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+        $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+        $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
         $data['home'] = false;	
         $data['showsearch']=true;	
         $sql=$this->site_model->gettblwidthid('tbl_meta',1);
-        $data['meta_title']=$sql->title;
-        $data['meta_key']=$sql->metakeywork;
-        $data['meta_des']=$sql->metadesc;
+        $data['meta_title']=  "Tìm gia sư, tìm giáo viên dạy kèm uy tín | Timviec365.com.vn";
+        $data['meta_key']="tìm gia sư, tìm giáo viên dạy kèm";
+        $data['meta_des']="Tìm gia sư, tìm giáo viên dạy kèm uy tín, chất lượng. Kết nối gia sư và phụ huynh có nhu cầu tìm giáo viên dạy kèm nhanh chóng, miễn phí trên Timviec365.com.vn";
         if(!empty($sql->name)){
           $data['metah1']=$sql->name;
         }else{
@@ -2302,11 +2534,13 @@ function AllTeacher()
         $data['topkey'] = $this->site_model->ListTopKeywork();
 
        // $order='last';
-       $result=$this->site_model->GetListTeacherBySearch($keywork,$subject,$class,$topic,$place,$district,$type,$sex,$order,$page,$perpage);
+       $result=$this->site_model->GetListTeacherBySearch($keywork,$subject,$class,$topic,$place,$district,$type,$sex,$order,$page,$perpage,$sub_id_s=0);
 
   
        // $link=base_url()."tim-giao-vien-day-kem&order=".$order;
-       $link=base_url()."tim-giao-vien-day-kem&order=".$order;
+       // $link=base_url()."tim-gia-su&order=".$order;
+       $data['url_logo'] =  base_url().'upload/images/imgshare.com.vn.png';
+       $link=base_url()."tim-gia-su";
        $data['lstitem']=$result['data'];
        $this->load->library('pagination');
        $config['total_rows'] = $result['total'];
@@ -2317,8 +2551,27 @@ function AllTeacher()
        $config['num_links'] = 4;
        $config['first_link'] = '<i class="fa fa-angle-double-left"></i>';
        $config['last_link'] = '<i class="fa fa-angle-double-right"></i>';
-       $config['base_url']=$link;
-       
+       $actual_link = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+       // $config['base_url']=$link;
+       if ($page > 0 ) {
+        $data['robots'] = 'noindex,nofollow';
+        if (strpos($order, 'pricelow') !== false) {
+           $config['base_url'] =base_url().'tim-gia-su&order=pricelow';
+         } else if (strpos($order, 'pricehigh') !== false) {
+           $config['base_url'] =base_url().'tim-gia-su&order=pricehigh';
+         } else {
+           $config['base_url'] = $link;
+       }
+       } else {
+         if (strpos($order, 'pricelow') !== false) {
+           $config['base_url'] =base_url().'tim-gia-su&order=pricelow';
+         } else if (strpos($order,'pricehigh') !== false) {
+           $config['base_url'] =base_url().'tim-gia-su&order=pricehigh';
+         } else {
+           $config['base_url'] = $link;
+       }
+      }
+      $data['current_link'] = $config['base_url'];
        $this->pagination->initialize($config);	
        $data['total']=$result['total'];
        $data['order']=$order;
@@ -2328,8 +2581,9 @@ function AllTeacher()
        $data['chude']=$this->site_model->GetTeacherFeature();
        $data['districk']=$this->site_model->CountTeacherbyCity();
        $data['lstonline']=$this->site_model->GetTeacherOnline(10);
-       $data['selectbox']=base_url()."tim-giao-vien-day-kem&order=";
-       $data['canonical']=base_url()."tim-giao-vien-day-kem";	
+       $data['selectbox']=base_url()."tim-gia-su&order=";
+       $data['canonicals']=base_url()."tim-gia-su";	
+       $data['canonical']=$config['base_url'];  
        $data['robots']= 'noindex,nofollow';	
        $data['content']='teacherall';
        $data['classheader']='navbar navbar-default white bootsnav on no-full';	
@@ -2479,6 +2733,7 @@ function AllTeacher()
   }
   function confirmuser($code,$email,$type){ 
     $data['home'] = true;	
+    $data['xacnhanuser'] = 1;
         //var_dump($code,$email,$type);	
     $sql=$this->site_model->gettblwidthid('tbl_footer',1);
 		$data['meta_title']="Xác nhận đăng ký tài khoản GIASU365";//$sql->meta_title;
@@ -2493,9 +2748,8 @@ function AllTeacher()
     $data['email'] = $email;
     $data['type'] = $type;
     $result=$this->site_model->getconfirmuser($code,$email,$type);
-
+    $_SESSION['UserInfo']['Active'] = 1;
     $data['itemconfirm']=$result;
-
     $data['useremail']=$email;
     $data['canonical']=base_url();	
     $data['robots']= 'noindex,nofollow'; 
@@ -2503,6 +2757,81 @@ function AllTeacher()
     $data['content']='confirmuser';
     $data['classheader']='navbar navbar-default white bootsnav on no-full';		
     $this->load->view('template',$data);
+  }
+  function xacthuctaikhoannhatuyendung(){ 
+   $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+   $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+   $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+   $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+   $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+   $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
+    $data['home'] = true; 
+        //var_dump($code,$email,$type); 
+    $sql=$this->site_model->gettblwidthid('tbl_footer',1);
+    $data['meta_title']="Xác nhận kích hoạt tài khoản GIASU365";//$sql->meta_title;
+    $data['meta_key']="Xác nhận kích hoạt tài khoản GIASU365";//$sql->meta_key;
+    $data['meta_des']="Xác nhận kích hoạt tài khoản GIASU365";//$sql->meta_des;
+    if(!empty($sql->name)){
+      $data['metah1']=$sql->name;
+    }else{
+      $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
+    }
+    // $data['code'] = $code;
+    // $data['email'] = $email;
+    // $data['type'] = $type;
+    // $result=$this->site_model->getconfirmuser($code,$email,$type);
+
+    // $data['itemconfirm']=$result;
+
+    // $data['useremail']=$email;
+    $data['canonical']=base_url();  
+    $data['robots']= 'noindex,nofollow'; 
+    $data['showsearch']=false;          
+    $data['content']='xacthuctaikhoan';
+    $data['classheader']='navbar navbar-default white bootsnav on no-full';   
+    $this->load->view($data['content']);
+  }
+  function xacthuctaikhoangiasu(){ 
+   $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+   $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+   $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+   $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+   $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+   $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
+    $data['home'] = true; 
+        //var_dump($code,$email,$type); 
+    $sql=$this->site_model->gettblwidthid('tbl_footer',1);
+    $data['meta_title']="Xác nhận kích hoạt tài khoản GIASU365";//$sql->meta_title;
+    $data['meta_key']="Xác nhận kích hoạt tài khoản GIASU365";//$sql->meta_key;
+    $data['meta_des']="Xác nhận kích hoạt tài khoản GIASU365";//$sql->meta_des;
+    if(!empty($sql->name)){
+      $data['metah1']=$sql->name;
+    }else{
+      $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
+    }
+    // $data['code'] = $code;
+    // $data['email'] = $email;
+    // $data['type'] = $type;
+    // $result=$this->site_model->getconfirmuser($code,$email,$type);
+
+    // $data['itemconfirm']=$result;
+
+    // $data['useremail']=$email;
+    $data['canonical']=base_url();  
+    $data['robots']= 'noindex,nofollow'; 
+    $data['showsearch']=false;          
+    $data['content']='xacthuctaikhoangiasu';
+    $data['classheader']='navbar navbar-default white bootsnav on no-full';   
+    $this->load->view($data['content']);
+  }
+  function ajaxxacthuctaikhoanntd() {
+      $name   = $_POST['name'];
+      $email  = $_POST['email'];
+      $pass   = $_POST['pass'];
   }
   function sendmailconfirmuser(){
     $data['home'] = true;   
@@ -2529,7 +2858,7 @@ function AllTeacher()
       function forgetmail(){
          $email= $this->input->post('email');
          $kq = $this->site_model->resendmail2($email);
-        echo json_encode($kq);
+         echo json_encode($kq);
       }
       function forgetmail2(){
         $email= $this->input->post('email');
@@ -3559,6 +3888,7 @@ function loginteacher()
   $password = $this->input->post('password');
   $username = $this->input->post('username');
   $remember = $this->input->post('typelogin');
+  $remember_teacher = $this->input->post('remember');
 
   $result=$this->site_model->GetLoginTeacher($username,md5($password));
 
@@ -3587,10 +3917,27 @@ function loginteacher()
     if($remember==1){
             setcookie("namephp", $username, time() + (86400 * 30), "/"); // 86400 = 1 day
             setcookie("puphp", md5($password), time() + (86400 * 30), "/"); // 86400 = 1 day
-          }
-        }
+    }
+    if ($remember_teacher == 1) {
+      setcookie("namephpteacher", $username, time() + (86400 * 30), "/");
+      setcookie("puphpteacher", $password, time() + (86400 * 30), "/");
+    } else {
+      delete_cookie("namephpteacher");
+      delete_cookie("puphpteacher");
+    }
+  }
   else if ($result != "" && $result->Active==0 && $result->UserType==1){
-    $data=array('kq'=>false,'msg'=>'Bạn chưa kích hoạt gmail hoặc gmail của bạn đã bị xóa , ban có muốn gửi lại không !');
+     $profileData = array("UserId" => $result->UserID,
+     "UserName" => $result->UserName,
+     "EmailAddress" => $result->Email,
+     "Name" => $result->Name, 
+     "Phone"=>$result->Phone,                                
+     "TokentKey" => $token,
+     "UserType"=>$result->UserType,
+     "Active" => 0,
+     "Balance"=>intval($balance->Balance));
+    $_SESSION['UserInfo'] = $profileData;
+    $data=array('kq'=>false,'sttlogin'=> 1,'msg'=>'Bạn chưa kích hoạt gmail hoặc gmail của bạn đã bị xóa , ban có muốn gửi lại không !');
   }
   else {
     $data=array('kq'=>false,'msg'=>'Đăng nhập không thành công. Vui lòng kiểm tra lại.');
@@ -3599,9 +3946,11 @@ function loginteacher()
 }
       function loginusers()
       {
-        $username = $this->input->post('username');
-        $password = $this->input->post('password');
-        $remember = $this->input->post('typelogin');
+        $username       = $this->input->post('username');
+        $password       = $this->input->post('password');
+        $remember       = $this->input->post('typelogin');
+        $remember_user  = $this->input->post('remember');
+
         $result=$this->site_model->GetLoginusers($username,md5($password));
         if($result != "" && $result->Active==1 && $result->UserType==0){
           $ip = time();
@@ -3642,9 +3991,25 @@ function loginteacher()
                 setcookie("namephp", $username, time() + (86400 * 30), "/"); // 86400 = 1 day
                 setcookie("puphp", md5($password), time() + (86400 * 30), "/"); // 86400 = 1 day
               }
+            if($remember_user==1){
+                setcookie("nameuserphp", $username, time() + (86400 * 30), "/"); // 86400 = 1 day
+                setcookie("puuserphp", $password, time() + (86400 * 30), "/"); // 86400 = 1 day
+            }else if($remember_user == 0) {
+                delete_cookie("nameuserphp");
+                delete_cookie("puuserphp");
+            }
         }
         else if ($result != "" && $result->Active==0 && $result->UserType==0){
-          $data=array('kq'=>false,'msg'=>'Bạn chưa kích hoạt gmail hoặc gmail của bạn đã bị xóa , ban có muốn gửi lại không !');
+           $profileData = array("UserId" => $result->UserID,
+             "Email" => $result->Email,
+             "Name" => $result->Name, 
+             "Phone"=>$result->Phone,                                
+             "TokentKey" => $token,
+             "TypeUser"=>$type,
+             "Active"=> 0,
+             "Balance"=>intval($balance->Balance));
+           $_SESSION['UserInfo'] = $profileData;
+          $data=array('kq'=>false,'loginstt'=> 1 ,'msg'=>'Bạn chưa kích hoạt gmail hoặc gmail của bạn đã bị xóa , bạn có muốn gửi lại không !');
         }
         else {
           $data=array('kq'=>false,'msg'=>'Đăng nhập không thành công. Vui lòng kiểm tra lại.');
@@ -3668,65 +4033,65 @@ function loginteacher()
             $data=$this->site_model->EmailNofity($findkey);
             echo json_encode($data,JSON_UNESCAPED_UNICODE);
           } 
-          function quickviewuser()
-          {
-            $userid=$this->input->post('objid');       
+          // function quickviewuser()
+          // {
+          //   $userid=$this->input->post('objid');       
 
-            $userinfo=$this->site_model->GetFirstUserTeacher(intval($userid));
+          //   $userinfo=$this->site_model->GetFirstUserTeacher(intval($userid));
 
-            $lichday="";
-            if(intval($userinfo->MonMorning)==1){$lichday[]=" Thứ 2 sáng";}
-            if(intval($userinfo->MonAfter)==1){$lichday[]=" Thứ 2 chiều";}
-            if(intval($userinfo->MonNight)==1){$lichday[]=" Thứ 2 tối";}
-            if(intval($userinfo->TueMorning)==1){$lichday[]=" Thứ 3 sáng";}
-            if(intval($userinfo->TueAfter)==1){$lichday[]=" Thứ 3 chiều";}
-            if(intval($userinfo->TueNight)==1){$lichday[]=" Thứ 3 tối";}
-            if(intval($userinfo->WeMorning)==1){$lichday[]=" Thứ 4 sáng";}
-            if(intval($userinfo->WeAfter)==1){$lichday[]=" Thứ 4 chiều";}
-            if(intval($userinfo->WeNight)==1){$lichday[]=" Thứ 4 tối";}
-            if(intval($userinfo->ThuMorning)==1){$lichday[]=" Thứ 5 sáng";}
-            if(intval($userinfo->ThuAfter)==1){$lichday[]=" Thứ 5 chiều";}
-            if(intval($userinfo->ThuNight)==1){$lichday[]=" Thứ 5 tối";}
-            if(intval($userinfo->FriMorning)==1){$lichday[]=" Thứ 6 sáng";}
-            if(intval($userinfo->FriAfter)==1){$lichday[]=" Thứ 6 chiều";}
-            if(intval($userinfo->FriNight)==1){$lichday[]=" Thứ 6 tối";}
-            if(intval($userinfo->SatMorning)==1){$lichday[]=" Thứ 7 sáng";}
-            if(intval($userinfo->SatAfter)==1){$lichday[]=" Thứ 7 chiều";}
-            if(intval($userinfo->SatNight)==1){$lichday[]=" Thứ 7 tối";}
-            if(intval($userinfo->SunMorning)==1){$lichday[]=" Chủ nhật sáng";}
-            if(intval($userinfo->SunAfter)==1){$lichday[]=" Chủ nhật chiều";}
-            if(intval($userinfo->SunNight)==1){$lichday[]=" Chủ nhật tối";}
+          //   $lichday="";
+          //   if(intval($userinfo->MonMorning)==1){$lichday[]=" Thứ 2 sáng";}
+          //   if(intval($userinfo->MonAfter)==1){$lichday[]=" Thứ 2 chiều";}
+          //   if(intval($userinfo->MonNight)==1){$lichday[]=" Thứ 2 tối";}
+          //   if(intval($userinfo->TueMorning)==1){$lichday[]=" Thứ 3 sáng";}
+          //   if(intval($userinfo->TueAfter)==1){$lichday[]=" Thứ 3 chiều";}
+          //   if(intval($userinfo->TueNight)==1){$lichday[]=" Thứ 3 tối";}
+          //   if(intval($userinfo->WeMorning)==1){$lichday[]=" Thứ 4 sáng";}
+          //   if(intval($userinfo->WeAfter)==1){$lichday[]=" Thứ 4 chiều";}
+          //   if(intval($userinfo->WeNight)==1){$lichday[]=" Thứ 4 tối";}
+          //   if(intval($userinfo->ThuMorning)==1){$lichday[]=" Thứ 5 sáng";}
+          //   if(intval($userinfo->ThuAfter)==1){$lichday[]=" Thứ 5 chiều";}
+          //   if(intval($userinfo->ThuNight)==1){$lichday[]=" Thứ 5 tối";}
+          //   if(intval($userinfo->FriMorning)==1){$lichday[]=" Thứ 6 sáng";}
+          //   if(intval($userinfo->FriAfter)==1){$lichday[]=" Thứ 6 chiều";}
+          //   if(intval($userinfo->FriNight)==1){$lichday[]=" Thứ 6 tối";}
+          //   if(intval($userinfo->SatMorning)==1){$lichday[]=" Thứ 7 sáng";}
+          //   if(intval($userinfo->SatAfter)==1){$lichday[]=" Thứ 7 chiều";}
+          //   if(intval($userinfo->SatNight)==1){$lichday[]=" Thứ 7 tối";}
+          //   if(intval($userinfo->SunMorning)==1){$lichday[]=" Chủ nhật sáng";}
+          //   if(intval($userinfo->SunAfter)==1){$lichday[]=" Chủ nhật chiều";}
+          //   if(intval($userinfo->SunNight)==1){$lichday[]=" Chủ nhật tối";}
 
-            if(count($lichday)<=0){
-              $lichday[]=" Chưa cập nhật";
-            }
-
-
+          //   if(count($lichday)<=0){
+          //     $lichday[]=" Chưa cập nhật";
+          //   }
 
 
-            $result=['kq'=>false];
 
-            if(empty($userinfo)){
-              $data='<div id="quick-view-box"><div class="tooltiptext"><div class="view view-users view-id-users view-display-id-attachment_7 view-dom-id-991d540f6fd86935d5e91fc993b31d22"><div class="view-content"><div class="views-row views-row-1 views-row-odd views-row-first views-row-last"><div class="fullname_tooltip">
-              <h4>Không tồn tại</h4></div>
-              </div></div></div></div></div>';
-            }else{
-              $data='<div id="quick-view-box"><div class="tooltiptext"><div class="view view-users view-id-users view-display-id-attachment_7 view-dom-id-991d540f6fd86935d5e91fc993b31d22"><div class="view-content"><div class="views-row views-row-1 views-row-odd views-row-first views-row-last"><div class="fullname_tooltip">';
-              $data.='<h4><a >'.$userinfo->Name.'</a></h4></div>';
-              $data.='<div class="class_content_popup">'.$userinfo->TitleView.' | '.$userinfo->CityName.'</div>';
-              $data.='<div class="popoverborder"><div class="class_content_popup"><b>Lịch dạy</b>:  '.join(',',$lichday).'</div>
 
-              <div class="class_content_popup" style="border-top:0.5px solid #f5f5f5;"><b>Số lớp đã dạy:</b> '.$userinfo->solopday.'</div>
+          //   $result=['kq'=>false];
 
-              <div class="class_content_popup" style="border-top:0.5px solid #f5f5f5;">'.$userinfo->Description.'</div></div>
+          //   if(empty($userinfo)){
+          //     $data='<div id="quick-view-box"><div class="tooltiptext"><div class="view view-users view-id-users view-display-id-attachment_7 view-dom-id-991d540f6fd86935d5e91fc993b31d22"><div class="view-content"><div class="views-row views-row-1 views-row-odd views-row-first views-row-last"><div class="fullname_tooltip">
+          //     <h4>Không tồn tại</h4></div>
+          //     </div></div></div></div></div>';
+          //   }else{
+          //     $data='<div id="quick-view-box"><div class="tooltiptext"><div class="view view-users view-id-users view-display-id-attachment_7 view-dom-id-991d540f6fd86935d5e91fc993b31d22"><div class="view-content"><div class="views-row views-row-1 views-row-odd views-row-first views-row-last"><div class="fullname_tooltip">';
+          //     $data.='<h4><a >'.$userinfo->Name.'</a></h4></div>';
+          //     $data.='<div class="class_content_popup">'.$userinfo->TitleView.' | '.$userinfo->CityName.'</div>';
+          //     $data.='<div class="popoverborder"><div class="class_content_popup"><b>Lịch dạy</b>:  '.join(',',$lichday).'</div>
 
-              </div></div></div></div></div>';
-            }
+          //     <div class="class_content_popup" style="border-top:0.5px solid #f5f5f5;"><b>Số lớp đã dạy:</b> '.$userinfo->solopday.'</div>
 
-            $result=['kq'=>true,'data'=>$data];
+          //     <div class="class_content_popup" style="border-top:0.5px solid #f5f5f5;">'.$userinfo->Description.'</div></div>
 
-            echo json_encode($result,JSON_UNESCAPED_UNICODE);
-          }
+          //     </div></div></div></div></div>';
+          //   }
+
+          //   $result=['kq'=>true,'data'=>$data];
+
+          //   echo json_encode($result,JSON_UNESCAPED_UNICODE);
+          // }
           function ajaxlstclass() 
           {
             $keytag=$this->input->post('keytag'); 
@@ -3821,10 +4186,10 @@ function loginteacher()
                <div class="giasu_logo">
                <a href="'.base_url().vn_str_filter($n->Name).'-gv'.$n->UserID.'" title="'.$lstitem[$i]->Name.'" target="_blank">';
                if(!empty($n->Image)){
-                $data.='<img src="'.gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),174,174,100).'" onerror="this.onerror=null;this.src="images/no-image2.png"/>';
+                $data.='<img alt="'.$n->Name.'" src="'.gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),174,174,100).'"  onerror="this.onerror=null;this.src="images/no-image2.png"/>';
               }else{ 
 
-               $data.='<img src="images/no-image2.png" alt="#" onerror=this.onerror=null;this.src="images/no-image2.png"/>';
+               $data.='<img src="images/no-image2.png" alt="'.$n->Name.'" onerror=this.onerror=null;this.src="images/no-image2.png"/>';
              }
              $data.='<span class="viewnow">Xem hồ sơ</span>
              </a>
@@ -3886,7 +4251,7 @@ function loginteacher()
               $tinhthanh=$this->site_model->SelectProvinceByID1(intval($place));
               $data['cityname']=$tinhthanh->cit_name;
             }
-            $result=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classname,$place,$district, $order,0,20);
+            $result=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classname,$place,$district, $order,0,20,$sub_id_s=0);
 
 
             $lstitem = $result['data'];
@@ -3904,16 +4269,16 @@ function loginteacher()
                       <div class="itemnews_l">
                           <a class="logouser">';
                           if(!empty($n->Image)){
-                           $data.='<img src="'.gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),63,63,100).'" onerror= this.onerror=null;this.src="images/no-image2.png"/>';
+                           $data.='<img alt="'.$n->Name.'" src="'.gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),63,63,100).'" onerror= this.onerror=null;this.src="images/no-image2.png"/>';
                       }else{
-                       $data.='<img src="images/no-image2.png" alt="#" onerror=this.onerror=null;this.src="images/no-image2.png"/>';
+                       $data.='<img src="images/no-image2.png" alt="'.$n->Name.'" onerror=this.onerror=null;this.src="images/no-image2.png"/>';
                         } 
                        $data.='</a>
-                          <a href="'.base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID.'" class="nameu" title="'.$n->Name.'">'.$n->Name.'</a>
+                          <a href="'.base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID.'" class="nameu" title="'.$n->Name.'">'.$n->Name.'</a>
                           <span>'.date("d/m/Y",strtotime($n->CreateDate)).'</span>
                       </div>
                       <div class="itemnews_r">
-                          <a target="_blank" href="'.base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID.'" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i>'.$n->ClassTitle.' </a>
+                          <a target="_blank" href="'.base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID.'" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i>'.$n->ClassTitle.' </a>
                           <p>';
                             $gn_text=$n->DescClass;
                                   if ( strlen( $n->DescClass ) > 250 ) {
@@ -4090,16 +4455,68 @@ function loginteacher()
           } 
           function AjaxchudeCheckbox()
           {
-            $idmonhoc=$this->input->post('idmon'); 
-            $lsttopic=$this->site_model->ListTopicBySubject($idmonhoc);
+            $idmonhoc=$this->input->post('idmon');
+            $lsttopic=$this->site_model->ListTopicBySubject($idmonhoc[0], $idmonhoc[1], $idmonhoc[2]);
             $data="";
             foreach($lsttopic as $n){
-
-              $data.="<li>";
+              $sub_name = $this->site_model->GetSubjectByID($n->SubjectID);
+              $sub_name_vn = vn_str_filter($sub_name->SubjectName);
+              $data.="<li class=child_".$sub_name_vn .">";
               $data.="<input class='radio-calendar' id='toppic-".$n->ID."' type='checkbox' name='toppicchk' value='".$n->ID."'>
               <label for='toppic-".$n->ID."'>".$n->NameTopic."</label>";
               $data.="</li>";
               $id = $n->SubjectID;
+            }
+
+            $result=['kq'=>true,'data'=>$data, 'id'=>$id];
+            echo json_encode($result,JSON_UNESCAPED_UNICODE);
+          }
+          function AjaxchudeCheckboxNew()
+          {
+            $idmonhoc=$this->input->post('idmon');
+            $lsttopic=$this->site_model->ListTopicBySubject_new($idmonhoc);
+            $data="";
+            foreach($lsttopic as $n){
+            $data.="<li>";
+            $data.="<input class='radio-calendar' id='toppic-".$n->ID."' type='checkbox' name='toppicchk' value='".$n->ID."'>
+            <label for='toppic-".$n->ID."'>".$n->NameTopic."</label>";
+            $data.="</li>";
+            $id = $n->SubjectID;
+            }
+
+            $result=['kq'=>true,'data'=>$data, 'id'=>$id];
+            echo json_encode($result,JSON_UNESCAPED_UNICODE);
+          }
+           function AjaxchudeCheckbox2()
+          {
+            $idmonhoc=$this->input->post('idmon'); 
+            $lsttopic=$this->site_model->ListTopicBySubject2($idmonhoc, $idmonhoc[1], $idmonhoc[2]);
+            $data="";
+            // foreach($lsttopic as $n){
+
+              $data.="<li>";
+              $data.="<input class='radio-calendar' id='toppic-".$lsttopic[0]->ID."' type='checkbox' name='toppicchk' value='".$lsttopic[0]->ID."'>
+              <label for='toppic-".$lsttopic[0]->ID."'>".$lsttopic[0]->NameTopic."</label>";
+              $data.="</li>";
+              $id = $lsttopic[0]->SubjectID;
+            // }
+
+            $result=['kq'=>true,'data'=>$data, 'id'=>$id];
+            echo json_encode($result,JSON_UNESCAPED_UNICODE);
+          }
+            function AjaxtopicCheckbox()
+          {
+            $idmonhoc=$this->input->post('idmon'); 
+            $lsttopic=$this->site_model->ListkeytagcBySubject($idmonhoc);
+
+            $data="";
+            foreach($lsttopic as $n){
+
+              $data.="<li>";
+              $data.="<input class='radio-calendar' id='toppic-".$n->id."' type='checkbox' name='toppicchk' value='".$n->id."'>
+              <label for='toppic-".$n->ID."'>".$n->NameTopic."</label>";
+              $data.="</li>";
+              $id = $n->sub_id;
             }
 
             $result=['kq'=>true,'data'=>$data, 'id'=>$id];
@@ -4118,6 +4535,11 @@ function loginteacher()
             $result=['kq'=>true,'data'=>$data];
             echo json_encode($result,JSON_UNESCAPED_UNICODE);
           }
+          function newmail() {
+            $body = file_get_contents(base_url().'EmailTemplate/thongbaodenghiday_new.htm');
+            echo $body;
+            die();
+          }
           function ajaxgetforgotpassword()
           {
             $result=['kq'=>false,'data'=>''];
@@ -4126,27 +4548,31 @@ function loginteacher()
             $data="";
             if($lsttopic != ""){
               $code="f_".rand(1000000,9999999);
-              $body=file_get_contents(base_url().'EmailTemplate/SendForgotPassword.htm');      
+              $body=file_get_contents(base_url().'EmailTemplate/SendForgotPassword.htm');  
               $body=str_replace('<%name%>',$lsttopic->Name,$body);
               $body=str_replace('<%email%>',$lsttopic->Email,$body);    
               $body=str_replace('<%code%>',$code,$body); 
+              $body=str_replace('<%base_url%>', base_url(), $body); 
 
 
               $subject='[giasu365] Lấy lại mật khẩu';
               $Description="Lấy lại mật khẩu";
-              $data="";
+              $data=""; // => $body
               $CreateDate=date("Y-m-d H:i:s",time());
               $queryconfrim="INSERT INTO comfirmtable(UserID,Code,Type,Status,Data,Description,CreateDate,UpdateDate) 
               VALUES('".$lsttopic->UserID."','".$code."','0','0','".$body."','".$Description."','".$CreateDate."','".$CreateDate."')";
               $insert=$this->db->query($queryconfrim);
               $Name=$lsttopic->Name;
               $arrphone=['Email'=>"'$username'",'Name'=>"'$name'"];        
-            //$message=formatsmsmessage(2,$code);//buildsendautocall($arrphone,$code);//
-            //$Statuscode=1;//
-            //$Statuscode=sendsms($lsttopic->Name,$message);
-            //$smslog=$this->site_model->InsertLogSms($code,$Statuscode,'2');
-              $body = base64_encode($body);
-              $this->site_model->CreateSendMail('timviec365-noreply@timviec365.com.vn',$lsttopic->Email,"","",$subject,$body);
+              //$message=formatsmsmessage(2,$code);//buildsendautocall($arrphone,$code);//
+              //$Statuscode=1;//
+              //$Statuscode=sendsms($lsttopic->Name,$message);
+              //$smslog=$this->site_model->InsertLogSms($code,$Statuscode,'2');
+            
+              // $body = base64_encode($body);
+
+              $this->site_model->sendmailnew($lsttopic->Email,$subject,$body);
+              // $this->site_model->CreateSendMail('timviec365-noreply@timviec365.com.vn',$lsttopic->Email,"","",$subject,$body);
               $result=['kq'=>true,'data'=>'Yêu cầu lấy lại mật khẩu thành công, bạn vui lòng kiểm tra email để thay đổi mật khẩu'];
             }
 
@@ -4196,6 +4622,55 @@ function loginteacher()
               if ($tg['UserType'] == 1 || $tg['TypeUser'] == 1) {
                 $kq=$this->site_model->adduservsclass($userid,$classid,0);
                 if($kq['kq'] == true){
+                  $urlweb= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+                  $user_name = $tg['Name'];
+                  $user_email = $tg['EmailAddress'];
+                  $ngaysinh = $tg['Birth'];
+                  $user_phone = $tg['Phone'];
+                  $infoclass = $this->site_model->Getclassbyuserid1($classid);
+                  $infoteacherclass = $this->site_model->GetUserInfoByUserID($infoclass[0]->UserID);
+                  $phuhuynhid = $infoclass[0]->UserID;
+                  $get_more_class_by = $this->site_model->GetListClassby($phuhuynhid, 5);
+                  $html_mail = "";
+                  foreach ($get_more_class_by as $n) {
+                    if ($n->TeachType == 1) {
+                        $kieuday = "Trực tuyến";
+                    } else {
+                        $kieuday = "Gặp mặt";
+                    }
+                    $cityname = "Chưa cập nhật";
+                    if ($n->City > 0) {
+                        $cityname = $this->site_model->GetNamecity($n->City);
+                        $citname = $cityname[0]->cit_name;
+                    }
+                    $html_mail .= "<div style='padding-left:40px; margin-top: 30px; font-family: 'Roboto''> <h3><a href='".base_url()."/lop-hoc/".$n->Alias."-".$n->ClassID."' style='text-decoration: none;color: #203043;'>".$n->ClassTitle."</a></h3>";
+                    $html_mail .= "<p>Đăng bởi: <span style='color:#00baba'>".$infoteacherclass->Name."</span></p>";
+                    $html_mail .= "<p><span style='background-color:#ffb11b; padding: 5px 5px; color: #FFFFFF; margin-right: 5px'>".$n->Money."</span><span style='background-color: #00baba; padding: 5px 5px; color: #FFFFFF; margin-right: 5px;'>".$kieuday."</span><span style='background-color: #00baba; padding: 5px 5px; color: #FFFFFF;'>".$citname."</span>";
+                    $html_mail .= "</div>";
+                  }
+
+                  $email_ph = $infoteacherclass->Email;
+                  $name_ph = $infoteacherclass->Name;
+                  //
+                  $link_chitietgiasu = base_url().vn_str_filter($user_name).'-gv'.$userid;
+                  $body=file_get_contents(base_url().'EmailTemplate/thongbaodenghiday.htm');  
+                  $body=str_replace('<%name%>',$name_ph,$body);
+                  $body=str_replace('<%classname%>',$infoclass[0]->ClassTitle,$body);
+                  $body=str_replace('<%giasu%>',$user_name,$body);    
+                  $body=str_replace('<%phone%>',$user_phone,$body); 
+                  $body=str_replace('<%link%>', $urlweb, $body); 
+                  $body=str_replace('<%chitietgiasu%>', $link_chitietgiasu, $body); 
+                  // 
+                  $body12 = file_get_contents(base_url().'EmailTemplate/thongbaodaguidenghiday.htm'); 
+                  $body12=str_replace('<%name1%>',$user_name,$body12);
+                  $body12=str_replace('<%classname%>',$infoclass[0]->ClassTitle,$body12);
+                  $body12=str_replace('<%link%>',$urlweb,$body12);
+                  $body12=str_replace('<%html%>',$html_mail,$body12);
+                  
+                  $subject='[giasu365] Đề nghị dạy lớp học';
+                  $this->site_model->sendmailnew($email_ph,$subject,$body); 
+                  $this->site_model->sendmailnew($user_email,$subject,$body12); 
+                  //    
                   $result=['kq'=>true,'data'=>'Đề nghị dạy thành công, bạn vui lòng chờ phản hồi của phụ huynh'];
                 }
                 else {
@@ -4272,7 +4747,7 @@ function loginteacher()
                   $data .="<tr>
                   <td class='stt'>".$i."</td>
                   <td><label>".$n->Name."</label>
-                  <a href='".base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID."' target='_blank'>".$n->ClassTitle."</a>
+                  <a href='".base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID."' target='_blank'>".$n->ClassTitle."</a>
                   </td>
                   <td>".$n->ghichu."</td>
                   <td><span>".$n->SubjectName."</span></td>
@@ -4468,7 +4943,7 @@ function loginteacher()
                   $j=($page*1) +$i;
                   $data.="<tr>
 
-                  <td><a href='".base_url().vn_str_filter($n->Name)."-gv".$n->UserID."'><".$n->Name."</a>
+                  <td><a href='".base_url().vn_str_filter($n->Name)."-gv".$n->UserID."'>".$n->Name."</a>
                   <span>".$n->TitleView."</span>
                   </td>
                   <td>".GetLearnType($n->WorkID)."</td>                                
@@ -4477,6 +4952,46 @@ function loginteacher()
                   <td >";
                   if($n->Active ==1){$data.="Chưa phản hồi";}else{ $data.="Đã phản hồi";}  
                   $data.="</td></tr>";
+                }
+                $result=['kq'=>true,'data'=>$data];
+              }
+            }
+            echo json_encode($result,JSON_UNESCAPED_UNICODE);
+          }
+           function ajaxloadmoreteachersee()
+          {
+            $result=['kq'=>false,'data'=>''];
+            $page=$this->input->post('page'); 
+
+            if(!empty($_SESSION['UserInfo'])){
+              $tg=$_SESSION['UserInfo'];
+              $userid=$tg['UserId'];
+              $lst=$this->site_model->GetInfoTeacher_see($userid,$page);
+              if($lst != ''){
+                $data="";
+                $i=0;
+                foreach($lst as $n){
+                  $i+=1;
+                  $j=($page*1) +$i;
+                  $data.="<tr>
+                  <td><a href='".base_url().vn_str_filter($n->Name)."-gv".$n->UserID."'>".$n->Name."</a>
+                  </td>";
+                  if ($n->Phone != '') {
+                    $data .="<td>".$n->Phone."</td>";
+                  } else {
+                     $data .="<td>Chưa cập nhật</td>";
+                  }
+                  if ($n->Email != '') {                                
+                  $data .="<td>".$n->Email."</td>";
+                  } else {
+                     $data .="<td>Chưa cập nhật</td>";
+                  }
+                  if ($n->CityName != '') {
+                    $data .="<td class='city-none'>".$n->CityName."</td>";
+                  } else {
+                    $data .="<td class='city-none'>>Chưa cập nhật</td>";
+                  }
+                  $data .= "</tr>";
                 }
                 $result=['kq'=>true,'data'=>$data];
               }
@@ -4706,6 +5221,8 @@ function loginteacher()
         $toi7=$_POST['toi7'];//: "1"
         $toi8=$_POST['toi8'];//: "1"
         $phone=$_POST['sdt'];//: "0912308"
+        $tenchude = $_POST['tentopic'];
+
 
         $descusers=$gioithieubanthan;
         // $lop = $_POST['lop']; 
@@ -4732,20 +5249,24 @@ function loginteacher()
           $j=$this->site_model->GetDistrictByID($arrdistrict[$i]);
           $arrquanhuyen[]=$j->cit_name." ";
         }
+        //
         $DistrictView=join(',',$arrquanhuyen) ;
         $lsttopic=$this->site_model->InsertUserTeacher($hoten,$hoten,$phone,$emailuser,$khuvucday,$tenkhuvucday,$quanhuyen,$DistrictView,$noiohientai,$descusers,1,$password,0,$imguser,'','',$gioitinh,$kinhnghiem,$thanhtich,$birth);
         if($lsttopic['data'] > 0){
+
           $code=$lsttopic['code'];
           $userid=$lsttopic['data'];
-          $filename = $_FILES['cmnduser']['name'];
-          $filedata = $_FILES['cmnduser']['tmp_name'];
-          $temp=explode('.',$filename);			
-          $imageThumb = new Image($filedata);
-          $thumb_path = "cmnd".date("YmdHis",time()).rand(10000,99999);
-          $imageThumb->save($thumb_path, 'upload/users/'.date("Y",time())."/".date("m",time())."/".date("d",time()), $temp[1]);
-          $imageThumb->resize(300,300,'crop');
-          $imageThumb->save($thumb_path, 'upload/users/thumb/'.date("Y",time())."/".date("m",time())."/".date("d",time()), $temp[1]);
-          $imgcmnd=$thumb_path.".".$temp[1];
+          if ($_FILES['cmnduser'] != null) {
+            $filename = $_FILES['cmnduser']['name'];
+            $filedata = $_FILES['cmnduser']['tmp_name'];
+            $temp=explode('.',$filename);     
+            $imageThumb = new Image($filedata);
+            $thumb_path = "cmnd".date("YmdHis",time()).rand(10000,99999);
+            $imageThumb->save($thumb_path, 'upload/users/'.date("Y",time())."/".date("m",time())."/".date("d",time()), $temp[1]);
+            $imageThumb->resize(300,300,'crop');
+            $imageThumb->save($thumb_path, 'upload/users/thumb/'.date("Y",time())."/".date("m",time())."/".date("d",time()), $temp[1]);
+            $imgcmnd=$thumb_path.".".$temp[1];
+          }
           $arrsubject = explode(',',$monhoc);
           $arrlophoc  = explode(',', $lopday);
           // var_dump($arrlophoc);
@@ -4777,8 +5298,9 @@ function loginteacher()
           $Classview .=join(',',$arrclass);
 
           //phần cũ 
-
-          $lsttopic=$this->site_model->InsertTeacher($userid,$hinhthucday,GetLearn($hinhthucday),$hientaila,$hocphi,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,'',$imgcmnd,0,$monhoc,$lopday,$TitleView,$chitietnoidung,$hoctruong,$chuyennganh,$namtotnghiep,$noicongtac);
+          // them topic :))
+          $lsttopic=$this->site_model->InsertTeacher($userid,$hinhthucday,GetLearn($hinhthucday),$hientaila,$hocphi,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,'',$imgcmnd,0,$monhoc,$lopday,$TitleView,$chitietnoidung,$hoctruong,$chuyennganh,$namtotnghiep,$noicongtac,$chudemonhoc,$tenchude);
+          
           // var_dump($lsttopic);
           // die();
           if($lsttopic['data'] > 0){
@@ -4805,7 +5327,18 @@ function loginteacher()
               $arrquanhuyen=$j->cit_name;
               $result2=$this->site_model->InsertTeacherDisctrict($key,$arrquanhuyen,$userid);
             }
-
+            $data =  array
+            (
+              'UserId' => $userid,
+              'Name' => $hoten,
+              'Email' => $emailuser,
+              'Phone' => $phone,
+              'Password' => md5($password),
+              'UserType' => 1,
+              'Active'  => 0,
+              'CreateDate' => date("Y-m-d H:i:s", time())
+            );
+            $_SESSION['UserInfo'] = $data;
 
             $result=['kq'=>true,'data'=>"$username",'file'=>'','msg'=>'Tạo tài khoản thành công','code'=>"$code"];
           }
@@ -4861,6 +5394,7 @@ function loginteacher()
       $toi6=$_POST['toi6'];//: "1"
       $toi7=$_POST['toi7'];//: "1"
       $toi8=$_POST['toi8'];//: "1"
+      $tenchude = $_POST['tentopic'];
       $descusers=$gioithieubanthan;
       $imguser="";
       $userid=0;
@@ -4905,7 +5439,7 @@ function loginteacher()
           $arrquanhuyen[]=$j->cit_name." ";
         }
         $DistrictView=join(',',$arrquanhuyen) ;
-        
+        // 
         $lsttopic=$this->site_model->UpdateUsersT($userid,$hoten,$khuvucday,$tenkhuvucday,$quanhuyen,$DistrictView,$noiohientai,$descusers,$imguser,$gioitinh,$kinhnghiem,$thanhtich,$birth);
        
         if($lsttopic['kq'] ==true){
@@ -4941,7 +5475,7 @@ function loginteacher()
           }
           $TitleView.=join(',',$arrtitle) ;
           $lsttopic=$this->site_model->UpdateTeacher($userid,$hinhthucday,GetLearn($hinhthucday),$hientaila,$hocphi,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,
-            $sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$imgcmnd,$TitleView,$monhoc,$chitietnoidung,$hoctruong,$chuyennganh,$namtotnghiep,$noicongtac);
+            $sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$imgcmnd,$TitleView,$monhoc,$chitietnoidung,$hoctruong,$chuyennganh,$namtotnghiep,$noicongtac,$tenchude);
           if($lsttopic['kq'] ==true){
             $xoatopic=$this->site_model->DeleteTeacherTopic($userid);
             for($i=0;$i< count($arrsubject);$i++){
@@ -5155,6 +5689,20 @@ function ajaxuserregisterphuhuynh ()
   $pass = $_POST['pass'];
   $type = 0;
   $result = $this->site_model->registerphuhuynh($hoten, $email, $sdt, $pass, $type);
+  if ($result['kq'] == true) {
+    $data =  array
+        (
+            'UserId' => $result['UserId'],
+            'Name' => $hoten,
+            'Email' => $email,
+            'Phone' => $sdt,
+            'Password' => md5($pass),
+            'UserType' => $type,
+            'Active'  => 0,
+            'CreateDate' => date("Y-m-d H:i:s", time())
+        );
+    $_SESSION['UserInfo'] = $data;
+  }
   echo json_encode($result);
 }
 function ajaxuserregistersuccess()
@@ -5284,7 +5832,8 @@ function ajaxuserupdateclass()
   $metadesc=$descclass;
   $lopday = $_POST['lopday'];
   $quanhuyen = $_POST['districtid'];
-
+  $NameTopic1 = $_POST['tk'];
+  $alias_classname = vn_str_filter($classname);
 
 
 
@@ -5295,12 +5844,14 @@ function ajaxuserupdateclass()
     $userid=$tg['UserId'];
     $resultclass=['kq'=>false,'data'=>0];
     if(intval($classid)>0){
-      $resultclass=$this->site_model->UpdateClass($classid,$classname,$monhoc,$tenmonhoc,$topicarr,$money,$hours,$workid,$phone,$cityid,$address,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$descclass,$num[1],$studens,$teachersex,$ExpectedDate,$teachertype,$lopday,$quanhuyen);
+      $resultclass=$this->site_model->UpdateClass($classid,$classname,$monhoc,$tenmonhoc,$topicarr,$money,$hours,$workid,$phone,$cityid,$address,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$descclass,$num[1],$studens,$teachersex,$ExpectedDate,$teachertype,$lopday,$quanhuyen, $NameTopic1);
       if($resultclass['kq']==true){
        $result =['kq'=>true,'data'=>'Cập nhật thành công'];
      }
    }else{
-    $resultclass=$this->site_model->InsertClass($classname,$monhoc,$tenmonhoc,$topicarr,$money,$hours,$workid,$phone,$cityid,$address,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$userid,$descclass,$num[1],$studens,$teachersex,$ExpectedDate,$userid,$teachertype,$lopday,$quanhuyen);
+    $check_alias_class = $this->site_model->check_alias_class($userid, $alias_classname);
+    if ($check_alias_class == 0) {
+    $resultclass=$this->site_model->InsertClass($classname,$monhoc,$tenmonhoc,$topicarr,$money,$hours,$workid,$phone,$cityid,$address,$sang2,$chieu2,$toi2,$sang3,$chieu3,$toi3,$sang4,$chieu4,$toi4,$sang5,$chieu5,$toi5,$sang6,$chieu6,$toi6,$sang7,$chieu7,$toi7,$sang8,$chieu8,$toi8,$userid,$descclass,$num[1],$studens,$teachersex,$ExpectedDate,$userid,$teachertype,$lopday,$quanhuyen,$NameTopic1,$alias_classname);
     $classid=$resultclass['data'];
     if($classid > 0){
       $resultmeta=$this->site_model->InsertClassMeta($classid,$metadesc,$metatitle,$metakey,'','');
@@ -5308,12 +5859,24 @@ function ajaxuserupdateclass()
         $result=['kq'=>true,'data'=>'Thêm mới thành công'];
       }
     }
+  } else {
+    $result = ['kq' => 3, 'data' => 'Bạn đã đăng tin với yêu cầu tìm kiếm gia sư này, vui lòng thay đổi yêu cầu tìm gia sư'];
+  }
   }
 }
 echo json_encode($result,JSON_UNESCAPED_UNICODE);
 }
 function listclassbyfilter($alias1, $subject,$class,$city)
 {
+  
+ $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+ $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+ $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+ $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+ $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+ $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
   $page=$start_row=$this->uri->segment(2);
   $classid      = $this->site_model->SelectClassByid($class)->id;
   $data['home'] = false;
@@ -5348,8 +5911,8 @@ function listclassbyfilter($alias1, $subject,$class,$city)
     $classname  = $this->site_model->SelectClassByid($class)->classname;
       
   }
-  $data['keyfilter']=['keywork'=>$key,'subject'=>$subject,'class'=>$class,'topic'=>$topic,'place'=>$city,'type'=>$type,'sex'=>$sex];
-  $data['lstitem']=$this->site_model->GetListClassBySearch($key,$subject,$classid,$topic,$city,$type,$sex,0,20);
+  $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject,'class'=>$class,'topic'=>$topic,'place'=>$city,'type'=>$type,'sex'=>$sex];
+  $data['lstitem']=$this->site_model->GetListClassBySearch($key,$subject,$classid,$topic,$city,$type,$sex,0,20,$sub_id_s=0);
   $data['monhoc']=$this->site_model->ListSubject();
   $data['lop']=$this->site_model->ListClass($class);
   $data['districk']=$this->site_model->GetListdistrictbycity();
@@ -5385,16 +5948,11 @@ function listclassbyfilter($alias1, $subject,$class,$city)
       $desc=$baiviettimlop->meta_des;
     }
     else{
-      if ($this->site_model->check_viec_subject($subject) > 0) {
-        $seosubject = $this->site_model->Get_viec_subject($monhoc->ID);
-       $metakey = $seosubject[0]->keywork;
-       $meta = $seosubject[0]->title;
-       $desc = $seosubject[0]->description;
-      } else {
+     
         $metakey="Việc làm gia sư ".$monhoc->SubjectName;
         $meta="Việc làm gia sư ".$monhoc->SubjectName." uy tín";
         $desc="Tìm việc làm gia sư ".$monhoc->SubjectName." uy tín. Thông tin về việc làm gia sư  ".$monhoc->SubjectName." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
-      }
+      
     }
   }
   else if(!empty(CheckClass($class)) && intval($subject)==0 && intval($city)==0)
@@ -5420,16 +5978,10 @@ function listclassbyfilter($alias1, $subject,$class,$city)
       $desc=$baiviettimlop->meta_des;
     }
     else{
-     if ($this->site_model->check_viec_city($city) > 0) {
-       $seocity = $this->site_model->Get_viec_city($city);
-       $metakey = $seocity[0]->keywork;
-       $meta = $seocity[0]->title;
-       $desc = $seocity[0]->description;
-     } else {
+     
        $metakey="Việc làm gia sư tại ".$tinhthanh->cit_name;
        $meta="Việc làm gia sư tại ".$tinhthanh->cit_name." uy tín";
        $desc="Tìm việc làm gia sư tại ".$tinhthanh->cit_name." uy tín. Thông tin về việc làm gia sư tại ".$tinhthanh->cit_name." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
-     }
     }
   }
   $data['nav_search'] = 2;
@@ -5455,6 +6007,197 @@ function listclassbyfilter($alias1, $subject,$class,$city)
   $data['content']='listclassbyfilter';
   $data['classheader']='navbar navbar-default white bootsnav on no-full';
   $data['cssbody']='customsl'	;
+  $this->load->view('template',$data);
+}
+//
+function listclassbyfilter_back($alias1, $subject,$class,$city)
+{
+  $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+  $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+  $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+  $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+  $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+  $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
+   $keywork = '';
+
+  if ($subject != 0) {
+    $info_search = $this->site_model->GetinfobyID($tbl='url_timviec',$subject);
+    $keywork = $info_search[0]->key_tag;
+  } else if ($subject == 0 && $city != '') {
+    $info_search = $this->site_model->GetinfobycitID($tbl='url_timviec', $city);
+    $keywork = $info_search[0]->key_tag;
+  }
+    
+  $topic_id = $subject;
+  $page=$start_row=$this->uri->segment(2);
+  $classid      = $this->site_model->SelectClassByid($class)->id;
+  $data['home'] = false;
+  $data['showsearch']=true;
+  if(!empty($sql->name)){
+    $data['metah1']=$sql->name;
+  }else{
+    $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
+  }
+  $data['topkey'] = $this->site_model->ListTopKeywork();
+  $topic=0;$type=0;$sex=0; // $type = 1
+  $key='';
+ 
+  $perpage=20;
+  if(empty($page)||intval($page)==0){
+    $page=0;
+  }else{
+    $page=intval($page);
+  }
+  if($page <= 20){
+    $data['robots']= 'noindex,nofollow';
+  }else{
+   $data['robots']= 'noindex,nofollow';
+  }
+
+  if(intval($class)==0)
+  {
+    $classname = '';
+  }
+  else
+  {
+    $classname  = $this->site_model->SelectClassByid($class)->classname;
+      
+  }
+  $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject,'class'=>$class,'topic'=>$topic,'place'=>$city,'type'=>$type,'sex'=>$sex];
+  $sub_id_r = $this->site_model->GetsubjectByTopicID($topic_id, $tbl='url_timviec');
+  $sub_id_s  = $sub_id_r['data'][0]->sub_id;
+  $data['lstitem']=$this->site_model->GetListClassBySearch($key,$topic_id,$classid,$topic,$city,$type,$sex,0,20,$sub_id_s);
+  $data['monhoc']=$this->site_model->ListSubject();
+  $data['lop']=$this->site_model->ListClass($class);
+  $data['districk']=$this->site_model->GetListdistrictbycity();
+  $data['lstonline']=$this->site_model->GetListClassbyUserOnline();
+  $tinhthanh="";
+  $monhoc="";
+  $lop="";
+  if (intval($topic_id)>0) {
+    $url_timviec = $this->site_model->selectvtbyid($topic_id);
+    $data['TopicName'] = $url_timviec->h1;
+  }
+  if ($topic_id == 0 && $city != 0) {
+      $url_timviec = $this->site_model->selectvtbycitid($city);
+      $data['TopicName'] = $url_timviec->h1;
+
+  }
+  if(intval($subject)>0){
+    $monhoc=$this->site_model->selectsubjectbyid(intval($subject));
+    $data['subjectname']=$monhoc->SubjectName;
+  }
+  if(intval($class)>0){
+    $lop=$this->site_model->SelectClassByid(intval($class));
+    $data['classname']=$lop->classname;
+  }
+  if(intval($city)>0){
+    $tinhthanh=$this->site_model->SelectProvinceByID1(intval($city));
+    $data['cityname']=$tinhthanh->cit_name;
+  }
+  $total=$this->site_model->GetListClassBySearchTotal($keywork,$topic_id,$lop->classid,$topic,$city,$type,$sex);
+  $meta="";$desc="";$metakey="";
+
+  $baiviettimlop = $this->site_model->BaiVietTimLop();
+  $data['baiviettimlop']=$baiviettimlop;
+  $linkdata = $baiviettimlop->link;
+ 
+  if(!empty($topic_id) && intval($class)==0 && intval($city)==0)
+  {
+    $link=base_url().'tim-viec-lam-gia-su-'.vn_str_filter($url_timviec->key_tag).'-s'.intval($url_timviec->ID).'c0p0.html';
+    if($link == $linkdata){
+      $metakey=$baiviettimlop->meta_key;
+      $meta=$baiviettimlop->meta_title;
+      $desc=$baiviettimlop->meta_des;
+    }
+    else{
+        if ($this->site_model->check_seo_tv($url_timviec->ID, $option=0) > 0) {
+          $seotv = $this->site_model->Get_seo_tv($url_timviec->ID, $option=0);
+          $metakey = $seotv[0]->seo_keyword;
+          $meta = $seotv[0]->seo_title;
+          $desc = $seotv[0]->seo_keyword;
+          $content = $seotv[0]->content;
+          if ($seotv[0]->index == 1) {
+            $data['robots']= 'index,follow';
+          }
+        } else {
+        $metakey="Việc làm gia sư ".$monhoc->SubjectName;
+        $meta="Việc làm gia sư ".$monhoc->SubjectName." uy tín";
+        $desc="Tìm việc làm gia sư ".$monhoc->SubjectName." uy tín. Thông tin về việc làm gia sư  ".$monhoc->SubjectName." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+      }
+      
+    }
+  }
+  else if(!empty(CheckClass($class)) && intval($subject)==0 && intval($city)==0)
+  {
+    $link=base_url().'tim-viec-lam-gia-su-'.vn_str_filter($lop->classname).'-s0c'.intval($class).'p0.html';
+    if($link == $linkdata){
+      $metakey=$baiviettimlop->meta_key;
+      $meta=$baiviettimlop->meta_title;
+      $desc=$baiviettimlop->meta_des;
+    }
+    else{
+      $metakey="Việc làm gia sư ".$lop->classname;
+      $meta="Việc làm gia sư ".$lop->classname." uy tín";
+      $desc="Tìm việc làm gia sư ".$lop->classname." uy tín. Thông tin về việc làm gia sư  ".$lop->classname." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+    }
+  }
+  else if(!empty($city) && intval($subject)==0 && intval($class)==0 && intval($district)==0)
+  {
+
+    $link=base_url().'tim-viec-lam-gia-su-tai-'.vn_str_filter($tinhthanh->cit_name).'-s0c0p'.intval($city).'.html';
+    if($link == $linkdata){
+      $metakey=$baiviettimlop->meta_key;
+      $meta=$baiviettimlop->meta_title;
+      $desc=$baiviettimlop->meta_des;
+    }
+    else{
+
+      if ($this->site_model->check_seo_tvb($city) > 0) {
+       $seotv = $this->site_model->Get_seo_tvb($city, $option=1);
+       $metakey = $seotv[0]->seo_keyword;
+       $meta = $seotv[0]->seo_title;
+       $desc = $seotv[0]->seo_keyword;
+       $content = $seotv[0]->content;
+       if ($seotv[0]->index == 1) {
+         $data['robots']= 'index,follow';
+       }
+      } else {
+       $metakey="Việc làm gia sư tại ".$tinhthanh->cit_name;
+       $meta="Việc làm gia sư tại ".$tinhthanh->cit_name." uy tín";
+       $desc="Tìm việc làm gia sư tại ".$tinhthanh->cit_name." uy tín. Thông tin về việc làm gia sư tại ".$tinhthanh->cit_name." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+     }
+    }
+  }
+    
+  // $data['search_class'] = 2;
+  $data['search_class'] = 2;
+  $data['nav_search'] = 2;
+  $data['canonical']=$link;
+  $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
+  $data['meta_title']=$meta;//$sql->title;
+  $data['meta_key']=$metakey;
+  $data['meta_des']=$desc;
+  $this->load->library('pagination');
+  $config['total_rows'] = $total;
+  $config['per_page'] = $perpage;
+  $config['uri_segment'] =2;
+  $config['next_link'] = '<i class="fa fa-angle-right"></i>';
+  $config['prev_link'] = '<i class="fa fa-angle-left"></i>';
+  $config['num_links'] = 4;
+  $config['first_link'] = '<i class="fa fa-angle-double-left"></i>';
+  $config['last_link'] = '<i class="fa fa-angle-double-right"></i>';
+  $config['base_url']=$link;
+  $this->pagination->initialize($config);
+  $data['content_seo'] = $content;
+  $data['total']=$total;
+  $data['start_row']= $page;
+  $data['pagination']= $this->pagination->create_links();
+  $data['content']='listclassbyfilter';
+  $data['classheader']='navbar navbar-default white bootsnav on no-full';
+  $data['cssbody']='customsl' ;
   $this->load->view('template',$data);
 }
 
@@ -5495,7 +6238,7 @@ else
 }
 // $class
 $data['keyfilter'] = ['keywork' => $key, 'subject' => $subject, 'class' => $class, 'topic' => $topic, 'place' => $city,'district' =>$district, 'type' => $type, 'sex' => $sex];
-$data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district, $order,0,20);
+$data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$classid,$place,$district, $order,0,20,$sub_id_s=0);
 $data['lienquan']=$this->site_model->GetListClassRelate($subject,$class,$place,$district);
 $data['monhoc']=$this->site_model->ListSubject();
 $data['lop']=$this->site_model->ListClass($class);
@@ -5576,6 +6319,174 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
         $data['cssbody']='customsl' ;
         $this->load->view('template',$data);
       }
+
+function listclassbyfilter_clone_back($alias1, $alias2, $subject, $class, $city)
+{
+
+  $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+  $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+  $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+  $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+
+  $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+  $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
+   $keywork = '';
+  if ($subject != 0) {
+    $info_search = $this->site_model->GetinfobyID($tbl='url_timviec',$subject);
+    $keywork = $info_search[0]->key_tag;
+  } else if ($subject == 0 && $city != '') {
+    $info_search = $this->site_model->GetinfobycitID($tbl='url_timviec', $city);
+    $keywork = $info_search[0]->key_tag;
+  }
+
+  $topic_id = $subject;
+  $page=$start_row=$this->uri->segment(2);
+  $classid    = $this->site_model->SelectClassByid($class)->id;
+  $data['home'] = false;
+  $data['showsearch']=true;
+  if(!empty($sql->name)){
+    $data['metah1']=$sql->name;
+  }else{
+    $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
+  }
+  $topic=0;$type=0;$sex=0; // $type =1
+  $key='';
+  $perpage=20;
+  if(empty($page)||intval($page)==0){
+    $page=0;
+  }else{
+    $page=intval($page);
+  }
+  if($page <= 20){
+    $data['robots']= 'noindex,nofollow';
+  }else{
+   $data['robots']= 'noindex,nofollow';
+ }
+$data['topkey'] = $this->site_model->ListTopKeywork();
+ if(intval($class)==0)
+ {
+  $classname = '';
+}
+else
+{
+  $classname = $this->site_model->SelectClassByid($class)->classname;
+}
+// $class
+$data['keyfilter'] = ['keywork' => $keywork, 'subject' => $subject, 'class' => $class, 'topic' => $topic, 'place' => $city,'district' =>$district, 'type' => $type, 'sex' => $sex];
+
+// var_dump($keywork,$topic_id);
+// die();
+$sub_id_r = $this->site_model->GetsubjectByTopicID($topic_id, $tbl='url_timviec');
+  $sub_id_s  = $sub_id_r['data'][0]->sub_id;
+$data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$topic_id,$classid,$city,$district, $order,0,20,$sub_id_s);
+$data['lienquan']=$this->site_model->GetListClassRelate($subject,$class,$place,$district);
+$data['monhoc']=$this->site_model->ListSubject();
+$data['lop']=$this->site_model->ListClass($class);
+$data['districk']=$this->site_model->GetListdistrictbycity();
+$data['lstonline']=$this->site_model->GetListClassbyUserOnline();
+$tinhthanh="";
+$monhoc="";
+$lop="";
+if(intval($subject)>0){
+  $monhoc=$this->site_model->selectsubjectbyid(intval($subject));
+  $data['subjectname']=$monhoc->SubjectName;
+}
+if (intval($topic_id)>0) {
+  $url_timviec = $this->site_model->selectvtbyid($topic_id);
+  $data['TopicName'] = $url_timviec->h1;
+}
+if ($topic_id == 0 && $city != 0) {
+  $url_timviec = $this->site_model->selectvtbycitid($city);
+  $data['TopicName'] = $url_timviec->h1;
+
+}
+if(intval($class)>0){
+  $lop=$this->site_model->SelectClassByid(intval($class));
+  $data['classname']=$lop->classname;
+}
+if(intval($city)>0){
+  $tinhthanh=$this->site_model->SelectProvinceByID1(intval($city));
+  $data['cityname']=$tinhthanh->cit_name;
+}
+$baiviettimlop = $this->site_model->BaiVietTimLop();
+$data['baiviettimlop']=$baiviettimlop;
+$linkdata = $baiviettimlop->link;
+if(!empty($topic_id) && !empty($city) && intval($class)==0 && intval($district)==0)
+{
+
+  $link=base_url().'tim-viec-lam-gia-su-mon-'.$url_timviec->alias.'-m'.intval($topic_id).'c0p'.intval($city).'.html';
+
+  if($link == $linkdata){
+    $metakey=$baiviettimlop->meta_key;
+    $meta=$baiviettimlop->meta_title;
+    $desc=$baiviettimlop->meta_des;
+  }
+  else{
+    if ($this->site_model->check_seo_both($url_timviec->ID) > 0) {
+      $seokey = $this->site_model->Get_seo_both($url_timviec->ID, $option=2);
+      $metakey = $seokey[0]->seo_keyword;
+      $meta = $seokey[0]->seo_title;
+      $desc = $seokey[0]->seo_description;
+      $content = $seokey[0]->content;
+      if ($seokey[0]->index == 1) {
+        $data['robots']= 'index,follow';
+      }     
+    } else {
+
+    $metakey="Việc làm gia sư ".$monhoc->SubjectName." tại ".$tinhthanh->cit_name;
+    $meta="Việc làm gia sư ".$monhoc->SubjectName." tại ".$tinhthanh->cit_name." uy tín";
+    $desc="Tìm việc làm gia sư ".$monhoc->SubjectName." tại ".$tinhthanh->cit_name." uy tín. Thông tin về việc làm gia sư ".$monhoc->SubjectName." tại ".$tinhthanh->cit_name." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+   }
+  }
+}
+else if(!empty(CheckSubject1($subject)) && !empty(CheckClass($class)) && intval($city)==0)
+{
+  $link=base_url().'viec-lam-gia-su-mon-'.vn_str_filter($monhoc->SubjectName).'/'.vn_str_filter($lop->classname).'-m'.intval($subject).'c'.intval($class).'p0.html'; 
+  if($link == $linkdata){
+    $metakey=$baiviettimlop->meta_key;
+    $meta=$baiviettimlop->meta_title;
+    $desc=$baiviettimlop->meta_des;
+  }
+  else{
+    $metakey="Việc làm gia sư ".$monhoc->SubjectName." ".$lop->classname;
+    $meta="Việc làm gia sư ".$monhoc->SubjectName." ".$lop->classname." uy tín";
+    $desc="Tìm việc làm gia sư ".$monhoc->SubjectName." ".$lop->classname." uy tín. Thông tin về việc làm gia sư ".$monhoc->SubjectName." ".$lop->classname." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+  }
+}
+
+// $lop->classname
+$total=$this->site_model->GetListClassBySearchTotal($keywork,$subject,$classid,$topic,$city,$type,$sex);
+// $meta="";$desc="";$metakey="";
+$data['search_class'] = 2;
+$data['canonical']=$link;
+
+$data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
+        $data['meta_title']=$meta;//$sql->title;
+        $data['meta_key']=$metakey;
+        $data['meta_des']=$desc;
+        $this->load->library('pagination');
+        $config['total_rows'] = $total;
+        $config['per_page'] = $perpage;
+        $config['uri_segment'] =2;
+        $config['next_link'] = '<i class="fa fa-angle-right"></i>';
+        $config['prev_link'] = '<i class="fa fa-angle-left"></i>';
+        $config['num_links'] = 4;
+        $config['first_link'] = '<i class="fa fa-angle-double-left"></i>';
+        $config['last_link'] = '<i class="fa fa-angle-double-right"></i>';
+        $config['base_url']=$link;
+        $this->pagination->initialize($config);
+        $data['content_seo'] = $content;
+        $data['total']=$total;
+        $data['start_row']= $page;
+        $data['pagination']= $this->pagination->create_links();
+        $data['content']='listclassbyfilter';
+        $data['classheader']='navbar navbar-default white bootsnav on no-full';
+        $data['cssbody']='customsl' ;
+        $this->load->view('template',$data);
+      }
+
+
 function listclassbyfilter_TPHCM($alias1, $alias2, $city, $district)
 {
   $page=$start_row=$this->uri->segment(2);
@@ -5610,7 +6521,7 @@ else
   $classname = $this->site_model->SelectClassByid($class)->classname;
 }
 $data['keyfilter'] = ['keywork' => $key, 'subject' => $subject, 'class' => $class, 'topic' => $topic, 'place' => $city,'district' =>$district, 'type' => $type, 'sex' => $sex];
-$data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$class,$place,$district, $order,0,20);
+$data['lstitem']=$this->site_model->ListClassBySearchHeader($keywork,$subject,$class,$place,$district, $order,0,20,$sub_id_s=0);
 $data['lienquan']=$this->site_model->GetListClassRelate($subject,$class,$place,$district);
 $data['monhoc']=$this->site_model->ListSubject();
 $data['lop']=$this->site_model->ListClass($class);
@@ -5683,6 +6594,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
 
       function listteacherbyfilter_clone($alias1, $alias2, $subject, $class, $city)
       {
+
         $page = $start_row = $this->uri->segment(2);
         $data['home'] = false;
         $data['showsearch'] = true;
@@ -5723,7 +6635,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
         $district=0;
         $order = 'last';
         $data['keyfilter'] = ['keywork' => $key, 'subject' => $subject, 'class' => $class, 'topic' => $topic, 'place' => $city,'district' =>$district, 'type' => $type, 'sex' => $sex];
-        $result = $this->site_model->GetListTeacherBySearch($key, $subject, $classname, $topic, $city,$district, $type, $sex, $order, $page, $perpage);
+        $result = $this->site_model->GetListTeacherBySearch($key, $subject, $classname, $topic, $city,$district, $type, $sex, $order, $page, $perpage, $sub_id_s=0);
         // var_dump($subject, $classname);
         // var_dump($result);
         // die();
@@ -5747,7 +6659,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
         $data['baiviettimgiasu']=$baiviettimgiasu;
         $linkdata = $baiviettimgiasu->link;
 
-        if(!empty(CheckSubject1($subject)) && (!empty($city)) && intval($class)==0 && intval($district)==0)
+        if((!empty($subject)) && (!empty($city)) && intval($class)==0 && intval($district)==0)
         {
 
           $link=base_url().'mon-'.vn_str_filter($monhoc->SubjectName).'/'.vn_str_filter($tinhthanh->cit_name).'-s'.intval($subject).'r0c'.intval($city).'.html';
@@ -5758,6 +6670,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
             $desc=$baiviettimgiasu->meta_des;
           }
           else{
+
             if ($this->site_model->check_seo_subject_city($monhoc->ID, $city) > 0) {
 
              $seosubject = $this->site_model->Get_seo_city_subject($monhoc->ID, $city);
@@ -5824,6 +6737,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
 
   function listteacherbyfilter_TPHCM($alias1, $alias2, $city, $district)
   {
+
     $page = $start_row = $this->uri->segment(2);
     $data['home'] = false;
     $data['showsearch'] = true;
@@ -5896,7 +6810,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
     }
 
 
-    $result = $this->site_model->GetListTeacherBySearch($key, $subject, $classname, $topic, $city, $district, $type, $sex, $order, $page, $perpage);
+    $result = $this->site_model->GetListTeacherBySearch($key, $subject, $classname, $topic, $city, $district, $type, $sex, $order, $page, $perpage, $sub_id_s=0);
     $lq = $this->site_model->GetTeacherRelate($subject,$classname,$city,$topic, $district);
     $data['lienquan']=$lq["data"];
     $data['linkseo'] = $this->site_model->getitemlinkseobuysearch($subject, $city, 2);
@@ -5985,7 +6899,7 @@ $data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,1);
 
   $data['keyfilter']=['keywork'=>$key,'subject'=>$subject, 'class'=>$class,'topic'=>$topic,'place'=>$city,'district' => $district,'type'=>$type,'sex'=>$sex];
   // $order
-  $result=$this->site_model->GetListTeacherBySearch($key,$subject,$classname,$topic,$city, $district,$type,$sex,$order,$page,$perpage);
+  $result=$this->site_model->GetListTeacherBySearch($key,$subject,$classname,$topic,$city, $district,$type,$sex,$order,$page,$perpage, $sub_id_s=0);
   $tinhthanh="";
   // $monhoc="";
   
@@ -6012,7 +6926,7 @@ $linkdata = $baiviettimgiasu->link;
 
     if((!empty(CheckSubject($monhoc->ID)) && intval($class)==0 && intval($city)==0))
     {
-      
+
       $link=base_url().'mon-'.vn_str_filter($monhoc->SubjectName).'-m'.intval($subject).'l0t0.html';
       if($link == $linkdata){
         // 
@@ -6115,6 +7029,260 @@ $data['classheader']='navbar navbar-default white bootsnav on no-full';
         $this->load->view('template',$data);
       }
 
+function listteacherbyfilter_back($alias1,$subject,$class,$city)
+  {
+    if ($subject != 0) {
+      $info_search = $this->site_model->GetinfobyID($tbl='topic',$subject);
+      $keywork = $info_search[0]->key_tag;
+    } else if ($subject == 0 && $city != '') {
+      $info_search = $this->site_model->GetinfobycitID($tbl='topic', $city);
+      $keywork = $info_search[0]->key_tag;
+    }
+   
+    $page=$start_row=$this->uri->segment(2);
+
+   
+    $data['list_search_teacher'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=6);
+    $data['list_class_teacher'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=6);
+
+    $data['list_search_teacher1'] = $this->site_model->listurlteacher($table='topic',$top=0,$limit=12);
+    $data['list_class_teacher1'] = $this->site_model->listurlteacher($table='url_timviec',$top=0,$limit=12);
+    $data['list_search_teacher_top'] = $this->site_model->listurlteacher($table='topic',$top=1,$limit=5);
+    $data['list_search_class_top'] = $this->site_model->listurlteacher($table='url_timviec',$top=1,$limit=5);
+    $data['home'] = false;
+    $data['showsearch']=true;
+    if(!empty($sql->name)){
+      $data['metah1']=$sql->name;
+    }else{
+      $data['metah1']='SO SÁNH LƯƠNG CỦA BẠN TRƯỚC KHI NHẢY VIỆC!';
+    }
+    $perpage=10;
+    if(empty($page)||intval($page)==0){
+      $page=0;
+    }else{
+      $page=intval($page);
+    }
+    if($page <= 10){
+      $data['robots']= 'noindex,nofollow';
+    }else{
+     $data['robots']= 'noindex,nofollow';
+   }
+   $topic=0;$type=0;$sex=0;
+   $key = '';
+   $meta="";$desc="";$metakey="";
+   $day=date('m/Y',time());
+   $year=date('Y',time());
+   $data['keyhome']=1;
+   $district=0;
+   if(intval($class)==0)
+   {
+    $classname = '';
+  }
+  else
+  {
+    $classname = $this->site_model->SelectClassByid($class)->classname;
+    
+  }
+
+  $subject_id = $subject;  
+  $topic_id   = $subject;
+
+  $monhoc=$this->site_model->selectsubjectbyid(intval($subject));
+  if ($topic_id == 0 && $city != 0) {
+      $topic_by = $this->site_model->selecttopictbycitid($city);
+      $data['NameTopic'] = $topic_by->h1;
+  } else {
+  $topic_by = $this->site_model->selecttopictbyid(intval($topic_id));
+  $data['NameTopic'] = $topic_by->h1;
+  }
+  $data['subjectname']=$monhoc->SubjectName;
+  $subject=$data['subjectname'];
+  $data['topkey'] = $this->site_model->ListTopKeywork();
+  if (isset($_POST['order'])) {
+    $order = $_POST['order'];
+  } else {
+    $order = '';
+  }
+  $data['keyfilter']=['keywork'=>$keywork,'subject'=>$subject, 'class'=>$class,'topic'=>$topic,'place'=>$city,'district' => $district,'type'=>$type,'sex'=>$sex];
+  // $subject, 
+
+  // $result=$this->site_model->GetListTeacherBySearch($key,$topic_id,$classname,$topic,$city, $district,$type,$sex,$order,$page,$perpage);
+  $tinhthanh="";
+  // $monhoc="";
+  
+  if(intval($subject)>0){
+    
+    $monhoc=$this->site_model->selectsubjectbyid(intval($subject));
+   
+    $data['subjectname']=$monhoc->SubjectName;
+    
+    
+  }
+  if(intval($city)>0){
+   $tinhthanh=$this->site_model->SelectProvinceByID1(intval($city));
+   $data['cityname']=$tinhthanh->cit_name;
+ }
+ if(intval($class)>0){
+  $lop=$this->site_model->SelectClassByid(intval($class));
+  $data['classname']=$lop->classname;
+}
+$baiviettimgiasu = $this->site_model->BaiVietTimGiaSu();
+$data['baiviettimgiasu']=$baiviettimgiasu;
+$linkdata = $baiviettimgiasu->link;
+
+    // CheckSubject($monhoc->ID)
+    if((!empty($topic_id) && intval($class)==0 && intval($city)==0))
+    {
+      
+      $link=base_url().'tim-gia-su-'.vn_str_filter($topic_by->NameTopic).'-m'.intval($topic_by->ID).'l0t0.html';
+      if($link == $linkdata){
+        $metakey=$baiviettimgiasu->meta_key;
+        $meta=$baiviettimgiasu->meta_title;
+        $desc=$baiviettimgiasu->meta_des;
+      }
+      else{
+        if ($this->site_model->check_seo_subject($topic_by->ID) > 0) {
+          $seosubject = $this->site_model->Get_seo_subject($topic_by->ID);
+          $metakey = $seosubject[0]->seo_keyword;
+          $meta = $seosubject[0]->seo_title;
+          $desc = $seosubject[0]->seo_description;
+          $content = $seosubject[0]->content;
+          if ($seosubject[0]->index == 1) {
+             $data['robots'] = 'index,follow';
+            ;
+          }
+        } else {
+          $metakey="gia sư ".$monhoc->SubjectName;
+          $meta="Tìm gia sư dạy kèm ".$monhoc->SubjectName." uy tín";
+          $desc="Tìm gia sư dạy kèm ".$monhoc->SubjectName." uy tín. Thông tin về gia sư ".$monhoc->SubjectName." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+        }
+      }
+    }
+    else if(!empty(CheckClass($class)) && intval($subject)==0 && intval($city)==0)
+    {
+      $link=base_url().vn_str_filter($lop->classname).'-m0l'.intval($class).'t0.html';
+      if($link == $linkdata){
+        $metakey=$baiviettimgiasu->meta_key;
+        $meta=$baiviettimgiasu->meta_title;
+        $desc=$baiviettimgiasu->meta_des;
+      }
+      else{
+        $metakey="gia sư ".$lop->classname;
+        $meta="Tìm gia sư dạy kèm ".$lop->classname." uy tín";
+        $desc="Tìm gia sư dạy kèm ".$lop->classname." uy tín. Thông tin về gia sư ".$lop->classname." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+      }
+    }
+
+    else if(!empty($city) && !empty($topic_id) && intval($class)==0 && intval($district)==0)
+    {
+
+      $link=base_url().'tim-gia-su-mon-'.$topic_by->alias.'-m'.$topic_by->ID.'l0t'.intval($city).'.html';
+      if($link == $linkdata){
+        $metakey=$baiviettimgiasu->meta_key;
+        $meta=$baiviettimgiasu->meta_title;
+        $desc=$baiviettimgiasu->meta_des;
+      }
+      else{
+
+        if ($this->site_model->check_seo_city2($topic_by->ID) > 0) {
+            $seocity = $this->site_model->Get_seo_city2($topic_by->ID, $option=2);
+            $metakey = $seocity[0]->seo_keyword;
+            $meta = $seocity[0]->seo_title;
+            $desc = $seocity[0]->seo_description;
+            $content = $seocity[0]->content;
+            if ($seocity[0]->index == 1) {
+              $data['robots'] = 'index,follow';
+            }
+
+        } else {
+            $metakey="gia sư tại ".$tinhthanh->cit_name;
+            $meta="Tìm gia sư dạy kèm tại ".$tinhthanh->cit_name." uy tín";
+            $desc="Tìm gia sư dạy kèm tại ".$tinhthanh->cit_name." uy tín. Thông tin về gia sư tại ".$tinhthanh->cit_name." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+        }
+      }
+    }
+    else if(!empty($city) && empty($subject) && intval($class)==0 && intval($district)==0)
+    {
+
+      $link=base_url().'tim-gia-su-tai-'.vn_str_filter($tinhthanh->cit_name).'-m0l0t'.intval($city).'.html';
+      if($link == $linkdata){
+        $metakey=$baiviettimgiasu->meta_key;
+        $meta=$baiviettimgiasu->meta_title;
+        $desc=$baiviettimgiasu->meta_des;
+      }
+      else{
+
+        if ($this->site_model->check_seo_city($tinhthanh->cit_id) > 0) {
+            $seocity = $this->site_model->Get_seo_city($tinhthanh->cit_id, $option=1);
+            $metakey = $seocity[0]->seo_keywork;
+            $meta = $seocity[0]->seo_title;
+            $desc = $seocity[0]->seo_description;
+            if ($seocity[0]->index == 1) {
+              $data['robots'] = 'index,follow';
+            }
+
+        } else {
+            $metakey="gia sư tại ".$tinhthanh->cit_name;
+            $meta="Tìm gia sư dạy kèm tại ".$tinhthanh->cit_name." uy tín";
+            $desc="Tìm gia sư dạy kèm tại ".$tinhthanh->cit_name." uy tín. Thông tin về gia sư tại ".$tinhthanh->cit_name." chi tiết rõ ràng, chính xác. Đảm bảo sự yên tâm và uy tín.";
+        }
+      }
+    }
+$sub_id_r = $this->site_model->GetsubjectByTopicID($topic_id, $tbl='topic');
+$sub_id_s  = $sub_id_r['data'][0]->sub_id;
+$result=$this->site_model->GetListTeacherBySearch($key,$topic_id,$classname,$topic,$city, $district,$type,$sex,$order,$page,$perpage,$sub_id_s);
+
+$data['linkseo']=$this->site_model->getitemlinkseobuysearch($subject,$city,2);
+
+$data['lstitem']=$result['data'];
+$this->load->library('pagination');
+$config['total_rows'] = $result['total'];
+
+$config['per_page'] = $perpage;
+$config['uri_segment'] = 2;
+$config['next_link'] = '<i class="fa fa-angle-right"></i>';
+$config['prev_link'] = '<i class="fa fa-angle-left"></i>';
+$config['num_links'] = 4;
+$config['first_link'] = '<i class="fa fa-angle-double-left"></i>';
+$config['last_link'] = '<i class="fa fa-angle-double-right"></i>';
+$config['base_url']=$link;
+$this->pagination->initialize($config);
+$data['content_seo'] = $content;
+$data['total']=$result['total'];
+$data['order']=$order;
+$data['start_row']= $page;
+$data['pagination']= $this->pagination->create_links();
+$data['monhoc']=$this->site_model->ListSubject();
+$data['chude']=$this->site_model->GetTeacherFeature();
+$data['districk']=$this->site_model->CountTeacherbyCity();
+$data['lstonline']=$this->site_model->GetTeacherOnline(10);
+$actual_link = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+
+// $data['selectbox']=base_url()."site/listteacherbyfilter/&order=".$order;
+$data['selectbox']=base_url()."giao-vien&key=".$keywork."&subject=".intval($subject)."&topic=".intval($topic)."&place=".intval($city)."&type=".intval($type)."&sex=".intval($sex)."&order=".$order;
+//$data['vansudia']=$this->site_model->GetListTeacherVSD(5);
+//$data['giasutheomonhoc']=$this->site_model->DemGiaSuTheoMonHoc();
+//$data['giasutheott']=$this->site_model->DemGiaSuTheoTinhThanh();
+//$data['congtymoinhat']=$this->site_model->GetTopCompany(10);
+//$data['ungviennoibat']=$this->site_model->GetListCandidate("1=1 ",5,'order by u.use_update_time desc');
+
+if ($page > 0) {
+  $data['robots']= 'noindex,nofollow';
+} 
+$data['canonical']=$link;
+    //$data['amp']=site_url('amp');
+$sql=$this->site_model->gettblwidthid('tbl_meta',1);
+$data['nav_search'] = 1;
+$data['meta_title']=$meta;
+$data['meta_key']=$metakey;
+$data['meta_des']=$desc;
+// $data['robots']= 'noindex,nofollow';
+$data['content']='listteacherbyfilter';
+$data['classheader']='navbar navbar-default white bootsnav on no-full';
+        $data['cssbody']='' ;//customsl
+        $data['showsupport']=true;
+        $this->load->view('template',$data);
+      }
 
       function xuat_excel(){
         $arr_subject = $this->site_model->get_subject();

@@ -8,13 +8,76 @@ if($_SESSION['UserInfo'] !=''){
 $uinfo = $CI->site_model->GetUserInfoByUserID($userid);
 ?>
 <!-- Start Navigation -->
+<style>
+@media screen and (max-width: 479px) { 
+a.returnhome {
+    display: inline-block;
+    text-align: center;
+    line-height: 16px;
+    color: #858585;
+}
+a.returnhome i {
+    padding-bottom: 2px;
+}
+.uvactiventd label div {
+    display: block;
+    width: 43px;
+    height: 20px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 10px;
+}
+.functionungvien {
+    float: left;
+    width: 100%;
+    padding-bottom: 20px !important;
+    padding-right: 66px !important;
+}
+.infosupport {
+    float: left;
+    width: 53%;
+    padding-left: 73px;
+}
+.th_ngaymoi {
+    padding-left: 3px !important;
+}
+.content-right .dashboard_r span {
+    width: 49%;
+    margin-right: 0px;
+    margin-top: 7px;
+}
+}
+@media (min-width: 768px) and (max-width: 1024px)  {
+.infontd .functionungvien {
+    padding-top: 21px;
+    position: relative;
+    width: calc(100% - 53%);
+    float: right;
+    text-align: right;
+}
+.right-uv .dashboard_r span {
+    width: 23.35% !important;
+    position: relative !important;
+    height: 110px;
+    line-height: 20px;
+    display: block;
+    float: left;
+    margin-top: 5px;
+}
+.th_ngaymoi {
+    padding-left: 7px !important;
+}
+}
+</style>
 <header class="manager">
    <div class="container">
    <div class="row">
         <div class="manager-col-left col-md-3 col-sm-12 width-250">
-            <div class="logo">
-            <a href="<?php echo base_url(); ?>" title="#">
-               <img src="images/logo-01.png" alt="#">
+            <div class="logo" style="padding: 6px 0px !important;">
+            <a href="<?php echo base_url(); ?>phu-huynh-manager" title="#">
+               <img src="<?php echo base_url(); ?>upload/images/logo-new.png" alt="Phụ huynh quản lý">
             </a>
             </div>
         </div>

@@ -7311,7 +7311,12 @@ nav.navbar.bootsnav ul.dropdown-menu.megamenu-content .content ul.menu-col li a 
 height:42px;
 }
 }
-
+@media (min-width: 768px) and (max-width: 1024px) {
+div.fun {
+	display: block;
+	height: 50px;
+}
+}
 @media screen and (max-width: 1199px) {
 h1 {font-size: 48px}
 h2 {font-size: 28px}

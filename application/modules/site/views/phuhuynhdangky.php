@@ -2,6 +2,36 @@
 <div class="container">
 <?php $this->load->view('headerfun'); ?>
 </div>
+<div id="wait" style="display:none;width:69px;height:89px;position:absolute;top:45%;left:48%;padding:2px; z-index: 1;"><img src='<?php echo base_url(); ?>upload/images/demo_wait.gif' width="64" height="64" /><br>Đang gửi..</div>
+<style type="text/css">
+    @media (max-width: 479px) {
+        #wait {
+            position: absolute !important;
+            top: 35% !important;
+            left: 45% !important;
+        }
+        .registerform h3 span {
+            float: right;
+            font-size: 14px;
+            font-weight: 400;
+            color: #3a3a3a;
+            display: inline-block;
+            text-align: center;
+            padding-top: 10px;
+            padding-right: 64px;
+            padding-bottom: 12px;
+        }
+        .registerform {
+            border: 1px solid #00baba;
+            background-color: #00baba;
+            border-radius: 7px;
+            float: left;
+            width: 100%;
+            color: #fff;
+            padding: 4px 4px 30px;
+        }
+    }
+</style>
 <section class="padd-top-30 padd-bot-30">
     <div class="container">
         <div class="row register">
@@ -49,8 +79,8 @@
            </div>
            <div class="col-md-12">
             <div class="fun">
-                <span class="btn btn-primary btn-success" id="dangkytaikhoan">Hoàn tất</span>
-                <span class="btn btn-primary btn-warning">Làm lại</span>
+                <button class="btn btn-primary btn-success" id="dangkytaikhoan">Hoàn tất</button>
+                <button class="btn btn-primary btn-warning" id="btnlamlai">Làm lại</button>
             </div>
         </div>
     </div>
@@ -81,12 +111,15 @@
                     },
                     dataType: 'json',
                     beforeSend: function () {
-                        $("#boxLoading").show();
+                      $("#wait").css('display', 'block');
+                      $("#dangkytaikhoan").attr('disabled', true);
+                      $("#btnlamlai").attr('disabled', true);
                     },
                     success: function (reponse) {
                         if (reponse.kq == true) {
                             alert(reponse.msg);
-                            window.location.href=configulr;
+                            // window.location.href=configulr;
+                            window.location.href = configulr+'xac-thuc-tai-khoan-ntd';
                         }
                         else 
                         {
@@ -97,9 +130,13 @@
                         alert("error");
                     },
                     complete: function () {
-                        $("#boxLoading").hide();
+                        $("#wait").css('display', 'none');
+                        $("#dangkytaikhoan").attr('disabled', false);
+                        $("#btnlamlai").attr('disabled', false);
                     }
                 }); 
+            } else if (typeof($('input[id=dongydieukhoan]:checked').val()) =='undefined') {
+                    alert('Bạn phải cam kết các quy định của Giasu365');
             }
         });
         self.validatephuhuynh=function()
@@ -118,7 +155,7 @@
                 if (regex_email.test(email) == false) 
                 {
                     $('#email').attr('title', 'Email không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtemail').focus();
+                    // $('#txtemail').focus();
                     return false;
                 }
                 else 
@@ -139,7 +176,7 @@
                 {
                    $('#hoten').attr('title', 'Vui lòng nhập họ tên.').tooltip('show').addClass('errorClass');
                 }
-                $('#txthoten').focus();
+                // $('#txthoten').focus();
                 return false;
             } 
             else 
@@ -152,7 +189,7 @@
                 if (regex_sdt.test(sdt) == false) 
                 {
                     $('#sdt').attr('title', 'Số điện thoại không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtsdt').focus();
+                    // $('#txtsdt').focus();
                     return false;
                 }
 
@@ -160,14 +197,14 @@
             else 
             {
                 $('#sdt').attr('title', 'Vui lòng nhập số điện thoại').tooltip('show').addClass('errorClass');
-                $('#txtsdt').focus();
+                // $('#txtsdt').focus();
                 return false;
             }
 
             if ($.trim($('#txtpass').val()) == '') 
             {
                 $('#pass').attr('title', 'Vui lòng nhập mật khẩu').tooltip('show').addClass('errorClass');
-                $('#txtpass').focus();
+                // $('#txtpass').focus();
                 return false;
             } 
             else 
@@ -178,7 +215,7 @@
             if ($.trim($('#txtrepass').val()) == '') 
             {
                 $('#repass').attr('title', 'Vui lòng nhập lại mật khẩu').tooltip('show').addClass('errorClass');
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
                 return false;
             } 
             else 
@@ -196,7 +233,7 @@
 
             if (checkPassword(pass, $('#repass')) == 0 && pass != repass) {
                 $('#repass').attr('title', 'Nhập lại mật khẩu không phù hợp').tooltip('show').addClass('errorClass');
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
                 return false;
             }
             return btndangky;
@@ -207,7 +244,7 @@
             var So = 0;
             if (pwd.length < 6) {
                 $(element).tooltip('hide').attr('title', 'Mật khẩu phải nhiều hơn hoặc có 6 ký tự').tooltip('show').addClass('errorClass');
-                $(element).focus();
+                // $(element).focus();
                 return 1;
             }
             $(element).data("title", "").removeClass("errorClass").tooltip("destroy");
@@ -223,7 +260,7 @@
                 {
                     $('#email').attr('title', 'Vui lòng nhập email').tooltip('show').addClass('errorClass');
                 }
-                $('#txtemail').focus();
+                // $('#txtemail').focus();
             }
             else
             {
@@ -237,14 +274,14 @@
                 if($('#txtemail').parent().hasClass('errorClass') == false){
                     $('#txtemail').parent().attr('title', 'Vui lòng nhập email.').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtemail').focus();
+                // $('#txtemail').focus();
             }
             else
             {
                 if (regex_email.test($('#txtemail').val()) == false)
                 {
                     $('#txtemail').parent().attr('title', 'Email không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtemail').focus();
+                    // $('#txtemail').focus();
                 }
                 else
                 {
@@ -262,7 +299,7 @@
                 {
                     $('#hoten').attr('title', 'Vui lòng nhập họ tên').tooltip('show').addClass('errorClass');
                 }
-                $('#txthoten').focus();
+                // $('#txthoten').focus();
 
             }
             else
@@ -275,7 +312,7 @@
                 if($('#hoten').hasClass('errorClass') == false){
                     $('#hoten').attr('title', 'Vui lòng nhập họ tên').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txthoten').focus();
+                // $('#txthoten').focus();
             }
         });
 
@@ -287,7 +324,7 @@
                 {
                     $('#sdt').attr('title', 'Vui lòng nhập số điện thoại').tooltip('show').addClass('errorClass');
                 }
-                $('#txtsdt').focus();
+                // $('#txtsdt').focus();
 
             }
             else
@@ -301,7 +338,7 @@
                 if($('#txtphone').parent().hasClass('errorClass') == false){
                     $('#txtphone').parent().attr('title', 'Vui lòng nhập số điện thoại').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtphone').focus();
+                // $('#txtphone').focus();
             }
             else
             {
@@ -309,7 +346,7 @@
                 if (regex_sdt.test($('#txtphone').val()) == false) 
                 {
                     $('#txtphone').parent().attr('title', 'Số điện thoại không phù hợp').tooltip('show').addClass('errorClass');
-                    $('#txtphone').focus();
+                    // $('#txtphone').focus();
                 }
                 else
                 {
@@ -326,7 +363,7 @@
                 {
                     $('#pass').attr('title', 'Vui lòng nhập mật khẩu').tooltip('show').addClass('errorClass');
                 }
-                $('#txtpass').focus();
+                // $('#txtpass').focus();
 
             }
             else
@@ -339,7 +376,7 @@
                 if($('#pass').hasClass('errorClass') == false){
                     $('#pass').attr('title', 'Vui lòng nhập mật khẩu').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtpass').focus();
+                // $('#txtpass').focus();
             }
             else
             {
@@ -362,7 +399,7 @@
                 {
                     $('#repass').attr('title', 'Vui lòng nhập lại mật khẩu').tooltip('show').addClass('errorClass');
                 }
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
             }
             else
             {
@@ -374,7 +411,7 @@
                 if($('#repass').hasClass('errorClass') == false){
                     $('#repass').attr('title', 'Vui lòng nhập lại mật khẩu').tooltip('show').addClass('errorClass');                
                 } 
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
             }
             else
             {
@@ -397,7 +434,7 @@
                 {
                     $('#repass').attr('title', 'Vui lòng nhập lại mật khẩu').tooltip('show').addClass('errorClass');
                 }
-                $('#txtrepass').focus();
+                // $('#txtrepass').focus();
             }
             else
             {

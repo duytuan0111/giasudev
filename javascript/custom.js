@@ -114,88 +114,88 @@ var configulr = 'http://localhost:8181/';
     });
   }
   csselem();
-  if ($('.col-popover').size() && window.innerWidth >= 1000) {
-    var timer, timer2;
-    var check = 0;
-    $('.col-popover .item_hd').each(function(index, element) {
-      $(this).popover({
-          trigger: "manual",
-          html: true,
-          animation: false,
-          placement: function(tip, element) {
-            var left = $(element).offset().left;
-            var windowWidth = $(window).width();
-            if (left < windowWidth / 2) {
-              return 'right';
-            } else {
-              return 'left';
-            }
-          },
-          content: function() {
-            return "Loading...";
-          }
-        })
-        .on("mouseenter", function() {
-          clearTimeout(timer);
-          var _this = this;
-          $('.col-popover .item_hd', $(this));
-          var object_id = $(this).attr('data-object');
-          $('.col-popover .item_hd', $(this));
-          var object_type = $(this).attr('data-type');
-          $('.col-md-4 .item_hd').not(_this).popover('hide');
-          var left = $(this).offset().left;
-          var windowWidth = $(window).width();
-          var width = this.offsetWidth;
-          var position = 0;
-          var arrow = "";
-          if (left < windowWidth / 2) {
-            position = -0; //-10
-            arrow = "left-arrow";
-          } else {
-            position = -295; //215;
-            arrow = "right-arrow";
-          }
-          var height = 0; // this.offsetHeight/2;
-          timer2 = setTimeout(function() {
+  // if ($('.col-popover').size() && window.innerWidth >= 1000) {
+  //   var timer, timer2;
+  //   var check = 0;
+  //   $('.col-popover .item_hd').each(function(index, element) {
+  //     $(this).popover({
+  //         trigger: "manual",
+  //         html: true,
+  //         animation: false,
+  //         placement: function(tip, element) {
+  //           var left = $(element).offset().left;
+  //           var windowWidth = $(window).width();
+  //           if (left < windowWidth / 2) {
+  //             return 'right';
+  //           } else {
+  //             return 'left';
+  //           }
+  //         },
+  //         content: function() {
+  //           return "Loading...";
+  //         }
+  //       })
+  //       .on("mouseenter", function() {
+  //         clearTimeout(timer);
+  //         var _this = this;
+  //         $('.col-popover .item_hd', $(this));
+  //         var object_id = $(this).attr('data-object');
+  //         $('.col-popover .item_hd', $(this));
+  //         var object_type = $(this).attr('data-type');
+  //         $('.col-md-4 .item_hd').not(_this).popover('hide');
+  //         var left = $(this).offset().left;
+  //         var windowWidth = $(window).width();
+  //         var width = this.offsetWidth;
+  //         var position = 0;
+  //         var arrow = "";
+  //         if (left < windowWidth / 2) {
+  //           position = -0; //-10
+  //           arrow = "left-arrow";
+  //         } else {
+  //           position = -295; //215;
+  //           arrow = "right-arrow";
+  //         }
+  //         var height = 0; // this.offsetHeight/2;
+  //         timer2 = setTimeout(function() {
 
-            if ($(_this).is(':hover')) {
-              $.ajax({
-                url: configulr + '/site/quickviewuser',
-                type: "POST",
-                data: {
-                  objid: object_id
-                },
-                dataType: 'json',
-                success: function(data) {
-                  $(".popover-content").empty();
-                  $(".popover-content").append(data.data);
-                  $('#quick-view-box .tooltiptext').addClass(arrow);
-                  $('#quick-view-box').css('top', -height);
-                  $('#quick-view-box').css('left', position);
-                }
-              });
-              $(_this).popover("show");
-            }
-            $(".popover").on("mouseleave", function() {
-              $('.col-md-4 .item_hd').popover('hide');
-            });
-          }, 500);
-          // $(".popover").on("mouseleave", function () {
-          //     $(_this).popover('hide');
-          // });
+  //           if ($(_this).is(':hover')) {
+  //             $.ajax({
+  //               url: configulr + '/site/quickviewuser',
+  //               type: "POST",
+  //               data: {
+  //                 objid: object_id
+  //               },
+  //               dataType: 'json',
+  //               success: function(data) {
+  //                 $(".popover-content").empty();
+  //                 $(".popover-content").append(data.data);
+  //                 $('#quick-view-box .tooltiptext').addClass(arrow);
+  //                 $('#quick-view-box').css('top', -height);
+  //                 $('#quick-view-box').css('left', position);
+  //               }
+  //             });
+  //             $(_this).popover("show");
+  //           }
+  //           $(".popover").on("mouseleave", function() {
+  //             $('.col-md-4 .item_hd').popover('hide');
+  //           });
+  //         }, 500);
+  //         // $(".popover").on("mouseleave", function () {
+  //         //     $(_this).popover('hide');
+  //         // });
 
 
-        }).on("mouseleave", function() {
-          clearTimeout(timer2);
-          var _this = this;
-          setTimeout(function() {
-            if (!$(".popover:hover").length) {
-              $(_this).popover("hide");
-            }
-          }, 200);
-        });
-    });
-  };
+  //       }).on("mouseleave", function() {
+  //         clearTimeout(timer2);
+  //         var _this = this;
+  //         setTimeout(function() {
+  //           if (!$(".popover:hover").length) {
+  //             $(_this).popover("hide");
+  //           }
+  //         }, 200);
+  //       });
+  //   });
+  // };
   var inputs = document.querySelectorAll('.inputfile');
   Array.prototype.forEach.call(inputs, function(input) {
     var label = input.nextElementSibling,
@@ -295,9 +295,14 @@ function UserManager() {
       return false;
 
     }
-
+    if (true) {}
 
     var cknhatuyendung = 1;
+    if ($('#rememberlogin').is(':checked')) {
+      remember_user = 1;
+    } else {
+      remember_user = 0
+    }
     // if(typeof ($('input[name=rememberlogin]:checked').val())=== "undefined"){
     //     cknhatuyendung=0;
     // }
@@ -308,6 +313,7 @@ function UserManager() {
       data: {
         username: $('#useremail').val(),
         password: $('#userpassword').val(),
+        remember: remember_user,
         typelogin: cknhatuyendung
       },
       dataType: 'json',
@@ -319,43 +325,44 @@ function UserManager() {
           window.location.href = configulr;
 
         } else {
-
-          var clickcomfirm=confirm(reponse.msg);
-          if (clickcomfirm==true)
-            {
-              var useremail = $('#useremail').val();
-              $.ajax({
-                url: configulr+"/site/forgetmail",
-                type: "POST",
-                data:{
-                  email:useremail
-                },
-                dataType: 'json',
-                success: function (res) 
-                { 
-                    if (res.kq == true) 
-                    {   
-                        alert('Vui lòng kiểm tra tin email để nhận mã xác thực kích hoạt tài khoản');
-                    }
-                    // else 
-                    // {
-                    //     alert('Gửi email không thành công. Vui lòng kiểm tra lại.');
-                    // }
-                },
-                error: function (xhr) 
-                {
-                    console.log(xhr);
-                },
-                complete: function () 
-                {
-                    $("#boxLoading").hide();
-                }
-            });
-            }
-          else
-            {
-              // alert('không có gì');
-            }
+          if (reponse.sttlogin == 1) {
+            window.location.href = configulr+'xac-thuc-tai-khoan';
+          } else {
+            alert('Đăng nhập không thành công vui lòng thử lại');
+          }
+          // var clickcomfirm=confirm(reponse.msg);
+          // if (clickcomfirm==true)
+          //   {
+          //     var useremail = $('#useremail').val();
+          //     $.ajax({
+          //       url: configulr+"/site/forgetmail",
+          //       type: "POST",
+          //       data:{
+          //         email:useremail
+          //       },
+          //       dataType: 'json',
+          //       success: function (res) 
+          //       { 
+          //           if (res.kq == true) 
+          //           {   
+          //               alert('Vui lòng kiểm tra tin email để nhận mã xác thực kích hoạt tài khoản');
+          //           }
+          //           // else 
+          //           // {
+          //           //     alert('Gửi email không thành công. Vui lòng kiểm tra lại.');
+          //           // }
+          //       },
+          //       error: function (xhr) 
+          //       {
+          //           console.log(xhr);
+          //       },
+          //       complete: function () 
+          //       {
+          //           $("#boxLoading").hide();
+          //       }
+          //   });
+          //   }
+         
         }
       },
       error: function(xhr) {
@@ -376,6 +383,7 @@ function UserManager() {
       if ($('#div_email_login').hasClass('errorClass') == false) {
         $('#div_email_login').addClass('errorClass');
         $('#div_email_login').after('<p id="emaillogin_error" style="color:red">Email không được để trống.</p>');
+        
       }
     } else {
       $('#div_email_login').removeClass("errorClass");
@@ -388,6 +396,7 @@ function UserManager() {
       if ($('#div_password_login').hasClass('errorClass') == false) {
         $('#div_password_login').addClass('errorClass');
         $('#div_password_login').after('<p id="passwordlogin_error" style="color:red">Password không được để trống.</p>');
+        
       }
     } else {
       $('#div_password_login').removeClass("errorClass");
@@ -401,15 +410,17 @@ function UserManager() {
       if ($('#div_email_login').hasClass('errorClass') == false) {
         $('#div_email_login').addClass('errorClass');
         $('#div_email_login').after('<p id="emaillogin_error" style="color:red;">Email không được để trống.</p>');
+        
       }
-      $('#useremail').focus();
+      // $('#useremail').focus();
     } else {
       if (regex_email.test($('#useremail').val()) == false) {
         if ($('#div_email_login').hasClass('errorClass') == false) {
           $('#div_email_login').addClass('errorClass');
           $('#div_email_login').after('<p id="emaillogin_error" style="color:red;">Email không đúng định dạng.</p>');
+          
         }
-        $('#useremail').focus();
+        // $('#useremail').focus();
       }
 
     }
@@ -420,15 +431,17 @@ function UserManager() {
       if ($('#div_password_login').hasClass('errorClass') == false) {
         $('#div_password_login').addClass('errorClass');
         $('#div_password_login').after('<p id="passwordlogin_error" style="color:red;">Mật khẩu không được để trống</p>');
+        
       }
-      $('#userpassword').focus();
+      // $('#userpassword').focus();
     } else {
       if ($('#userpassword').val().length < 6) {
         if ($('#div_password_login').hasClass('errorClass') == false) {
           $('#div_password_login').addClass('errorClass');
           $('#div_password_login').after('<p id="passwordlogin_error" style="color:red;">Mật khẩu phải nhiều hơn hoặc có 6 ký tự</p>');
+          
         }
-        $('#userpassword').focus();
+        // $('#userpassword').focus();
       } else {
         $('#div_password_login').removeClass("errorClass");
         $('#passwordlogin_error').remove();
@@ -445,18 +458,18 @@ function UserManager() {
       if ($('#div_email_login').hasClass('errorClass') == false) {
         $('#div_email_login').addClass('errorClass');
         $('#div_email_login').after('<p id="emaillogin_error" style="color:red">Vui lòng nhập Email.</p>');
+         
       }
-      useremail.focus();
-      return false;
+      // useremail.focus();
     } else {
       if (regex_email.test(useremail.val()) == false) {
         if ($('#div_email_login').hasClass('errorClass') == false) {
           $('#div_email_login').addClass('errorClass');
           $('#div_email_login').after('<p id="emaillogin_error" style="color:red">Email không đúng định dạng.</p>');
+          
 
         }
-        useremail.focus();
-        return false;
+         // useremail.focus();
       } else {
         useremail.removeClass("errorClass");
         $('#emaillogin_error').remove();
@@ -467,20 +480,23 @@ function UserManager() {
       if ($('#div_password_login').hasClass('errorClass') == false) {
         $('#div_password_login').addClass('errorClass');
         $('#div_password_login').after('<p id="passwordlogin_error" style="color:red">Vui lòng nhập password.</p>');
+        
+
       } else {
         userpassword.removeClass("errorClass");
         $('#passwordlogin_error').remove();
       }
-      password.focus();
-      return false;
-
+      // password.focus();
     }
-
-
-    // var cknhatuyendung=1;
-    // if(typeof ($('input[name=rememberlogin]:checked').val())=== "undefined"){
-    //     cknhatuyendung=0;
-    // }
+    var cknhatuyendung=1;
+    if(typeof ($('input[name=rememberlogin]:checked').val())=== "undefined"){
+        cknhatuyendung=0;
+    }
+    if ($('#rememberlogin').is(':checked')) {
+      remember_user = 1;
+    } else {
+      remember_user = 0
+    }
     var cknhatuyendung = 0;
     $.ajax({
       url: configulr + "site/loginusers",
@@ -488,6 +504,7 @@ function UserManager() {
       data: {
         username: $('#useremail').val(),
         password: $('#userpassword').val(),
+        remember: remember_user,
         typelogin: cknhatuyendung
       },
       dataType: 'json',
@@ -498,39 +515,38 @@ function UserManager() {
         if (reponse.kq == true) {
           window.location.href = configulr;
         } else {
-          var clickcomfirm=confirm(reponse.msg);
-          if (clickcomfirm==true)
-            {
-              var useremail = $('#useremail').val();
-              $.ajax({
-                url: configulr+"/site/forgetmail2",
-                type: "POST",
-                data:{
-                  email:useremail
-                },
-                dataType: 'json',
-                success: function (res) 
-                { 
-                    if (res.kq == true) 
-                    {   
-                        alert('Vui lòng kiểm tra tin email để nhận mã xác thực kích hoạt tài khoản');
-                    }
-                },
-                error: function (xhr) 
-                {
-                    console.log(xhr);
-                },
-                complete: function () 
-                {
-                    $("#boxLoading").hide();
-                }
-              });
-            }
-          else
-            {
-              // alert(reponse.msg);
-            }
-        }
+          if (reponse.loginstt == 1) {
+             window.location.href = configulr+'xac-thuc-tai-khoan-ntd';
+          } else {
+            alert('Đăng nhập không thành công vui lòng thử lại');
+          }
+          // var clickcomfirm=confirm(reponse.msg);
+          // if (clickcomfirm==true)
+          //   {
+          //     var useremail = $('#useremail').val();
+          //     $.ajax({
+          //       url: configulr+"/site/forgetmail2",
+          //       type: "POST",
+          //       data:{
+          //         email:useremail
+          //       },
+          //       dataType: 'json',
+          //       success: function (res) 
+          //       { 
+          //           console.log(res);
+          //       },
+          //       error: function (xhr) 
+          //       {
+          //           console.log(xhr);
+          //       },
+          //       complete: function () 
+          //       {
+          //           $("#boxLoading").hide();
+          //       }
+          //     });
+          //   }
+         
+        } 
       },
       error: function(xhr) {
         alert("error");
@@ -1240,37 +1256,37 @@ function AllClearCooke() {
   })
 }
 
-function searchteacherbyheader() {
+// function searchteacherbyheader() {
 
-  var nganhnghe = $('#index_nganhnghe').val();
-  var diadiem = $('#index_dia_diem').val();
-  var lop = $('#index_lop').val();
-  var quanhuyen = $('#index_quanhuyen').val();
+//   var nganhnghe = $('#index_nganhnghe').val();
+//   var diadiem = $('#index_dia_diem').val();
+//   var lop = $('#index_lop').val();
+//   var quanhuyen = $('#index_quanhuyen').val();
 
-  $.ajax({
-    url: configulr + "site/ajaxsearchteacherheader",
-    type: 'POST',
-    dataType: "json",
-    data: {
-      subject: nganhnghe,
-      class: lop,
-      place: diadiem,
-      district: quanhuyen
-    },
+//   $.ajax({
+//     url: configulr + "site/ajaxsearchteacherheader",
+//     type: 'POST',
+//     dataType: "json",
+//     data: {
+//       subject: nganhnghe,
+//       class: lop,
+//       place: diadiem,
+//       district: quanhuyen
+//     },
 
-    success: function(reponse) {
-      // $(".main_giaovien").innerHTML = reponse.data;
-      $(".main_giaovien").html(reponse.data);
-    },
-    error: function(xhr) {
-      console.log(xhr);
-    },
-    complete: function() {
-      $("#boxLoading").hide();
-    }
-  });
+//     success: function(reponse) {
+//       // $(".main_giaovien").innerHTML = reponse.data;
+//       $(".main_giaovien").html(reponse.data);
+//     },
+//     error: function(xhr) {
+//       console.log(xhr);
+//     },
+//     complete: function() {
+//       $("#boxLoading").hide();
+//     }
+//   });
 
-}
+// }
 
 function searchclassbyheader() {
 
@@ -1303,36 +1319,36 @@ function searchclassbyheader() {
 
 }
 
-function searchbyteachertitle() {
+// function searchbyteachertitle() {
 
-  var nganhnghe = $('#index_nganhnghe').val();
-  var diadiem = $('#index_dia_diem').val();
-  var lop = $('#index_lop').val();
-  var quanhuyen = $('#index_quanhuyen').val();
+//   var nganhnghe = $('#index_nganhnghe').val();
+//   var diadiem = $('#index_dia_diem').val();
+//   var lop = $('#index_lop').val();
+//   var quanhuyen = $('#index_quanhuyen').val();
 
-  $.ajax({
-    url: configulr + "site/ajaxsearchteachertitle",
-    type: 'POST',
-    dataType: "json",
-    data: {
-      subject: nganhnghe,
-      class: lop,
-      place: diadiem,
-      district: quanhuyen
-    },
-    success: function(reponse) {
-      console.log(reponse.da);
-      $(".searchteachertitle").html(reponse.data);
-    },
-    error: function(xhr) {
-      console.log(xhr);
-    },
-    complete: function() {
-      $("#boxLoading").hide();
-    }
-  });
+//   $.ajax({
+//     url: configulr + "site/ajaxsearchteachertitle",
+//     type: 'POST',
+//     dataType: "json",
+//     data: {
+//       subject: nganhnghe,
+//       class: lop,
+//       place: diadiem,
+//       district: quanhuyen
+//     },
+//     success: function(reponse) {
+//       console.log(reponse.da);
+//       $(".searchteachertitle").html(reponse.data);
+//     },
+//     error: function(xhr) {
+//       console.log(xhr);
+//     },
+//     complete: function() {
+//       $("#boxLoading").hide();
+//     }
+//   });
 
-}
+// }
 
 function searchclassbytitle() {
 

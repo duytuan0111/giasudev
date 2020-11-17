@@ -1,4 +1,57 @@
 <?php ?>
+<style>
+  @media screen and (max-width: 479px) {
+    .content-right .fieldset .group-control .control-label {
+      width: 87%;
+      text-align: left;
+    }
+    .note {
+      padding-top: 5px;
+      padding-right: 5px;
+    }
+    .group-control .fa-showpass:after {
+      top: 2px;
+      float: right;
+      padding-right: 0px;
+    }
+    .updatepass .group-control .form-control {
+      max-width: calc(100% - 28%);
+      display: inline-block;
+      box-shadow: none;
+      border-radius: 2px;
+      height: 32px;
+      background-color: #fff;
+      border-color: #dcdcdc;
+      /* padding-left: 12px; */
+      margin-left: 11px;
+    }
+    .updatepass .control-label {
+    width: 23%;
+    text-align: right;
+    margin-right: 23px;
+    margin-left: 14px;
+    float: left;
+    margin-bottom: 0px;
+    line-height: 32px;
+    height: 32px;
+  }
+    .updatepass .note-1 {
+    font-weight: 700;
+    font-style: italic;
+    font-size: 12px;
+    color: #5d5d5d;
+    padding-left: 2%;
+    margin-bottom: 2px;
+    position: relative;
+    top: -7px;
+}
+.fieldset .btngroup {
+    text-align: center;
+    margin-bottom: 22px;
+    padding-bottom: 33px;
+}
+}
+</style>
 <section class="padd-0">
 <div class="container">
     <div class="row">
@@ -19,7 +72,8 @@
                 <div class="title"><span><i class="fa fa-pincode"></i>Đổi mật khẩu</span></div>
                
                 <div class="fieldset">
-                <div class="note"><span>(<b>*</b>) Thông tin bắt buộc</b></span>  </div>              
+                <div class="note"><span>(<b>*</b>) Thông tin bắt buộc</b></span>  
+                </div>              
                 <div class="group-control">
                     <label class="control-label required">Mật khẩu cũ</label>
                     <div class="form-control"><input type="password" id="oldpassword" name="oldpassword" placeholder=""/><i class="fa-showpass" data-val="oldpassword"></i></div>

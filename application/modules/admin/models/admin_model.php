@@ -33,6 +33,10 @@ class admin_model extends Model
             $this->db->update($tbl,$data);    
         }
     }
+    function update_tbl($tbl,$data, $id) {
+        $this->db->where('id', $id);
+        return $this->db->update($tbl, $data);
+    }
     function insert($table, $data) {
          $this->db->insert($table, $data);
          return true;
@@ -372,6 +376,10 @@ function GetClassByID($idclass)
         //var_dump($sql);die();
 		$this->db->query($sql);
 	}
+    function del_vieclam($id) {
+        $sql = "UPDATE  teacherclass set Active = 0 WHERE ClassID = $id ";
+        $this->db->query($sql);
+    } 
     function del_urlgiasu($tbl,$fieldid,$id)
     {
         $sql="DELETE from $tbl WHERE ".$fieldid."='$id'";
@@ -397,20 +405,65 @@ function GetClassByID($idclass)
             return TRUE;
         }
     }
+    // check alias
     function checkalias($alias)
     {
         $this->db->where('alias',$alias);
-        $sql=$this->db->get('url_phuhuynh');
-        if($sql->num_rows()==1)
+        $this->db->where('option',0);
+        $sql=$this->db->get('topic');
+
+        if($sql->num_rows()>0)
         {
             return TRUE;
         }
     }
-     function checkalias_phuhuynh($alias)
+     function checkplace($place)
+    {
+        $this->db->where('place_id',$place);
+        $this->db->where('option',1);
+        $sql=$this->db->get('topic');
+        if($sql->num_rows()>0)
+        {
+            return TRUE;
+        }
+    }
+     function checkap($alias, $place)
     {
         $this->db->where('alias',$alias);
+        $this->db->where('place_id',$place);
+        $this->db->where('option',2);
+        $sql=$this->db->get('topic');
+        if($sql->num_rows()>0)
+        {
+            return TRUE;
+        }
+    }
+    function checkplace_phuhuynh($place)
+    {
+        $this->db->where('place_id',$place);
+        $this->db->where('option',1);
         $sql=$this->db->get('url_timviec');
-        if($sql->num_rows()==1)
+        if($sql->num_rows()>0)
+        {
+            return TRUE;
+        }
+    }
+    function checkalias_phuhuynh($alias)
+    {
+        $this->db->where('alias',$alias);
+        $this->db->where('option',0);
+        $sql=$this->db->get('url_timviec');
+        if($sql->num_rows()>0)
+        {
+            return TRUE;
+        }
+    }
+    function checkap_phuhuynh($alias, $place) {
+        $this->db->where('alias',$alias);
+        $this->db->where('place_id',$place);
+        $this->db->where('option',2);
+        $sql=$this->db->get('url_timviec');
+        if($sql->num_rows()>0)
         {
             return TRUE;
         }
@@ -419,7 +472,7 @@ function GetClassByID($idclass)
     {
         $this->db->where('name',$name);
         $sql=$this->db->get('tbl_admin');
-        if($sql->num_rows()==1)
+        if($sql->num_rows()>0)
         {
             return TRUE;
         }
@@ -479,15 +532,52 @@ function GetClassByID($idclass)
         }
         return $kq = ['data' => $catlink, 'total' => $total];
     }
-     function Getallfilterby($table, $search, $option) {
-        if ($search == '') {
-            $query = "SELECT * from ".$table." where  option = ".$option."";
-        } else if ($option == '') {
+    function Getallbylm($table, $page, $perpage) {
+        $query = "SELECT * from ".$table." order by id desc";
+        $total = $this->db->query($query)->num_rows();
+        $query.=" limit ".$page.",".$perpage;
+        $sql1 = $this->db->query($query);
+        $catlink = "";
+        if($sql1->num_rows() >0)
+        {                   
+            foreach($sql1->result() as $items)
+            {                            
+                $catlink[] =        $items;                     
+            }   
+        
+        }
+        return $kq = ['data' => $catlink, 'total' => $total];
+    }
+     function Getallfilterby($table, $search, $option,$address, $page, $perpage) {
+        if ($search == '' && $address == '') {
+            if ($option == 3) {
+                $query = "SELECT * from ".$table."";
+            } else {
+                $query = "SELECT * from ".$table." where  option = ".$option."";
+            }
+        } else if ($option == '' && $address == '') {
             $query = "SELECT * from ".$table." where key_tag like '%".$search."%'";
+        } else if ($search == '' && $address != '') {
+            if ($option == 3) {
+                $query = "SELECT * from ".$table." where place_id = ".$address."";
+            } else {
+                $query = "SELECT * from ".$table." where  option = ".$option." and place_id = ".$address."";
+            }
+        } else if ($search !='' && $address != '') {
+            if ($option == 3) {
+                $query = "SELECT * from ".$table." where key_tag like '%".$search."%' and place_id = ".$address."";
+            } else {
+                $query = "SELECT * from ".$table." where key_tag like '%".$search."%' and option = ".$option." and place_id = ".$address."";
+            }
         } else {
-            $query = "SELECT * from ".$table." where key_tag like '%".$search."%' and option = ".$option."";
+            if ($option == 3) {
+                $query = "SELECT * from ".$table." where key_tag like '%".$search."%'";
+            } else {
+                $query = "SELECT * from ".$table." where key_tag like '%".$search."%' and option = ".$option."";
+            }
         }
         $total = $this->db->query($query)->num_rows();
+        $query.=" limit ".$page.",".$perpage;
         $sql1 = $this->db->query($query);
         $catlink = "";
         if($sql1->num_rows() >0)
@@ -520,7 +610,7 @@ function GetClassByID($idclass)
     function Getallcompanybypage($findkey,$city,$page,$perpage){
         $timenow=date("Y-m-d",time());
         $timenow1 = strtotime($timenow.' - 1000 day');
-        $query="select * FROM teacherclass as t where 1=1";
+        $query="select * FROM teacherclass as t where Active=1";
         if($findkey!=''){
          $query.=" and t.ClassTitle like '%".str_replace(' ','%',$findkey)."%'";   
         }else{

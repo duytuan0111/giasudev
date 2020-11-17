@@ -19,16 +19,16 @@
                                     <div class="itemnews_l">
                                         <a class="logouser">
                                         <?php if(!empty($n->Image)){?>
-                                        <img src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),63,63,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                        <img alt="<?php echo $n->Name ?>" src="<?php gethumbnail(geturlimageAvatar(strtotime($n->CreateDate)).$n->Image,$n->Image,strtotime($n->CreateDate),63,63,100) ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                     <?php }else{ ?>
-                                     <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                     <img src="images/no-image2.png" alt="<?php echo $n->Name ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                      <?php } ?>
                                      </a>
-                                        <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
+                                        <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
                                         <span><?php echo date("d/m/Y",strtotime($n->CreateDate)); ?></span>
                                     </div>
                                     <div class="itemnews_r">
-                                        <a target="_blank" href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
+                                        <a target="_blank" href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
                                         <p><?php $gn_text=$n->DescClass;
                                                 if ( strlen( $n->DescClass ) > 250 ) {
                                                        $gn_text = substr( $n->DescClass, 0, 250 );
@@ -85,7 +85,7 @@
                                 <input type="text" name="findkey" id="findkey" placeholder="Nhập từ khóa..." />
                             </div>
                             <div class="input">
-                                <span class="icon-before"><img src="images/s_01.png" alt=""></span>
+                                <span class="icon-before"><img src="images/s_01.png" alt="Chọn môn học"></span>
                                 <select id="monhoc" name="monhoc">
                                     <option value="">Chọn môn học</option>
                                      <?php 
@@ -98,14 +98,14 @@
                                 </select>
                             </div>
                             <div class="input">
-                                <span class="icon-before"><img src="images/s_01.png" alt=""></span>
+                                <span class="icon-before"><img src="images/s_01.png" alt="Chọn chủ đề môn học"></span>
                                 <select id="chudehoc" class="city_ab_tag">                        
                                     <option value="" >Chọn chủ đề môn học</option>
                                                            
                                  </select>
                             </div>
                             <div class="input">
-                                <span class="icon-before" style="top:8px"><img src="images/s_02.png" alt=""></span>
+                                <span class="icon-before" style="top:8px"><img src="images/s_02.png" alt="Tỉnh thành"></span>
                                 <select id="tinhthanh" class="mucluong_ab_tag">                        
                                     <option data-tokens="0" value="">Tỉnh thành</option>
                                     <option data-tokens="1" value="1">Hà Nội</option> 
@@ -174,7 +174,7 @@
                                 </select>
                             </div>
                             <div class="input">
-                                <span class="icon-before"><img src="images/icongioitinh.png" alt=""></span>
+                                <span class="icon-before"><img src="images/icongioitinh.png" alt="Giới tính"></span>
                                 <select id="gioitinh" class="ngoaingu_ab_tag">                        
                                     <option value="" ></option>
                                     <option value="1">Nam</option>
@@ -182,7 +182,7 @@
                                  </select>
                             </div>
                             <div class="input">
-                                <span class="icon-before" style="top:8px"><img src="images/iconhinhthuchoc.png" alt=""></span>
+                                <span class="icon-before" style="top:8px"><img src="images/iconhinhthuchoc.png" alt="Hình thức"></span>
                                 <select id="hinhthuchoc" class="kinhnghiem_ab_tag">                        
                                     <option value="">Chọn hình thức dạy</option>
                                     <option value="1">(Offline) Gặp mặt</option>

@@ -19,19 +19,19 @@
                                     <div class="itemnews_l">
                                         <a class="logouser">
                                         <?php if(!empty($n->Image)){?>
-                                        <img src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                        <img alt="<?php echo $n->Name  ?>" src="<?php echo base_url(); ?>upload/images/<?php echo $n->Image  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                     <?php }else{ ?>
-                                     <img src="images/no-image2.png" alt="#" onerror='this.onerror=null;this.src="images/no-image2.png";' />
+                                     <img src="images/no-image2.png" alt="<?php echo $n->Name  ?>" onerror='this.onerror=null;this.src="images/no-image2.png";' />
                                      <?php } ?>
                                      </a>
-                                        <a href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
+                                        <a href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="nameu" title="<?php echo $n->Name ?>"><?php echo $n->Name ?></a>
                                         <span><?php echo date("d/m/Y",strtotime($n->CreateDate)); ?></span>
                                     </div>
                                     <div class="itemnews_r">
-                                        <a target="_blank" href="<?php echo base_url().'lop-hoc/'.vn_str_filter($n->ClassTitle).'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
-                                        <p><?php $gn_text=$n->DescClass;
-                                                if ( strlen( $n->DescClass ) > 250 ) {
-                                                       $gn_text = substr( $n->DescClass, 0, 250 );
+                                        <a target="_blank" href="<?php echo base_url().'lop-hoc/'.$n->Alias.'-'.$n->ClassID ?>" class="item-uv-name" tabindex="0"><i class="fa fa-online"></i> <?php echo $n->ClassTitle ?> </a>
+                                        <p class="chitietmobile"><?php $gn_text=$n->DescClass;
+                                                if ( strlen( $n->DescClass ) > 100 ) {
+                                                       $gn_text = substr( $n->DescClass, 0, 100 );
                                                        $space   = strrpos( $gn_text, ' ' );
                                                        $gn_text = substr( $gn_text, 0, $space ). '...';                
                                                   }
@@ -76,7 +76,7 @@
                 </div>
             </div>
             <div class="col-md-30 col-sm-12 col-right-search padd-l-0">
-                <div class="box_job_search user">
+              <!--   <div class="box_job_search user">
                     <h3><i class="fa fa-userl"></i> Tìm kiếm lớp dạy</h3>
                     <div class="main_sc">        
                         <form action="" method="post">  
@@ -184,7 +184,7 @@
                             <center><input class="btn btnsearchuv" type="button" name="submit" value="Tìm kiếm"></center>
                         </form>
                     </div>
-                </div>
+                </div> -->
                 <!-- <div class="box_job_search tagwork uvonline">
                     <h3>Phụ huynh, học viên đang online
                     </h3>
